@@ -39,6 +39,7 @@ class PlaygroundChatRequest(BaseModel):
     post_context: Optional[str] = None
     media_cache_id: Optional[str] = None
     thread_id: Optional[str] = None
+    session_id: Optional[str] = None
     user_name: Optional[str] = "Khách Hàng (Brand Test)"
     history: List[Dict[str, str]] = Field(default_factory=list)
 
@@ -117,6 +118,40 @@ async def handle_zernio_webhook(
     orchestrator = get_orchestrator()
     result = orchestrator.process(inbound)
 
+    # Save to persistent chat sessions
+    try:
+        store = get_event_store()
+        sess_id = inbound.thread_id or f"thread_{inbound.user_id or inbound.id}"
+        turn_data = {
+            "turn_index": 1,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "customer_message": inbound.text,
+            "bot_reply": result.draft_reply,
+            "decision": result.decision,
+            "flag": result.flag,
+            "status_badge": result.status_badge,
+            "matched_product": result.matched_product.name if result.matched_product else None,
+            "matched_rule": result.matched_rule or result.matched_edge_case,
+            "intent": result.intent,
+            "knowledge_files": result.knowledge_files,
+            "reply_sent": result.reply_sent
+        }
+        store.save_session_turn(
+            session_id=sess_id,
+            channel=inbound.channel,
+            platform=inbound.platform,
+            surface=inbound.surface,
+            user_message=inbound.text,
+            reply=result.draft_reply,
+            turn_data=turn_data,
+            thread_id=inbound.thread_id,
+            user_id=inbound.user_id,
+            user_name=inbound.user_name,
+            status="handover" if result.flag == "handover" else "active"
+        )
+    except Exception as e:
+        print(f"Warning: Failed to log chat session turn: {e}")
+
     return {
         "status": "processed",
         "event_id": inbound.id,
@@ -170,6 +205,34 @@ async def get_events(
     store = get_event_store()
     events = store.get_recent_events(channel=channel, platform=platform, limit=limit)
     return {"events": events}
+
+@app.get("/api/chat-sessions")
+async def list_chat_sessions(
+    channel: Optional[str] = Query(None),
+    platform: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0)
+):
+    store = get_event_store()
+    sessions = store.get_chat_sessions(
+        channel=channel, platform=platform, search=search, limit=limit, offset=offset
+    )
+    return {"sessions": sessions, "count": len(sessions)}
+
+@app.get("/api/chat-sessions/{session_id}")
+async def get_chat_session_detail(session_id: str):
+    store = get_event_store()
+    sess = store.get_chat_session(session_id)
+    if not sess:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    return sess
+
+@app.delete("/api/chat-sessions/{session_id}")
+async def delete_chat_session(session_id: str):
+    store = get_event_store()
+    success = store.delete_chat_session(session_id)
+    return {"success": success}
 
 @app.get("/api/events/stream")
 async def stream_events(request: Request):
@@ -268,6 +331,44 @@ async def playground_chat(body: PlaygroundChatRequest):
         history=body.history
     )
     result = orchestrator.process(inbound)
+
+    # Save turn to chat_sessions store
+    try:
+        store = get_event_store()
+        sess_id = body.session_id or body.thread_id or f"sess_{inbound.id}"
+        turn_idx = (len(body.history) // 2) + 1
+        turn_data = {
+            "turn_index": turn_idx,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "customer_message": body.text,
+            "bot_reply": result.draft_reply,
+            "decision": result.decision,
+            "flag": result.flag,
+            "status_badge": result.status_badge,
+            "matched_product": result.matched_product.name if result.matched_product else None,
+            "matched_rule": result.matched_rule or result.matched_edge_case,
+            "intent": result.intent,
+            "knowledge_files": result.knowledge_files,
+            "missing_fields": result.missing_fields,
+            "attached_image_url": result.attached_image_url,
+            "model_used": result.model_used
+        }
+        store.save_session_turn(
+            session_id=sess_id,
+            channel=body.channel,
+            platform=body.platform,
+            surface=body.surface,
+            user_message=body.text,
+            reply=result.draft_reply,
+            turn_data=turn_data,
+            thread_id=body.thread_id or sess_id,
+            user_id="brand_tester_01",
+            user_name=body.user_name or "Khách Hàng (Brand Test)",
+            status="handover" if result.flag == "handover" else "active"
+        )
+    except Exception as e:
+        print(f"Warning: Failed to save playground session turn: {e}")
+
     return {
         "id": inbound.id,
         "reply": result.draft_reply,

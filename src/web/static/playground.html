@@ -36,6 +36,9 @@
       <button class="btn-header btn-case-hub" id="btn-case-hub" onclick="openCaseHubModal()" title="Xem danh sách Golden Examples và Case Lỗi đã lưu">
         📋 Thư Viện Case <span class="badge-counter" id="cases-count-badge">0</span>
       </button>
+      <button class="btn-header" onclick="openLogsModal()" title="Xem danh sách lịch sử các phiên chat đã lưu">
+        📜 Logs Chat
+      </button>
       <button class="btn-header btn-gold" id="btn-export-csv" onclick="exportSessionCsv()" title="Tải xuống CSV toàn bộ phiên chat">
         📥 Export CSV
       </button>
@@ -434,6 +437,7 @@
 
       try {
         const payload = {
+          session_id: state.sessionId,
           channel: state.channel,
           platform: state.platform,
           surface: state.surface,
@@ -1716,7 +1720,106 @@
         setTimeout(() => toast.remove(), 250);
       }, 3500);
     }
+
+    /* ==========================================================================
+       Session Logs Modal Logic
+       ========================================================================== */
+    async function openLogsModal() {
+      const modal = document.getElementById('playground-logs-modal');
+      const listEl = document.getElementById('pg-logs-list');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:2rem;">⏳ Đang tải danh sách session...</div>';
+
+      try {
+        const res = await fetch('/api/chat-sessions?limit=50');
+        const data = await res.json();
+        const sessions = data.sessions || [];
+
+        if (sessions.length === 0) {
+          listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:2rem;">Chưa có session chat nào được lưu trong database. Hãy nhắn tin để tạo phiên chat!</div>';
+          return;
+        }
+
+        let html = '';
+        sessions.forEach(s => {
+          const isCurrent = s.id === state.sessionId;
+          const updated = s.updated_at ? new Date(s.updated_at).toLocaleString() : '';
+          html += `
+            <div style="background:#1e293b; border:1px solid ${isCurrent ? '#38bdf8' : '#334155'}; border-radius:8px; padding:0.9rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
+                  <strong style="color:${isCurrent ? '#38bdf8' : '#f8fafc'}; font-size:0.9rem;">${escapeHtml(s.id)}</strong>
+                  ${isCurrent ? '<span style="background:#0284c7; color:#fff; font-size:0.65rem; padding:0.1rem 0.4rem; border-radius:4px; font-weight:700;">Đang chat</span>' : ''}
+                  <span style="font-size:0.75rem; color:#94a3b8;">${escapeHtml(s.channel.toUpperCase())} · ${escapeHtml(s.platform.toUpperCase())}</span>
+                  <span style="background:#334155; color:#e2e8f0; font-size:0.7rem; padding:0.1rem 0.4rem; border-radius:10px; font-weight:700;">${s.turn_count || 1} turns</span>
+                </div>
+                <div style="font-size:0.8rem; color:#cbd5e1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  Khách: <em>"${escapeHtml(s.last_message || '')}"</em>
+                </div>
+                <div style="font-size:0.75rem; color:#facc15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:0.2rem;">
+                  Bot: "${escapeHtml(s.last_reply || '')}"
+                </div>
+                <div style="font-size:0.7rem; color:#64748b; margin-top:0.2rem;">${updated}</div>
+              </div>
+              <button onclick="downloadSessionCsvDirect('${escapeHtml(s.id)}')" class="btn-action-small" style="background:#d97706; color:#fff; font-size:0.75rem; padding:0.35rem 0.7rem; white-space:nowrap; border:none; cursor:pointer;">
+                📥 CSV
+              </button>
+            </div>
+          `;
+        });
+        listEl.innerHTML = html;
+      } catch (err) {
+        listEl.innerHTML = `<div style="color:#ef4444; padding:1.5rem; text-align:center;">Lỗi: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function closeLogsModal() {
+      const modal = document.getElementById('playground-logs-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function downloadSessionCsvDirect(sessionId) {
+      try {
+        const res = await fetch(`/api/chat-sessions/${sessionId}`);
+        if (!res.ok) throw new Error('Không tìm thấy session');
+        const data = await res.json();
+        const turns = data.turns || [];
+        if (turns.length === 0) {
+          showToast('Session này chưa có turns', 'warning');
+          return;
+        }
+
+        let csv = '\uFEFFTurn,Timestamp,KhachHang,BotReply,Intent,SanPham,Rule,Decision\n';
+        turns.forEach((t, i) => {
+          csv += [
+            t.turn_index || (i + 1),
+            `"${(t.timestamp || '').replace(/"/g, '""')}"`,
+            `"${(t.customer_message || t.user_message || '').replace(/"/g, '""')}"`,
+            `"${(t.bot_reply || t.reply || '').replace(/"/g, '""')}"`,
+            `"${(t.intent || '').replace(/"/g, '""')}"`,
+            `"${(t.matched_product || '').replace(/"/g, '""')}"`,
+            `"${(t.matched_rule || '').replace(/"/g, '""')}"`,
+            `"${(t.decision || '').replace(/"/g, '""')}"`
+          ].join(',') + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `session_${sessionId}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+        showToast('Đã tải CSV session thành công', 'success');
+      } catch (err) {
+        showToast('Lỗi export CSV: ' + err.message, 'error');
+      }
+    }
   </script>
+
 
   <!-- ==========================================================================
        MODAL 1: Đánh Giá ĐẠT (Golden Example Modal) - Clean Light Theme
@@ -1986,6 +2089,23 @@
 
       <div class="modal-footer">
         <button class="btn-action-small" onclick="closeCaseHubModal()">Đóng</button>
+      </div>
+    </div>
+  <!-- Modal Xem Danh Sách Session Logs Trong Playground -->
+  <div id="playground-logs-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; width:100%; max-width:850px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.6);">
+      <div style="padding:1rem 1.5rem; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3 style="margin:0; font-size:1.15rem; color:#f8fafc;">📜 Lịch Sử Chat Sessions &amp; Logs</h3>
+          <span style="font-size:0.75rem; color:#94a3b8;">Dữ liệu lưu trữ bền vững (Hỗ trợ Cloud PostgreSQL &amp; SQLite)</span>
+        </div>
+        <button onclick="closeLogsModal()" style="background:transparent; border:none; color:#94a3b8; font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+      <div id="pg-logs-list" style="padding:1.25rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.75rem;">
+        <div style="text-align:center; color:#94a3b8; padding:2rem;">Đang tải danh sách session...</div>
+      </div>
+      <div style="padding:0.75rem 1.5rem; border-top:1px solid #334155; display:flex; justify-content:flex-end;">
+        <button onclick="closeLogsModal()" class="btn-action-small" style="background:#334155; color:#fff;">Đóng</button>
       </div>
     </div>
   </div>

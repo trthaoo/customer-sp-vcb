@@ -66,3 +66,31 @@ Nếu bạn muốn giao diện UI chạy riêng trên domain Vercel (`.vercel.ap
 2. Import repo GitHub.
 3. Trong phần cấu hình, tệp [`vercel.json`](file:///c:/Users/MR.%20WIND/OneDrive/Desktop/customer%20sp_vcb/vercel.json) đã được chuẩn bị sẵn trong project để Vercel phục vụ các trang `/playground` và `/`.
 4. Trên giao diện UI `playground.html`, trỏ các lời gọi `fetch('/api/playground/chat')` về domain backend Render của bạn: `https://vcb-customer-concierge.onrender.com/api/playground/chat`.
+
+---
+
+## 5. LƯU GIỮ LOGS & CHAT SESSIONS TRÊN RENDER: CÓ CẦN DATABASE KHÔNG?
+
+### 👉 Trả lời:
+- **Ở máy Local**: **KHÔNG cần database**, hệ thống tự dùng SQLite cục bộ lưu vào file `.db`.
+- **Khi deploy lên Render (Gói Free)**: **NÊN THÊM DATABASE CLOUD (Miễn phí 100%)**.
+  - *Lý do:* Render Free sử dụng **ổ cứng tạm (ephemeral filesystem)**. Sau mỗi lần Render khởi động lại hoặc deploy bản mới, các file SQLite cục bộ trong container sẽ bị reset.
+  - *Giải pháp:* Dự án đã được tích hợp **cơ chế Dual Database thông minh**:
+    - Nếu **KHÔNG có `DATABASE_URL`**: Tự động dùng SQLite cục bộ.
+    - Nếu **CÓ `DATABASE_URL`**: Tự động chuyển sang Cloud PostgreSQL, lưu giữ toàn bộ Chat Sessions, Turns, Metrics và Events vĩnh viễn!
+
+### Cách lấy PostgreSQL miễn phí chỉ trong 1 phút:
+1. **Cách 1 (Ngay trên Render - Khuyên dùng):**
+   - Vào Dashboard Render -> Bấm **New +** -> **PostgreSQL**.
+   - Đặt tên: `vcb-database` -> Bấm **Create Database**.
+   - Copy mục **Internal Database URL** (dạng `postgresql://user:pass@host/dbname`).
+   - Vào Web Service của bạn trên Render -> Mục **Environment** -> Thêm biến:
+     `DATABASE_URL` = `<URL vừa copy>`.
+   - Bấm **Save Changes**. Xong!
+2. **Cách 2 (Neon.tech / Supabase - Free vĩnh viễn):**
+   - Đăng ký tài khoản tại [https://neon.tech](https://neon.tech) (1-click login bằng GitHub).
+   - Tạo database miễn phí -> Copy Connection String dán vào biến `DATABASE_URL` trên Render.
+
+### Xem Lại Logs Chat:
+- **Trên Ops Dashboard (`/`)**: Vào tab **"📜 Chat Sessions & Logs"** để xem toàn bộ danh sách phiên chat, số lượt trao đổi, lọc theo kênh, và xem transcript chi tiết từng tin nhắn khách và bot!
+- **Trên Playground (`/playground`)**: Bấm nút **"📜 Logs Chat"** ở thanh header để xem lịch sử và tải CSV phiên chat trực tiếp.

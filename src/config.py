@@ -30,7 +30,11 @@ HOLD_ON_HANDOVER = os.getenv("HOLD_ON_HANDOVER", "true").lower() in ("true", "1"
 # Environment (prod, test, dev)
 APP_ENV = os.getenv("APP_ENV", "prod")
 
-# Database path
+# Database configuration (PostgreSQL for Cloud/Render or SQLite local)
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "data" / "events.db"))
 
 # Knowledge directories

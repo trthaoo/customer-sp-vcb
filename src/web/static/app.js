@@ -227,6 +227,186 @@ function refreshCurrentTab() {
     fetchTikTokMetrics();
   } else if (currentTab === 'handover') {
     fetchHandoverQueue();
+  } else if (currentTab === 'sessions') {
+    loadChatSessions();
+  }
+}
+
+let chatSessionsData = [];
+
+async function loadChatSessions() {
+  const container = document.getElementById('sessions-list-container');
+  const chanFilter = document.getElementById('sessions-filter-chan') ? document.getElementById('sessions-filter-chan').value : 'all';
+  try {
+    const res = await fetch(`/api/chat-sessions?channel=${chanFilter}&limit=100`);
+    const data = await res.json();
+    chatSessionsData = data.sessions || [];
+    renderSessionsList(chatSessionsData);
+  } catch (err) {
+    console.error('Failed to load chat sessions:', err);
+    if (container) container.innerHTML = `<div class="empty-state">Lỗi tải dữ liệu sessions: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function filterSessionsList() {
+  const query = (document.getElementById('sessions-search-input')?.value || '').toLowerCase().trim();
+  if (!query) {
+    renderSessionsList(chatSessionsData);
+    return;
+  }
+  const filtered = chatSessionsData.filter(s => 
+    (s.id && s.id.toLowerCase().includes(query)) ||
+    (s.last_message && s.last_message.toLowerCase().includes(query)) ||
+    (s.user_name && s.user_name.toLowerCase().includes(query)) ||
+    (s.platform && s.platform.toLowerCase().includes(query))
+  );
+  renderSessionsList(filtered);
+}
+
+function renderSessionsList(sessions) {
+  const container = document.getElementById('sessions-list-container');
+  if (!container) return;
+
+  if (!sessions || sessions.length === 0) {
+    container.innerHTML = '<div class="empty-state">Chưa có session chat nào được lưu trong database. Hãy chat thử trên Playground hoặc gửi webhook để tạo phiên chat!</div>';
+    return;
+  }
+
+  let html = `
+    <table class="handover-table">
+      <thead>
+        <tr>
+          <th>Session ID</th>
+          <th>Funnel / Kênh</th>
+          <th>Khách Hàng</th>
+          <th>Lượt Chat</th>
+          <th>Thời Điểm Cuối</th>
+          <th>Tin Nhắn Khách Gần Nhất</th>
+          <th>Phản Hồi Bot</th>
+          <th>Trạng Thái</th>
+          <th>Thao Tác</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  sessions.forEach(s => {
+    const badgeClass = s.status === 'handover' ? 'status-pill-fail' : 'status-pill-pass';
+    const statusLabel = s.status === 'handover' ? 'Handover' : 'Active / Auto';
+    const updatedTime = s.updated_at ? new Date(s.updated_at).toLocaleString() : '';
+
+    html += `
+      <tr>
+        <td><code>${escapeHtml(s.id)}</code></td>
+        <td>
+          <span style="font-weight:600; text-transform:uppercase;">${escapeHtml(s.channel)}</span> · 
+          <span style="color:var(--text-dim);">${escapeHtml(s.platform)} (${escapeHtml(s.surface)})</span>
+        </td>
+        <td><strong>${escapeHtml(s.user_name || 'Khách Hàng')}</strong></td>
+        <td><span style="display:inline-block; padding:0.2rem 0.5rem; background:#334155; border-radius:12px; font-weight:700; font-size:0.8rem;">${s.turn_count || 1} turns</span></td>
+        <td style="font-size:0.8rem; color:var(--text-dim);">${updatedTime}</td>
+        <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(s.last_message || '')}">
+          ${escapeHtml(s.last_message || '')}
+        </td>
+        <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--brand-gold);" title="${escapeHtml(s.last_reply || '')}">
+          ${escapeHtml(s.last_reply || '')}
+        </td>
+        <td>
+          <span class="status-pill ${badgeClass}">${statusLabel}</span>
+        </td>
+        <td>
+          <div style="display:flex; gap:0.4rem;">
+            <button class="action-btn" onclick="viewSessionDetails('${escapeHtml(s.id)}')" title="Xem toàn bộ transcript phiên chat" style="background:#2563eb; color:#fff;">
+              👁 Transcript
+            </button>
+            <button class="action-btn" onclick="deleteSession('${escapeHtml(s.id)}')" title="Xóa session" style="background:#dc2626; color:#fff;">
+              ✕
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+async function viewSessionDetails(sessionId) {
+  const modal = document.getElementById('session-transcript-modal');
+  const titleEl = document.getElementById('modal-session-title');
+  const subEl = document.getElementById('modal-session-subtitle');
+  const bodyEl = document.getElementById('modal-session-body');
+  const countEl = document.getElementById('modal-session-count');
+
+  if (!modal) return;
+  modal.style.display = 'flex';
+  titleEl.textContent = `Session: ${sessionId}`;
+  subEl.textContent = 'Đang tải toàn bộ hội thoại...';
+  bodyEl.innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">Đang tải...</div>';
+
+  try {
+    const res = await fetch(`/api/chat-sessions/${sessionId}`);
+    if (!res.ok) throw new Error('Không tìm thấy session');
+    const data = await res.json();
+
+    subEl.textContent = `${data.channel.toUpperCase()} · ${data.platform.toUpperCase()} (${data.surface}) · Cập nhật: ${new Date(data.updated_at).toLocaleString()}`;
+    countEl.textContent = `Tổng số: ${data.turns ? data.turns.length : 0} lượt trao đổi`;
+
+    if (!data.turns || data.turns.length === 0) {
+      bodyEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:2rem;">Không có chi tiết turn nào trong session này.</div>';
+      return;
+    }
+
+    let turnsHtml = '';
+    data.turns.forEach((t, idx) => {
+      turnsHtml += `
+        <div style="background:#1e293b; border:1px solid #334155; border-radius:8px; padding:1rem; display:flex; flex-direction:column; gap:0.6rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#94a3b8;">
+            <span style="font-weight:700; color:#38bdf8;">Turn #${t.turn_index || (idx + 1)}</span>
+            <span>${t.timestamp || ''}</span>
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:flex-start;">
+            <span style="background:#0284c7; color:#fff; font-size:0.7rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:4px;">Khách</span>
+            <div style="background:#0f172a; padding:0.6rem 0.8rem; border-radius:6px; color:#f8fafc; font-size:0.85rem; flex:1; white-space:pre-wrap;">
+              ${escapeHtml(t.customer_message || t.user_message || '')}
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:flex-start;">
+            <span style="background:#eab308; color:#0f172a; font-size:0.7rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:4px;">Bot</span>
+            <div style="background:#022c22; border:1px solid #065f46; padding:0.6rem 0.8rem; border-radius:6px; color:#ecfdf5; font-size:0.85rem; flex:1; white-space:pre-wrap;">
+              ${escapeHtml(t.bot_reply || t.reply || '')}
+            </div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.7rem; margin-top:0.25rem;">
+            ${t.intent ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#94a3b8;">Intent: <strong>${escapeHtml(t.intent)}</strong></span>` : ''}
+            ${t.matched_product ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#38bdf8;">SP: <strong>${escapeHtml(t.matched_product)}</strong></span>` : ''}
+            ${t.matched_rule ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#facc15;">Rule: <strong>${escapeHtml(t.matched_rule)}</strong></span>` : ''}
+            ${t.decision ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#4ade80;">Decision: <strong>${escapeHtml(t.decision)}</strong></span>` : ''}
+            ${t.attached_image_url ? `<span style="background:#065f46; padding:0.1rem 0.4rem; border-radius:3px; color:#a7f3d0;">📷 Có ảnh SP</span>` : ''}
+          </div>
+        </div>
+      `;
+    });
+    bodyEl.innerHTML = turnsHtml;
+  } catch (err) {
+    bodyEl.innerHTML = `<div style="color:#ef4444; padding:1.5rem; text-align:center;">Lỗi: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function closeSessionModal() {
+  const modal = document.getElementById('session-transcript-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function deleteSession(sessionId) {
+  if (!confirm(`Bạn có chắc muốn xóa vĩnh viễn session ${sessionId}?`)) return;
+  try {
+    const res = await fetch(`/api/chat-sessions/${sessionId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Không thể xóa');
+    loadChatSessions();
+  } catch (err) {
+    alert('Lỗi xóa session: ' + err.message);
   }
 }
 
