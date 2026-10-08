@@ -64,7 +64,6 @@ class ModelAdapter:
 
     def get_info(self) -> Dict[str, Any]:
         key = self.api_key
-        masked_key = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else ("configured" if key else "")
         provider = self.provider
         if not provider:
             if "gemini" in self.model_name.lower() or key.startswith("AIza") or key.startswith("AQ."):
@@ -76,8 +75,6 @@ class ModelAdapter:
             "is_vision_capable": self.is_vision_capable(),
             "provider": provider,
             "model_name": self.model_name,
-            "base_url": self.base_url,
-            "masked_key": masked_key
         }
 
     def generate_reply(
@@ -108,7 +105,7 @@ class ModelAdapter:
             if "vision" in err_str or "image" in err_str or "unsupported" in err_str or "modal" in err_str:
                 raise ValueError(f"vision_unsupported: {e}")
             print(f"Warning: Model generation failed ({e})")
-            return f"[Lỗi kết nối Model API: {e}]"
+            return "[Lỗi kết nối Model API]"
 
     def _generate_gemini(
         self,

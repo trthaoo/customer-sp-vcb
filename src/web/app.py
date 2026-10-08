@@ -1,4 +1,7 @@
 import io
+import os
+import base64
+import secrets
 import csv
 import json
 import uuid
@@ -8,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List, Literal
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException, Header, Query, UploadFile, File
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -26,6 +29,20 @@ app = FastAPI(title="Customer Service Auto-Reply Gateway", version="1.0.0")
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
+
+# Password-protect everything except the health check (Render/UptimeRobot) and the
+# Zernio webhook (it has its own HMAC check). Disabled when BASIC_AUTH_PASS is unset.
+_AUTH_PASS = os.getenv("BASIC_AUTH_PASS", "")
+_AUTH_HEADER = "Basic " + base64.b64encode(f"{os.getenv('BASIC_AUTH_USER', '')}:{_AUTH_PASS}".encode()).decode()
+_PUBLIC_PATHS = {"/api/health", "/webhooks/zernio"}
+
+@app.middleware("http")
+async def basic_auth(request: Request, call_next):
+    if _AUTH_PASS and request.url.path not in _PUBLIC_PATHS:
+        given = request.headers.get("authorization", "").encode()
+        if not secrets.compare_digest(given, _AUTH_HEADER.encode()):
+            return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="vcb"'})
+    return await call_next(request)
 
 class HandoverStateUpdate(BaseModel):
     state: HandoverStateType

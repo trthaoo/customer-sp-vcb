@@ -20,11 +20,17 @@ services:
       - key: MODEL_PROVIDER
         value: openai
       - key: MODEL_BASE_URL
-        value: https://loading-shoot-over-tobago.trycloudflare.com/v1
+        value: https://openrouter.ai/api/v1
       - key: MODEL_API_KEY
-        value: sk-marketing-d682d24e4a3130801e6c7311464ff5152f92fd46ad20fd501a59a11f90186edd
+        sync: false
       - key: MODEL_NAME
         value: deepseek/deepseek-v4.1-flash
+      - key: EMBEDDING_API_KEY
+        sync: false
+      - key: BASIC_AUTH_USER
+        sync: false
+      - key: BASIC_AUTH_PASS
+        sync: false
       - key: AUTO_SEND
         value: "false"
       - key: HOLD_ON_HANDOVER

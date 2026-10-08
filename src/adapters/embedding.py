@@ -21,7 +21,7 @@ class GoogleAIStudioEmbedding:
     def api_key(self) -> str:
         if self._api_key:
             return self._api_key
-        return os.getenv("MODEL_API_KEY", config.MODEL_API_KEY or "").strip()
+        return os.getenv("EMBEDDING_API_KEY", "").strip()
 
     @property
     def model_name(self) -> str:

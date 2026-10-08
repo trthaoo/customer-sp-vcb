@@ -35,9 +35,10 @@ Nếu chưa đẩy lên GitHub:
    - **Plan**: `Free`
 5. Nhập **Environment Variables (Môi trường)**:
    - `MODEL_PROVIDER`: `openai`
-   - `MODEL_BASE_URL`: `https://loading-shoot-over-tobago.trycloudflare.com/v1`
-   - `MODEL_API_KEY`: `sk-marketing-d682d24e4a3130801e6c7311464ff5152f92fd46ad20fd501a59a11f90186edd`
+   - `MODEL_BASE_URL`: `https://openrouter.ai/api/v1`
+   - `MODEL_API_KEY`: key OpenRouter (nhập trực tiếp trên Render, không commit vào repo)
    - `MODEL_NAME`: `deepseek/deepseek-v4.1-flash`
+   - `BASIC_AUTH_USER` / `BASIC_AUTH_PASS`: tài khoản đăng nhập cho người test. Bỏ trống thì ai có link cũng vào được.
    - `AUTO_SEND`: `false`
    - `HOLD_ON_HANDOVER`: `true`
 6. Bấm **Create Web Service**. Đợi 2-3 phút, bạn sẽ nhận được domain vĩnh viễn:
