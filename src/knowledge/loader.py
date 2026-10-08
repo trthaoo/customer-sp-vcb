@@ -55,6 +55,8 @@ class KnowledgeBase:
         self.tiktok_edge_cases: List[EdgeCase] = []
         self.policies: Dict[str, str] = {}
         self.products: List[Product] = []
+        # Parse problems the app skips at runtime; tests/test_knowledge_valid.py fails on any.
+        self.errors: List[str] = []
         self.load_all()
 
     def _read_file(self, rel_path: str) -> str:
@@ -131,7 +133,7 @@ class KnowledgeBase:
                 if intent_part:
                     self.intents.append(intent_part)
 
-    def _extract_yaml_blocks(self, content: str) -> List[Any]:
+    def _extract_yaml_blocks(self, content: str, source: str = "") -> List[Any]:
         # Extract ```yaml ... ``` blocks
         results = []
         blocks = re.findall(r'```(?:yaml|yml)?\s*\n(.*?)\n```', content, re.DOTALL)
@@ -142,12 +144,12 @@ class KnowledgeBase:
                     results.extend(data)
                 elif isinstance(data, dict):
                     results.append(data)
-            except Exception:
-                pass
+            except Exception as e:
+                self.errors.append(f"{source}: invalid YAML block: {e}")
         return results
 
     def _parse_rules(self, content: str, default_channel: str) -> List[Rule]:
-        data = self._extract_yaml_blocks(content)
+        data = self._extract_yaml_blocks(content, f"{default_channel}/rules.md")
         rules = []
         for item in data:
             if not isinstance(item, dict) or "id" not in item:
@@ -157,11 +159,12 @@ class KnowledgeBase:
                 rule = Rule(**item)
                 rules.append(rule)
             except Exception as e:
+                self.errors.append(f"{default_channel}/rules.md: rule {item.get('id')}: {e}")
                 print(f"Warning: Failed to parse rule {item.get('id')}: {e}")
         return rules
 
     def _parse_edge_cases(self, content: str, default_channel: str) -> List[EdgeCase]:
-        data = self._extract_yaml_blocks(content)
+        data = self._extract_yaml_blocks(content, f"{default_channel}/edge_cases.md")
         edge_cases = []
         for item in data:
             if not isinstance(item, dict) or "id" not in item:
@@ -171,6 +174,7 @@ class KnowledgeBase:
                 ec = EdgeCase(**item)
                 edge_cases.append(ec)
             except Exception as e:
+                self.errors.append(f"{default_channel}/edge_cases.md: edge case {item.get('id')}: {e}")
                 print(f"Warning: Failed to parse edge case {item.get('id')}: {e}")
         return edge_cases
 
@@ -193,6 +197,7 @@ class KnowledgeBase:
                 if isinstance(p, dict):
                     self.products.append(Product(**p))
         except Exception as e:
+            self.errors.append(f"catalogue/{target.name}: {e}")
             print(f"Warning: Could not load products from {target}: {e}")
 
 _kb_instance: Optional[KnowledgeBase] = None

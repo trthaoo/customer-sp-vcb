@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      # These three call the live model, which CI does not have.
+      - run: >
+          python -m pytest -q
+          --deselect tests/test_case_loi.py::test_unsupported_payment_methods_handover
+          --deselect tests/test_case_loi.py::test_anti_scam_legitimacy_inquiry
+          --deselect tests/test_case_loi.py::test_customer_want_to_buy_product

@@ -95,3 +95,19 @@ Nếu bạn muốn giao diện UI chạy riêng trên domain Vercel (`.vercel.ap
 ### Xem Lại Logs Chat:
 - **Trên Ops Dashboard (`/`)**: Vào tab **"📜 Chat Sessions & Logs"** để xem toàn bộ danh sách phiên chat, số lượt trao đổi, lọc theo kênh, và xem transcript chi tiết từng tin nhắn khách và bot!
 - **Trên Playground (`/playground`)**: Bấm nút **"📜 Logs Chat"** ở thanh header để xem lịch sử và tải CSV phiên chat trực tiếp.
+
+---
+
+## 6. VPS: TỰ DEPLOY KHI PUSH LÊN `main`
+
+Bản đang chạy cho bên test nằm trên VPS (`https://62-106-66-4.sslip.io`), không dùng Render.
+
+Quy trình khi sửa rule hoặc code:
+1. Sửa file (ví dụ `knowledge/meta/rules.md`) rồi push lên nhánh `main`.
+2. GitHub Actions (tab **Actions**) chạy test. Nếu một khối YAML trong rule hoặc edge case viết sai, test `tests/test_knowledge_valid.py` sẽ báo đỏ và chỉ ra file bị lỗi.
+3. Trong vòng 1 phút, VPS tự kéo commit mới, chạy lại test kiểm tra kiến thức, rồi restart app.
+4. Nếu test trên VPS fail hoặc app không lên, VPS giữ nguyên bản cũ và bỏ qua commit đó. Sửa lỗi rồi push commit mới là được.
+
+Không cần secret nào trên GitHub: VPS tự kéo code từ repo public. Nếu chuyển repo sang private, cần thêm deploy key (read-only) cho VPS.
+
+Xem log deploy trên VPS: `journalctl -u vcb-deploy -n 50`.
