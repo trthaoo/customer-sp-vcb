@@ -1,0 +1,883 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vien Chi Bao Product Catalogue (US Market)",
+  "description": "Live product catalogue for Vien Chi Bao Fine Jewelry & Artistry (US Market) imported from official sales sheet with comprehensive descriptions, USD prices, and specifications.",
+  "products": [
+    {
+      "id": "N0006-07-S-WH",
+      "name": "S925 Sterling Silver Invisible Setting Moissanite Eternity Ring",
+      "aliases": [
+        "invisible setting moissanite ring",
+        "moissanite eternity ring",
+        "s925 moissanite ring",
+        "invisible ring",
+        "nhẫn tàng hình",
+        "nhẫn tàng hình moissanite",
+        "nhẫn tàng hình s925",
+        "nhẫn đính moissanite",
+        "N0006-07-S-WH"
+      ],
+      "price": 356.0,
+      "currency": "USD",
+      "material": "Platinum-plated S925 sterling silver, hypoallergenic and anti-tarnish, set with premium Moissanite",
+      "description": "Crafted from premium S925 sterling silver and finished with a durable platinum plating that resists oxidation, ensures skin safety, and provides long-lasting brilliance. The ring features an exquisite invisible setting with continuous Moissanite stones seamlessly aligned without visible prongs. Band weight is approximately 2-3g. Symbolically, the seamless circular design with neither beginning nor end embodies eternal love, lifelong devotion, and uninterrupted harmony. Moissanite radiates diamond-like fire, signifying self-confidence, good fortune, and vibrant positive energy that elevates the wearer's poise and refined taste. Designed for women, it is ideal for daily wear, office elegance, casual outings, or celebratory occasions like romantic dinners, anniversaries, and birthdays. It also serves as a deeply meaningful gift for wives, partners, or cherished loved ones.",
+      "variants": [
+        "US Size 4",
+        "US Size 5",
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9",
+        "US Size 10",
+        "US Size 11",
+        "US Size 12"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Packaged in an artisan presentation gift box.",
+      "size_guide": "Standard US sizes 4 through 12. Measure inner finger circumference in mm to match US size.",
+      "url": null,
+      "notes": "Seamless invisible stone setting without beginning or end, symbolizing eternal love and lifelong devotion. Weight: ~2-3g. Ideal for daily wear, anniversaries, or meaningful gifting.",
+      "image_url": "/static/products/N0006-07-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/N0006-07-S-WH.jpg"
+    },
+    {
+      "id": "N0025-10-S-WH",
+      "name": "Men's S925 Sterling Silver Cogwheel Gear Spinning Ring with Moissanite",
+      "aliases": [
+        "men's gear spinning ring",
+        "cogwheel moissanite ring",
+        "spinning gear ring",
+        "men's moissanite spinning ring",
+        "nhẫn xoay răng cưa",
+        "nhẫn răng cưa",
+        "nhẫn xoay moissanite nam",
+        "nhẫn nam răng cưa",
+        "N0025-10-S-WH"
+      ],
+      "price": 962.0,
+      "currency": "USD",
+      "material": "Platinum-plated S925 sterling silver, anti-tarnish and hypoallergenic, set with brilliant-cut Moissanite",
+      "description": "Engineered from solid S925 sterling silver with a protective platinum plating that resists tarnishing and is completely safe for sensitive skin. The center features master-cut Moissanite with exceptional optical brilliance that rivals natural diamonds. The ring has a substantial, masculine weight of ~11-13g with a precision-machined 360-degree rotating outer gear band. Symbolically, the smooth spinning mechanism fosters mental equilibrium, inner peace, and effective stress relief during busy days. The bold cogwheel / gear motif represents an indomitable spirit, perseverance, and the tenacity to conquer life's challenges, while the sparkling Moissanite stands for prestige, prosperity, and self-affirmation. Designed for men for daily wear, it complements masculine, bold, or minimalist aesthetics. Easily paired with a luxury timepiece or metallic cuff, it is perfect for business meetings, social gatherings, evening parties, or layered Moissanite styling.",
+      "variants": [
+        "US Size 7",
+        "US Size 8",
+        "US Size 9",
+        "US Size 10",
+        "US Size 11",
+        "US Size 12"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Packaged in an artisan presentation gift box.",
+      "size_guide": "Standard US sizes 7 to 12. Solid band weight ~11-13g.",
+      "url": null,
+      "notes": "Features a smooth 360-degree rotating gear/cogwheel outer band for stress relief and mindfulness. Solid masculine statement ring (~11-13g).",
+      "image_url": "/static/products/N0025-10-S-WH.png",
+      "image_path": "knowledge/catalogue/images/N0025-10-S-WH.png"
+    },
+    {
+      "id": "N0017-08-S-WH",
+      "name": "S925 Sterling Silver Eye of Horus Ring with Green Moissanite",
+      "aliases": [
+        "eye of horus ring",
+        "green moissanite eye of horus ring",
+        "horus ring",
+        "nhẫn mắt thần horus",
+        "nhẫn mắt thần",
+        "nhẫn horus",
+        "nhẫn moissanite xanh",
+        "nhẫn mắt thần đính moissanite xanh lá",
+        "N0017-08-S-WH"
+      ],
+      "price": 423.0,
+      "currency": "USD",
+      "material": "High-polish S925 sterling silver set with radiant green Moissanite centerpiece",
+      "description": "Skillfully crafted from high-polish S925 sterling silver, known for its durable luster, color retention, and skin-friendly properties over prolonged wear. At its heart sits a vivid green Moissanite offering exceptional Mohs hardness and brilliant fire. Ring weight spans 3.84g to 4.73g across US sizes 5 to 11. Symbolically inspired by the legendary Eye of Horus, this sacred talisman represents spiritual shielding, divine protection, discernment, and good fortune. The emerald-green Moissanite symbolizes vitality, balance, inner strength, and personal charisma—reflecting a resilient, independent spirit constantly drawn toward constructive growth. Suitable for both daily wear and memorable occasions such as dates, anniversaries, and milestones. An empowering and meaningful gift for partners, spouses, or cherished friends.",
+      "variants": [
+        "US Size 5",
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9",
+        "US Size 10",
+        "US Size 11"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Luxury gift box included.",
+      "size_guide": "Standard US sizes 5 to 11. Band weight: 3.84g - 4.73g.",
+      "url": null,
+      "notes": "Inspired by the sacred Eye of Horus, symbolizing divine protection, wisdom, and good fortune. Features a vibrant green Moissanite centerpiece.",
+      "image_url": "/static/products/N0017-08-S-WH.png",
+      "image_path": "knowledge/catalogue/images/N0017-08-S-WH.png"
+    },
+    {
+      "id": "N0036-06-S-WH",
+      "name": "S925 Sterling Silver Blooming Golden Blossom Ring with 6mm Moissanite",
+      "aliases": [
+        "blooming blossom ring",
+        "kim hoa ring",
+        "flower moissanite ring",
+        "6mm moissanite ring",
+        "nhẫn kim hoa",
+        "nhẫn hoa moissanite",
+        "nhẫn kim hoa 6li",
+        "N0036-06-S-WH"
+      ],
+      "price": 385.0,
+      "currency": "USD",
+      "material": "Premium S925 sterling silver featuring a 6mm (1 carat equivalent) center Moissanite with floral halo stones",
+      "description": "Crafted from fine S925 sterling silver weighing approximately 3g, this ring features an impressive 6mm Moissanite center stone (1-carat equivalent) framed by sculpted golden blossom petals set with brilliant pavé accents. The 'Kim Hoa' (Golden Blossom) motif symbolizes aristocratic elegance, radiant vitality, and everlasting love. The lifelike blooming floral silhouette captures a woman's most luminous, graceful moments. With the central gemstone framed by gleaming petals, the design expresses wishes for a joyful, fulfilling life where the wearer remains the radiant center of admiration across time. Designed for women, it enhances romantic, delicate styling as well as polished, modern chic. An ideal choice for self-gifting, promise rings, or celebrating landmark anniversaries.",
+      "variants": [
+        "US Size 5",
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Packaged in an artisan presentation gift box.",
+      "size_guide": "Standard US sizes 5 to 9. Center stone: 6mm Moissanite (~1ct). Weight: ~3g.",
+      "url": null,
+      "notes": "Kim Hoa (Golden Blossom) symbolizes radiant beauty, blooming grace, and eternal love. Weight: ~3g.",
+      "image_url": "/static/products/N0036-06-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/N0036-06-S-WH.jpg"
+    },
+    {
+      "id": "N0044-09-S-WH",
+      "name": "S925 Sterling Silver Four-Leaf Clover Spinning Ring with Zircon Accents",
+      "aliases": [
+        "four-leaf clover spinning ring",
+        "clover spinning ring",
+        "clover ring",
+        "spinning clover ring",
+        "nhẫn xoay cỏ bốn lá",
+        "nhẫn cỏ bốn lá",
+        "nhẫn xoay cỏ 4 lá",
+        "nhẫn cỏ 4 lá",
+        "nhẫn xoay may mắn",
+        "nhẫn cỏ 4 lá xoay s925",
+        "N0044-09-S-WH",
+        "VCB_SP01"
+      ],
+      "price": 279.0,
+      "currency": "USD",
+      "material": "Anti-tarnish crafted S925 sterling silver with sparkling AAA cubic zirconia accents",
+      "description": "Meticulously crafted from high-grade S925 sterling silver and treated with an advanced anti-tarnish coating to ensure enduring luminosity and skin comfort. Features a solid 4.9g band crowned with a precision-balanced, smooth 360-degree rotating four-leaf clover motif accented with brilliant AAA zircon crystals. Drawing from the sacred four-leaf clover legend, each petal embodies a transcendent virtue: Faith, Hope, Love, and Good Fortune. The seamless spinning motion acts as a tangible mindfulness anchor for stress and anxiety relief, while symbolizing an unbroken cycle of positive aura and good fortune along life's journey. Designed for women, its ergonomic profile blends seamlessly with casual, business, or formal attire. Perfect for birthdays, romantic anniversaries, personal milestones, or heartfelt gifting.",
+      "variants": [
+        "US Size 5",
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days, packaged in an artisan presentation gift box.",
+      "size_guide": "Standard US sizes 5 to 9. Band weight: 4.9g. Measure finger circumference in mm to match US size.",
+      "url": "https://vienchibao.com/san-pham/nhan-xoay-co-bon-la-s925",
+      "notes": "Smooth 360-degree rotating clover motif designed for mindfulness and stress relief. The four leaves symbolize faith, hope, love, and luck. Constant motion represents continuous positive energy.",
+      "image_url": "/static/products/N0044-09-S-WH.png",
+      "image_path": "knowledge/catalogue/images/N0044-09-S-WH.png"
+    },
+    {
+      "id": "N0011-08-S-WH",
+      "name": "S925 Sterling Silver Orbiting Planet Spinning Moissanite Ring",
+      "aliases": [
+        "planet spinning ring",
+        "orbiting planet ring",
+        "celestial moissanite spinning ring",
+        "nhẫn hành tinh",
+        "nhẫn xoay hành tinh",
+        "nhẫn hành tinh moissanite",
+        "N0011-08-S-WH"
+      ],
+      "price": 212.0,
+      "currency": "USD",
+      "material": "Anti-tarnish S925 sterling silver with spinning planetary ring and Moissanite accents",
+      "description": "Crafted from certified S925 sterling silver (92.5% silver content), treated against oxidation to preserve lasting brilliance and protect sensitive skin. Total ring weight ranges between 2.59g and 3.04g across US sizes 5 to 9. The ring features an astronomical planetary orb surrounded by a freely rotating orbit ring set with sparkling Moissanite. Symbolically, the rotating planet embodies continuous kinetic progression, intellectual exploration, and personal evolution—carrying a motivating message of striving upward, embracing constructive change, and maintaining confident posture. Designed for women for daily styling, its streamlined aesthetic matches casual, creative, and professional wardrobes. An inspiring gift for graduates, colleagues, or loved ones embarking on new life chapters.",
+      "variants": [
+        "US Size 5",
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation gift box included.",
+      "size_guide": "Standard US sizes 5 to 9. Weight: 2.59g - 3.04g.",
+      "url": null,
+      "notes": "Celestial rotating planet design symbolizing continuous forward motion, personal growth, and boundless cosmic exploration.",
+      "image_url": "/static/products/N0011-08-S-WH.png",
+      "image_path": "knowledge/catalogue/images/N0011-08-S-WH.png"
+    },
+    {
+      "id": "N0009-07-S-YL",
+      "name": "Princess Crown Dual Ring Set S925 with Square Radiant Moissanite (Yellow Gold Vermeil)",
+      "aliases": [
+        "princess crown ring set",
+        "square radiant moissanite ring",
+        "princess tiara ring set",
+        "nhẫn công chúa",
+        "nhẫn vương miện công chúa",
+        "nhẫn đôi công chúa",
+        "nhẫn công chúa xi vàng vàng",
+        "N0009-07-S-YL"
+      ],
+      "price": 375.0,
+      "currency": "USD",
+      "material": "18K Yellow Gold vermeil over S925 sterling silver with square radiant-cut Moissanite and tiara crown band",
+      "description": "Exquisitely cast in S925 sterling silver layered with warm 18K yellow gold vermeil. This two-piece bridal stack includes a regal solitaire ring centered with a square radiant-cut Moissanite and an interlocking curved crown tiara band. Symbolically, the set celebrates fairytale romance, gentle sheltering, and an enduring promise of togetherness. The square radiant stone signifies distinguished nobility and total devotion to one's beloved, while the arched crown band cradles the solitaire to symbolize unconditional protection and two harmonious souls intertwined as one. Perfect for wedding proposals, engagements, or bridal wear. Can be worn together for gala grandeur, or worn separately as individual statement pieces for office and daily casual elegance.",
+      "variants": [
+        "US Size 5",
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Packaged in a velvet bridal presentation box.",
+      "size_guide": "Standard US sizes 5 to 9. Two-piece stacking bridal set (engagement solitaire + curved tiara band).",
+      "url": null,
+      "notes": "Fairytale-inspired 2-in-1 bridal set. The solitaire features a square radiant-cut Moissanite paired with an interlocking curved crown band.",
+      "image_url": "/static/products/N0009-07-S-YL.jpg",
+      "image_path": "knowledge/catalogue/images/N0009-07-S-YL.jpg"
+    },
+    {
+      "id": "N0053-00-S-WH",
+      "name": "S925 Sterling Silver Laurel Wreath Adjustable Ring with 5mm Moissanite",
+      "aliases": [
+        "laurel wreath ring",
+        "adjustable laurel wreath ring",
+        "moissanite laurel ring",
+        "nhẫn nguyệt quế",
+        "nhẫn bạc nguyệt quế",
+        "nhẫn nguyệt quế freesize",
+        "nhẫn nguyệt quế đính moissanite 5li",
+        "N0053-00-S-WH"
+      ],
+      "price": 202.0,
+      "currency": "USD",
+      "material": "High-shine hypoallergenic S925 sterling silver set with a 5mm brilliant Moissanite (~0.5ct)",
+      "description": "Fashioned from high-shine S925 sterling silver conforming to international 92.5% purity standards, ensuring optimal luster and hypoallergenic comfort for sensitive skin. Features an open-ended adjustable band weighing ~2-3g, sculpted in classical laurel wreath leaf motifs and highlighted by a 5mm Moissanite solitaire (~0.5ct). Since ancient antiquity, the laurel wreath has stood as the universal emblem of triumph, honor, and distinguished victory. When paired with a diamond-bright Moissanite, the ring becomes a beacon of confidence, intellectual poise, and unwavering determination. The open freesize cuff comfortably adjusts between US sizes 5 and 9, making it an effortless gift for graduations, promotions, birthdays, and personal achievements.",
+      "variants": [
+        "Adjustable (Freesize: US 5-9)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Artisan gift pouch and box included.",
+      "size_guide": "Freesize open-band design comfortably adjusts from US size 5 to 9. Weight: ~2-3g.",
+      "url": null,
+      "notes": "Laurel wreath design symbolizes victory, honor, and resilience. Adjustable open cuff band ensures an easy, comfortable fit without sizing worries.",
+      "image_url": "/static/products/N0053-00-S-WH.png",
+      "image_path": "knowledge/catalogue/images/N0053-00-S-WH.png"
+    },
+    {
+      "id": "N0040-07-S-WH",
+      "name": "S925 Rose Gold Vermeil Destined Union Ring with 6mm Moissanite",
+      "aliases": [
+        "destined union ring",
+        "sánh duyên ring",
+        "rose gold moissanite ring",
+        "nhẫn sánh duyên",
+        "nhẫn moissanite 6li xi vàng hồng",
+        "nhẫn sánh duyên s925",
+        "N0040-07-S-WH"
+      ],
+      "price": 260.0,
+      "currency": "USD",
+      "material": "Rose gold vermeil over S925 sterling silver with 6mm Moissanite centerpiece and pavé channel stones",
+      "description": "Crafted in S925 sterling silver finished with romantic rose gold vermeil plating. The design showcases a prominent 6mm Moissanite centerpiece (~1.0ct) flanked by sparkling side pavé stones cascading along the band shoulders. Available in US sizes 5 through 9. Named 'Sánh Duyên' (Destined Union), the ring symbolizes the destined alignment of two soulmates and a sacred oath of enduring love that stands firm against time. The warm blush tones of rose gold paired with fiery Moissanite create a deeply romantic aura. Highly favored for marriage proposals, milestone wedding anniversaries, or as an elegant accent for upscale galas and dinner dates.",
+      "variants": [
+        "US Size 5",
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation gift box included.",
+      "size_guide": "Standard US sizes 5 through 9. Center stone: 6mm (~1.0ct).",
+      "url": null,
+      "notes": "Translates to 'Destined Union', symbolizing soulmate connection and eternal devotion. Accented by side pavé stones on a rose gold vermeil band.",
+      "image_url": "/static/products/N0040-07-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/N0040-07-S-WH.jpg"
+    },
+    {
+      "id": "N0042-09-S-WH",
+      "name": "S925 Sterling Silver Solid Band Cat's Eye Shield Ring (5mm)",
+      "aliases": [
+        "cat's eye ring",
+        "cat eye band ring",
+        "silver cat eye ring",
+        "nhẫn mắt mèo",
+        "nhẫn mắt mèo 5li",
+        "nhẫn bản kín mắt mèo",
+        "N0042-09-S-WH"
+      ],
+      "price": 356.0,
+      "currency": "USD",
+      "material": "Platinum-plated S925 sterling silver with carved cat's eye optical texture",
+      "description": "Cast from solid S925 sterling silver and finished in sleek platinum plating for anti-oxidation protection and hypoallergenic comfort. Weighing approximately 4.2g across US sizes 6 to 12, the 5mm closed band features precision chiseled cat's eye grooves that produce a shimmering optical light-ray effect upon wrist movement. In sacred feng shui lore, the cat's eye motif serves as an energetic shield that deflects negativity, sharpens analytical intuition, and attracts wealth and prosperity. The solid closed band construction conveys inner stability, strength, and grounded style. Designed as a versatile unisex piece, it pairs effortlessly with daily street style, corporate outfits, or evening gatherings.",
+      "variants": [
+        "US Size 6",
+        "US Size 7",
+        "US Size 8",
+        "US Size 9",
+        "US Size 10",
+        "US Size 11",
+        "US Size 12"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation gift box included.",
+      "size_guide": "Standard US sizes 6 to 12. Solid band width: 5mm. Weight: ~4.2g.",
+      "url": null,
+      "notes": "Cat's eye motif in spiritual jewelry serves as an energetic shield against negativity, sharpening intuition and attracting prosperity. Solid unisex band.",
+      "image_url": "/static/products/N0042-09-S-WH.png",
+      "image_path": "knowledge/catalogue/images/N0042-09-S-WH.png"
+    },
+    {
+      "id": "N0049-75-S-WH",
+      "name": "Men's S925 Sterling Silver Emerald-Cut Band with 7.2mm Moissanite",
+      "aliases": [
+        "men's emerald band ring",
+        "men's moissanite signet ring",
+        "7.2mm moissanite men's ring",
+        "nhẫn nam moissanite",
+        "nhẫn nam đai emerald",
+        "nhẫn nam viễn chí bảo",
+        "N0049-75-S-WH"
+      ],
+      "price": 876.0,
+      "currency": "USD",
+      "material": "Heavyweight S925 sterling silver with prominent 7.2mm (~1.5ct equivalent) Moissanite solitaire",
+      "description": "Expertly forged from heavyweight S925 sterling silver, offering robust structural strength, durability, and a deep reflective polish specifically engineered for statement men's jewelry. Weighing a substantial 11.1g, the ring commands presence with a magnificent 7.2mm Moissanite solitaire (~1.5ct equivalent) framed within a bold emerald-cut beveled geometric band. Symbolically, this ring embodies male authority, leadership, and unwavering determination. The clean, assertive angles of the emerald silhouette represent sharp vision, decisive leadership, and personal maturity. Ideal for discerning gentlemen to wear daily, at executive boardrooms, or black-tie events. A top-tier gift for career milestones, fatherhood, or personal achievement.",
+      "variants": [
+        "US Size 9",
+        "US Size 10"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Luxury wooden presentation gift box included.",
+      "size_guide": "Standard US sizes 9 and 10. Heavy solid band weight: 11.1g.",
+      "url": null,
+      "notes": "A bold, masculine statement ring featuring a substantial 7.2mm Moissanite set in a strong emerald-cut architectural band. Symbolizes authority, leadership, and success.",
+      "image_url": "/static/products/N0049-75-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/N0049-75-S-WH.jpg"
+    },
+    {
+      "id": "D0008-00-S-WH",
+      "name": "S925 Sterling Silver Dancing Moissanite Pendant Necklace (6.5mm)",
+      "aliases": [
+        "dancing stone necklace",
+        "dancing moissanite necklace",
+        "floating stone pendant",
+        "dây chuyền đá nhảy",
+        "dây chuyền moissanite đá nhảy",
+        "mặt đá nhảy",
+        "D0008-00-S-WH"
+      ],
+      "price": 260.0,
+      "currency": "USD",
+      "material": "Platinum-plated S925 sterling silver with suspended floating 6.5mm Moissanite center stone",
+      "description": "Crafted from fine S925 sterling silver with platinum plating to resist oxidation and protect delicate skin. The centerpiece incorporates a patented suspended cradle holding a brilliant 6.5mm Moissanite (~1.0ct). The chain measures 39cm with a 5cm extender (approx. 15.5\" - 17.5\") with a total piece weight of 3-5g. The kinetic stone mechanism vibrates continuously with the wearer's subtle pulse and movements, creating a continuous play of dancing light. Wearing this pendant attracts vibrant positive energy, joy, and peace of mind. Its delicate silhouette makes it exceptionally versatile for everyday styling, office blazers, and evening dresses, as well as a captivating gift for birthdays, romantic holidays, or self-celebrations.",
+      "variants": [
+        "Standard Length: 15.5 inches + 2-inch extender (39cm + 5cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation jewelry box included.",
+      "size_guide": "Chain length: 39cm + 5cm extension (approx. 15.5\" to 17.5\"). Weight: 3-5g.",
+      "url": null,
+      "notes": "Features a proprietary suspension setting where the 6.5mm Moissanite vibrates and flutters continuously with every movement, creating a mesmerizing sparkle.",
+      "image_url": "/static/products/D0008-00-S-WH.png",
+      "image_path": "knowledge/catalogue/images/D0008-00-S-WH.png"
+    },
+    {
+      "id": "D0002-00-S-WH",
+      "name": "S925 Sterling Silver Convertible 2-Way Four-Leaf Clover Necklace",
+      "aliases": [
+        "2-way clover necklace",
+        "convertible clover necklace",
+        "four leaf clover necklace",
+        "clover heart necklace",
+        "dây chuyền cỏ 4 lá",
+        "dây chuyền cỏ 4 lá đeo hai dáng",
+        "dây chuyền biến hình cỏ 4 lá",
+        "D0002-00-S-WH"
+      ],
+      "price": 221.0,
+      "currency": "USD",
+      "material": "S925 sterling silver accented with micro-pavé cubic zirconia stones",
+      "description": "Crafted from S925 sterling silver and bordered with micro-pavé cubic zirconia crystals along the pendant contours. The 45cm chain carries a 3.15g pendant with an ingenious convertible magnetic mechanism allowing it to be worn in two distinct styles: closed as a harmonious four-leaf clover, or opened into a graceful row of four aligned hearts. In metaphysical tradition, the four-leaf clover channels auspicious blessings and full contentment—each petal enshrining a sacred virtue: Faith, Hope, Love, and Good Fortune. Wearing this convertible piece repels sorrow and invites serene harmony into the soul. Designed for women, it easily transitions from playful daytime casuals to sleek evening attire, making it an exceptional anniversary or festive gift.",
+      "variants": [
+        "Length: 17.7 inches (45cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Gift presentation box included.",
+      "size_guide": "Length: 45cm (17.7 inches). Pendant weight: 3.15g.",
+      "url": null,
+      "notes": "Clever convertible design: can be worn closed as a four-leaf clover (faith, hope, love, luck) or opened into an aligned row of four delicate hearts.",
+      "image_url": "/static/products/D0002-00-S-WH.png",
+      "image_path": "knowledge/catalogue/images/D0002-00-S-WH.png"
+    },
+    {
+      "id": "D0018-00-S-YL",
+      "name": "S925 18K Gold Vermeil Radiant Firework Sparkle Pendant Necklace",
+      "aliases": [
+        "firework pendant necklace",
+        "sparkling firework necklace",
+        "gold firework necklace",
+        "dây chuyền pháo hoa",
+        "dây chuyền pháo hoa phát sáng",
+        "dây chuyền pháo hoa xi vàng",
+        "D0018-00-S-YL"
+      ],
+      "price": 279.0,
+      "currency": "USD",
+      "material": "18K Gold vermeil over S925 sterling silver set with multi-directional brilliant white zircons",
+      "description": "Sculpted in S925 sterling silver and finished in rich 18K yellow gold vermeil, featuring a multi-dimensional fireworks burst motif set with high-refraction white zircons. The necklace length is 41cm plus a 4cm extension chain, weighing 3.52g. Fireworks symbolize celebration, festive jubilation, and the aspiration to shine fearlessly. Each sparkling ray carries the empowering message: 'Always shine brightly in your own unique way.' The warm gold tone conveys warmth, romance, and good fortune, serving as an uplifting spiritual emblem that inspires optimism and self-assurance. Tailored for women, it pairs wonderfully with feminine, delicate styles as well as contemporary evening fashion. A delightful present for holidays, birthdays, or new beginnings.",
+      "variants": [
+        "Length: 16 inches + 1.5-inch extender (41cm + 4cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation jewelry box included.",
+      "size_guide": "Chain length: 41cm + 4cm extension. Weight: 3.52g.",
+      "url": null,
+      "notes": "Radiant firework burst motif symbolizing celebration, joyful beginnings, and shining brightly in your own unique way. Warm gold vermeil with dazzling multi-faceted zircon rays.",
+      "image_url": "/static/products/D0018-00-S-YL.png",
+      "image_path": "knowledge/catalogue/images/D0018-00-S-YL.png"
+    },
+    {
+      "id": "B0003-65-S-WH",
+      "name": "S925 Sterling Silver Classic 6-Prong Moissanite Stud Earrings",
+      "aliases": [
+        "6-prong moissanite earrings",
+        "moissanite stud earrings",
+        "classic moissanite studs",
+        "bông tai 6 chấu",
+        "khuyên tai 6 chấu",
+        "hoa tai moissanite 6 chấu",
+        "B0003-65-S-WH"
+      ],
+      "price": 183.0,
+      "currency": "USD",
+      "material": "S925 sterling silver with secure 6-prong crown basket holding brilliant round Moissanite",
+      "description": "Crafted from fine S925 sterling silver, featuring a classic 6-prong crown basket setting available in either 5mm (0.83g/pair) or 6.5mm (1.28g/pair) round brilliant Moissanite gems. The deep poetic meaning draws from the legend of affinity across three lifetimes, celebrating enduring fidelity and eternal connection. The 6 prongs individually symbolize the pillars of deep devotion: Responsibility, Promise, Tolerance, Trust, Protection, and Cherishing. The architectural 6-prong crown holds the stone firmly while allowing light to penetrate from all angles for maximum fire. Its minimalist, timeless silhouette complements everything from everyday casual attire to glamorous evening gowns. A beloved, universally appreciated gift for women of all ages.",
+      "variants": [
+        "5mm Moissanite (~0.5ct each)",
+        "6.5mm Moissanite (~1.0ct each)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Includes luxury jewelry stud box.",
+      "size_guide": "Available in 5mm (0.83g pair) or 6.5mm (1.28g pair). Secure stud post back.",
+      "url": null,
+      "notes": "Timeless 6-prong solitaire setting securely holds the Moissanite to maximize light entry. The six prongs symbolize Responsibility, Promise, Forgiveness, Trust, Protection, and Cherishing.",
+      "image_url": "/static/products/B0003-65-S-WH.png",
+      "image_path": "knowledge/catalogue/images/B0003-65-S-WH.png"
+    },
+    {
+      "id": "B0030-00-S-YL",
+      "name": "S925 Gold Vermeil Autumn Maple Leaf Earrings with Ruby-Red CZ",
+      "aliases": [
+        "maple leaf earrings",
+        "red cz maple earrings",
+        "phong tam earrings",
+        "bông tai phong tâm",
+        "khuyên tai lá phong",
+        "hoa tai lá phong đỏ",
+        "B0030-00-S-YL"
+      ],
+      "price": 279.0,
+      "currency": "USD",
+      "material": "Gold vermeil over S925 sterling silver set with vivid ruby-red cubic zirconia stones",
+      "description": "Crafted from S925 sterling silver finished in luxurious gold vermeil, featuring sculpted maple leaf silhouettes (1.3cm x 1.3cm, weight 3.75g) set with deep ruby-red cubic zirconia stones. Across cultural traditions, the maple leaf ('Phong Tâm') represents renewal, resilience, and the grace of adapting through life's changing seasons. Just as maple leaves transform beautifully without losing their identity, this piece celebrates the modern woman who grows more confident, radiant, and courageous through every chapter of life. The passionate ruby-red hue embodies love, warmth, and prosperous luck. Designed for women, it pairs effortlessly with office suits, feminine dresses, or cocktail gowns. An exquisite gift for Valentine's, Thanksgiving, anniversaries, or self-empowerment.",
+      "variants": [
+        "Post Stud: 1.3cm x 1.3cm"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation jewelry box included.",
+      "size_guide": "Dimensions: 1.3cm x 1.3cm (approx. 0.5\" x 0.5\"). Weight: 3.75g.",
+      "url": null,
+      "notes": "Inspired by the resilient maple leaf ('Phong Tâm'), symbolizing renewal, graceful adaptation, and fiery inner strength. The radiant red stone evokes passionate love and vibrant vitality.",
+      "image_url": "/static/products/B0030-00-S-YL.png",
+      "image_path": "knowledge/catalogue/images/B0030-00-S-YL.png"
+    },
+    {
+      "id": "D0031-00-S-WH",
+      "name": "S925 Sterling Silver Autumn Maple Leaf Pendant Necklace",
+      "aliases": [
+        "maple leaf necklace",
+        "phong tam necklace",
+        "red maple pendant",
+        "dây chuyền phong tâm",
+        "dây chuyền lá phong",
+        "mặt lá phong",
+        "D0031-00-S-WH"
+      ],
+      "price": 241.0,
+      "currency": "USD",
+      "material": "Platinum-plated S925 sterling silver accented with ruby-red stones",
+      "description": "Forged in S925 sterling silver and finished with anti-tarnish platinum plating for sensitive skin comfort. The necklace features a delicate chain (40cm + 5cm extension, weight ~3g) adorned with stylized maple leaf motifs accented by warm ruby-red gemstones. Inspired by scarlet autumn maple foliage, the design represents personal maturity, tenacity, and forward evolution. The scarlet gemstone evokes passion, good fortune, and empowering energy, while the interlocking leaf contours suggest harmony, gratitude, and shining on one's own terms. Designed for women, its slim chain drapes elegantly on collars and shirts. A thoughtful gift for birthdays, anniversaries, promotions, or romantic celebrations.",
+      "variants": [
+        "Length: 15.7 inches + 2-inch extender (40cm + 5cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation gift box included.",
+      "size_guide": "Chain length: 40cm + 5cm extension. Pendant weight: ~3g.",
+      "url": null,
+      "notes": "Complementary pendant to the Phong Tâm collection. Symbolizes positive transformation, resilience, and personal maturity. Red accent stone brings good fortune and warmth.",
+      "image_url": "/static/products/D0031-00-S-WH.png",
+      "image_path": "knowledge/catalogue/images/D0031-00-S-WH.png"
+    },
+    {
+      "id": "D0001-00-S-BL",
+      "name": "S925 Sterling Silver Twin Heart Dancing Sapphire-Blue CZ Necklace",
+      "aliases": [
+        "dancing heart necklace",
+        "blue heart dancing stone necklace",
+        "twin heart necklace",
+        "dây chuyền trái tim đá nhảy",
+        "dây chuyền tim xanh",
+        "mặt dây chuyền trái tim",
+        "D0001-00-S-BL"
+      ],
+      "price": 189.0,
+      "currency": "USD",
+      "material": "S925 sterling silver featuring an entwined double heart setting with dancing sapphire-blue CZ",
+      "description": "Crafted from fine S925 sterling silver on a 45cm chain, this 2.7g pendant features entwined double hearts embracing a suspended dancing sapphire-blue cubic zirconia stone. The dual intertwined heart contours symbolize unbreakable romance and two souls forever united. Suspended at the center, the blue CZ stone trembles and shimmers with every heartbeat, representing unwavering faith, serene peace, and loyal commitment. The protective heart cage cradling the dancing gem reflects tenderness and devoted care for true love. Designed for women, it transitions smoothly from office wear to evening dinners. A beloved gift for Valentine's Day, anniversaries, or birthdays.",
+      "variants": [
+        "Length: 17.7 inches (45cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation jewelry box included.",
+      "size_guide": "Chain length: 45cm. Weight: 2.7g.",
+      "url": null,
+      "notes": "Intertwined twin hearts embrace a suspended dancing sapphire-blue stone that flutters with every breath. Symbolizes eternal devotion, serenity, and protective love.",
+      "image_url": "/static/products/D0001-00-S-BL.png",
+      "image_path": "knowledge/catalogue/images/D0001-00-S-BL.png"
+    },
+    {
+      "id": "B0010-60-S-WH",
+      "name": "S925 Sterling Silver Screw-Back 6-Prong Moissanite Stud Earrings (6mm)",
+      "aliases": [
+        "screw back moissanite earrings",
+        "6mm screw back studs",
+        "threaded post moissanite studs",
+        "bông tai nụ chốt xoắn 6li",
+        "bông tai chốt xoắn",
+        "hoa tai chốt vặn",
+        "B0010-60-S-WH"
+      ],
+      "price": 260.0,
+      "currency": "USD",
+      "material": "S925 sterling silver with threaded screw-back posts and 6-prong basket holding 6mm Moissanites",
+      "description": "Crafted from S925 sterling silver, these stud earrings feature 6mm Moissanite gemstones (~0.8ct each) secured within a classic 6-prong crown setting with precision threaded screw-back posts. The 6 prongs embrace the round gemstone like a blooming blossom, creating a balanced, harmonious silhouette that maximizes fire and brilliance. The threaded twist-lock mechanism provides reliable security against accidental loss, symbolizing the careful safeguarding of life's most precious memories and steadfast devotion. Designed for women who value elegance with complete peace of mind, they are ideal for active daily routines, formal evenings, and safe, comfortable sleeping. An exceptional gift for birthdays, anniversaries, or special milestones.",
+      "variants": [
+        "6mm Moissanite (~0.8ct each pair) with threaded screw-back"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Luxury stud presentation box included.",
+      "size_guide": "6mm Moissanite center stones. Threaded screw backs for maximum comfort and security.",
+      "url": null,
+      "notes": "Features threaded screw backs designed for active lifestyle, ensuring earrings never fall off or pinch. 6-prong setting provides classic elegance with complete peace of mind.",
+      "image_url": "/static/products/B0010-60-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/B0010-60-S-WH.jpg"
+    },
+    {
+      "id": "B0004-50-S-WH",
+      "name": "S925 Sterling Silver Screw-Back 6-Prong Moissanite Stud Earrings (5mm)",
+      "aliases": [
+        "5mm screw back moissanite studs",
+        "5li screw back studs",
+        "bông tai bạc 6 chấu 5li",
+        "bông tai moissanite 5li chốt xoắn",
+        "khuyên tai chốt xoắn 5li",
+        "B0004-50-S-WH"
+      ],
+      "price": 144.0,
+      "currency": "USD",
+      "material": "Hypoallergenic S925 sterling silver with threaded screw-back posts and 5mm Moissanites",
+      "description": "Crafted from hypoallergenic S925 sterling silver with 5mm Moissanite gemstones (~0.5ct each) held securely by a balanced 6-prong basket and threaded screw-back closure. The classic 6-prong architecture delivers maximum light exposure for sparkling radiance while holding the gem firmly. The screw-back posts ensure the earrings remain snug and secure throughout physical activities, work, and sleep without slipping or irritating the earlobe. The petite 5mm diameter is ideal for delicate primary ear piercings or sophisticated secondary piercings. Versatile across every wardrobe, it makes a wonderful starter piece, graduation gift, or everyday staple.",
+      "variants": [
+        "5mm Moissanite (~0.5ct each) with threaded screw-back"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation jewelry box included.",
+      "size_guide": "5mm Moissanite stones. Threaded twist posts for safe, all-day comfortable wear.",
+      "url": null,
+      "notes": "Delicate 5mm size ideal for daily wear or second piercings. Threaded screw back ensures total security so earrings stay firmly in place.",
+      "image_url": "/static/products/B0004-50-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/B0004-50-S-WH.jpg"
+    },
+    {
+      "id": "D401088-V",
+      "name": "S925 Sterling Silver Golden Spade & Gem Pendant Necklace",
+      "aliases": [
+        "spade pendant necklace",
+        "silver shovel necklace",
+        "xeng ngoc necklace",
+        "dây chuyền xẻng ngọc",
+        "dây chuyền cái xẻng",
+        "mặt xẻng ngọc",
+        "D401088-V"
+      ],
+      "price": 189.0,
+      "currency": "USD",
+      "material": "S925 sterling silver with micro-gemstone accent and fine spade craftsmanship",
+      "description": "Crafted from fine S925 sterling silver weighing ~2g, featuring an intricate spade / shovel pendant set with a sparkling gemstone accent on a 40cm chain with 3 adjustment links. In modern symbolic lore, the spade motif embodies purposeful pioneering, building from the ground up, and excavating one's hidden potential to generate lasting self-worth. The gemstone embedded in the blade symbolizes the precious harvest of prosperity, luck, and perseverance attained through dedication. Wearing this necklace serves as an empowering daily reminder that fortune favors determination. Easily styled with casual tees, blazers, or minimalist dresses, it is a creative and inspiring talisman for entrepreneurs, professionals, and ambitious dreamers.",
+      "variants": [
+        "Length: 15.7 inches + 3 adjustable loop links (40cm + adjusters)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Artisan gift presentation box included.",
+      "size_guide": "Length: 40cm with 3 micro-adjusting rings. Weight: ~2g.",
+      "url": null,
+      "notes": "Creative spade motif symbolizing purposeful hard work, excavation of inner treasure, and cultivating self-made prosperity. A lucky talisman for entrepreneurs, professionals, and dream-builders.",
+      "image_url": "/static/products/D401088-V.jpg",
+      "image_path": "knowledge/catalogue/images/D401088-V.jpg"
+    },
+    {
+      "id": "D0029-00-S-WH",
+      "name": "S925 Sterling Silver Convertible 2-Way Cherry Blossom Pendant Necklace",
+      "aliases": [
+        "cherry blossom necklace",
+        "sakura convertible necklace",
+        "2-way cherry blossom necklace",
+        "dây chuyền hoa anh đào",
+        "dây chuyền hoa đào đeo 2 dáng",
+        "mặt hoa anh đào",
+        "D0029-00-S-WH"
+      ],
+      "price": 191.0,
+      "currency": "USD",
+      "material": "S925 sterling silver set with delicate crystal accents",
+      "description": "Crafted in premium S925 sterling silver accented with sparkling multi-faceted crystal gems. Pendant weight is 3.15g on an adjustable 41cm + 4.5cm chain. The design features a flexible 2-way convertible structure that can be worn in two distinct configurations: clustered together as a blossoming cherry flower, or opened into a vertical cascade of delicate petals. Cherry blossoms (Sakura) symbolize good fortune, fresh beginnings, and youthful grace. The dual styling mechanism honors personal adaptability, creativity, and the joy of reinvention. Designed for women for daily styling across blouses, t-shirts, and dresses, it makes a lovely gift for birthdays, spring holidays, or personal celebrations.",
+      "variants": [
+        "Length: 16.1 inches + 1.8-inch extender (41cm + 4.5cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation jewelry box included.",
+      "size_guide": "Chain length: 41cm + 4.5cm extension. Pendant weight: 3.15g.",
+      "url": null,
+      "notes": "Cherry blossom (Sakura) symbolizes renewal, graceful beginnings, and vibrant youth. Features a 2-way convertible mechanism that allows styling as a clustered blossom or an elongated drop pendant.",
+      "image_url": "/static/products/D0029-00-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/D0029-00-S-WH.jpg"
+    },
+    {
+      "id": "D0012-00-S-WH",
+      "name": "S999 Fine Pure Silver Butterfly Bow Ribbon Pendant Necklace",
+      "aliases": [
+        "butterfly bow necklace",
+        "ribbon butterfly pendant",
+        "s999 pure silver butterfly necklace",
+        "dây chuyền nơ hồ điệp",
+        "dây chuyền nơ bướm",
+        "dây chuyền bạc s999 nơ",
+        "D0012-00-S-WH"
+      ],
+      "price": 158.0,
+      "currency": "USD",
+      "material": "Pure S999 fine silver (99.9% purity) with pavé cubic zirconia butterfly bow",
+      "description": "Crafted from pure S999 fine silver (99.9% silver purity), celebrated for its high purity, radiant natural silver glow, and hypoallergenic safety for even the most sensitive skin. Weighing 2.4g on a 40cm + 5cm extension chain, the pendant pairs an elegant ribbon bow with the delicate wings of a butterfly, accented with sparkling CZ stones. This pairing symbolizes grace, gentle femininity, maturity, and personal freedom. It reflects the portrait of the modern woman—soft and compassionate, yet self-assured and shining on her own terms. The necklace conveys wishes for joyful beginnings, prosperity, and happiness. Its slender chain effortlessly matches daily workwear, casual blouses, and romantic dresses. A sweet, heartwarming gift for partners, daughters, or close friends.",
+      "variants": [
+        "Length: 15.7 inches + 2-inch extender (40cm + 5cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Luxury gift box included.",
+      "size_guide": "Length: 40cm + 5cm extender. Total weight: 2.4g. Pure silver is exceptionally gentle on sensitive skin.",
+      "url": null,
+      "notes": "Combines the gentle elegance of a tied ribbon bow with the transformative freedom of a butterfly. Crafted from ultra-pure S999 silver with a brilliant natural white luster.",
+      "image_url": "/static/products/D0012-00-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/D0012-00-S-WH.jpg"
+    },
+    {
+      "id": "D0007-00-S-WH",
+      "name": "S925 Sterling Silver Snowflake Pendant Necklace with 5mm Moissanite",
+      "aliases": [
+        "snowflake moissanite necklace",
+        "snowflake pendant",
+        "winter snowflake necklace",
+        "dây chuyền bông tuyết",
+        "dây chuyền hoa tuyết",
+        "dây chuyền tuyết moissanite",
+        "D0007-00-S-WH"
+      ],
+      "price": 250.0,
+      "currency": "USD",
+      "material": "S925 sterling silver crafted in an intricate snowflake motif with 5mm Moissanite center (~0.5ct)",
+      "description": "Crafted from high-grade S925 sterling silver, featuring a delicate 2.23g snowflake silhouette crowned by a brilliant 5mm Moissanite center stone on a 40cm + 5cm chain. In Eastern and Western traditions, the snowflake represents pure innocence, gentle elegance, and the ephemeral beauty of life's magical moments. The design serves as a serene reminder to cherish precious moments and shine with authentic individuality. The center Moissanite reflects pure, crystalline light like sunshine over fresh snow—honoring feminine independence and the journey of self-discovery. Designed for women for everyday wear or festive holiday celebrations. An enchanting gift for birthdays, winter festivities, and memorable achievements.",
+      "variants": [
+        "Standard Chain: 16 inches + 2-inch extension"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Packaged in a holiday presentation box.",
+      "size_guide": "Chain length: 40cm + 5cm extension. Pendant weight: 2.23g.",
+      "url": null,
+      "notes": "Symbolizes purity, uniqueness, and cherishing life's fleeting, magical moments. The 5mm center Moissanite shines brilliantly like starlight on fresh snow.",
+      "image_url": "/static/products/D0007-00-S-WH.png",
+      "image_path": "knowledge/catalogue/images/D0007-00-S-WH.png"
+    },
+    {
+      "id": "K0002-56-S-WH",
+      "name": "S999 Fine Pure Silver Solid Cat's Eye Bangle (Unisex)",
+      "aliases": [
+        "s999 cat's eye bangle",
+        "pure silver cat eye bracelet",
+        "solid silver cuff bangle",
+        "kiềng tay mắt mèo",
+        "kiềng bạc s999 mắt mèo",
+        "vòng tay mắt mèo bản kín",
+        "K0002-56-S-WH"
+      ],
+      "price": 1059.0,
+      "currency": "USD",
+      "material": "Pure S999 fine silver (99.9% purity) with hand-carved optical cat's eye chiseled texture",
+      "description": "Forged from ultra-pure S999 fine silver with a verified purity of 99.9%, delivering peerless brilliance, exceptional durability, and complete hypoallergenic skin safety. The bangle has a band width of 5.8mm and thickness of 2.5mm, with a solid weight of 24.63g, available in 54mm, 56mm, and 58mm inner diameters. The surface features an exquisite optical cat's eye relief engraving that casts a rotating vortex of light as the wrist moves. In traditional metaphysics, the cat's eye guards its bearer against negative energies, enhances sharp intuition, and attracts wealth and prosperous opportunities. The solid closed cuff fits the wrist snugly like a shield of inner vitality. Perfectly suited for both women and men, it enhances business attire, traditional occasions, and daily elegance. An extraordinary gift for milestones, longevity celebrations, and loved ones.",
+      "variants": [
+        "Inner Diameter 54mm (Small)",
+        "Inner Diameter 56mm (Medium)",
+        "Inner Diameter 58mm (Large)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Includes luxury solid wood collector's box and certification.",
+      "size_guide": "Band width: 5.8mm, thickness: 2.5mm. Weight: ~24.63g. Available in 54mm, 56mm, and 58mm inner diameters.",
+      "url": null,
+      "notes": "Heavy solid pure silver cuff bangle featuring optical cat's eye engraving that shimmers as it catches light. Acts as an energetic shield against negativity while enhancing focus and wealth attraction.",
+      "image_url": "/static/products/K0002-56-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/K0002-56-S-WH.jpg"
+    },
+    {
+      "id": "L0012-C003",
+      "name": "Handcrafted S925 White Gold Vermeil 5mm Moissanite Tennis Bracelet",
+      "aliases": [
+        "moissanite tennis bracelet",
+        "5mm tennis bracelet",
+        "handcrafted tennis bracelet",
+        "lắc tay tennis",
+        "lắc tay tennis moissanite 5mm",
+        "lắc tay chế tác hk93926",
+        "L0012-C003"
+      ],
+      "price": 1261.0,
+      "currency": "USD",
+      "material": "Bespoke handcrafted 18K White Gold vermeil over S925 sterling silver with continuous line of 5mm Moissanite stones",
+      "description": "Individually handcrafted in the master atelier from S925 sterling silver plated with multi-layer 18K white gold vermeil. Measures 17cm (approx. 6.7 inches) in length, featuring an unbroken, flexible line of precision-calibrated 5mm Moissanite stones (~0.5ct each) secured with a double-latch safety clasp. The tennis bracelet represents 'Eternal Love, Unbroken Connection, and Timeless High-Jewelry Prestige.' The uninterrupted line of brilliant stones symbolizes wholeness, abundant positive energy, and an unbreakable bond between souls. Designed as an iconic unisex classic, it is remarkably versatile: stunning on the red carpet, galas, and weddings with evening dresses; or effortlessly paired with tailored business suits to project refined taste. A legendary gift for lifelong milestones.",
+      "variants": [
+        "Length: 6.7 inches (17cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Ships in an artisan velvet presentation case.",
+      "size_guide": "Length: 17cm (approx. 6.7 inches). Features safety box clasp with double figure-eight safety latches.",
+      "url": null,
+      "notes": "A timeless high-jewelry classic tennis bracelet featuring continuous 5mm Moissanite stones. Handcrafted atelier edition representing endless love, unbroken connection, and red-carpet elegance.",
+      "image_url": "/static/products/L0012-C003.jpg",
+      "image_path": "knowledge/catalogue/images/L0012-C003.jpg"
+    },
+    {
+      "id": "K0003-54-S-WH",
+      "name": "S925 White Gold Vermeil Kim Dieu Radiant Moissanite Bangle",
+      "aliases": [
+        "kim dieu bangle",
+        "radiant moissanite bangle",
+        "white gold vermeil moissanite cuff",
+        "kiềng tay kim diệu",
+        "kiềng kim diệu moissanite",
+        "vòng kim diệu",
+        "K0003-54-S-WH"
+      ],
+      "price": 616.0,
+      "currency": "USD",
+      "material": "Platinum / white gold vermeil over S925 sterling silver with pavé line of 4-5mm Moissanite stones",
+      "description": "Crafted from S925 sterling silver finished in high-polish white gold vermeil. Features a continuous channel of graduated 4-5mm Moissanite gemstones running along the upper curve of the cuff. Available in wrist sizes 52mm, 54mm, 56mm, and 58mm. Named 'Kim Diệu' (Golden Radiance), this bangle carries the symbol of 'Walking Hand-in-Hand, Eternal Love, and Modern Glamour.' The sparkling gemstone stream represents unbreakable bonds and extending positive energy throughout life. Highly versatile for women: wear solo with office attire for understated executive charm, or stack with bracelets for festive galas to turn every head. A prized anniversary or holiday gift.",
+      "variants": [
+        "Size 52mm",
+        "Size 54mm",
+        "Size 56mm",
+        "Size 58mm"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Packaged in a luxury hinged presentation box.",
+      "size_guide": "Inner wrist diameters: 52mm, 54mm, 56mm, 58mm. Measure wrist across for exact fit.",
+      "url": null,
+      "notes": "'Kim Diệu' (Golden Radiance) bangle showcases a continuous channel of graduated 4-5mm Moissanites. Symbolizes lifelong partnership, modern luxury, and persistent positive energy.",
+      "image_url": "/static/products/K0003-54-S-WH.jpg",
+      "image_path": "knowledge/catalogue/images/K0003-54-S-WH.jpg"
+    },
+    {
+      "id": "L0006-00-S-WH",
+      "name": "S925 Thai Sterling Silver Three Lifetimes Interlocking Rings Bracelet",
+      "aliases": [
+        "three lifetimes bracelet",
+        "tam sinh tam the bracelet",
+        "interlocking rings bracelet",
+        "lắc tay tam sinh tam thế",
+        "vòng tam sinh tam thế",
+        "lắc bạc thái tam sinh",
+        "L0006-00-S-WH"
+      ],
+      "price": 202.0,
+      "currency": "USD",
+      "material": "Antique oxidized Thai S925 sterling silver with three interlocking eternity ring charms",
+      "description": "Artisan-crafted from antique oxidized Thai S925 sterling silver, known for its durable vintage patina, color stability, and skin-friendly comfort. Total chain length is 15cm + 3.5cm extension, weighing 4.9g, centered with 3 interlocking circular charms. Drawing poetic inspiration from the Eastern epic of 'Three Lifetimes, Three Worlds' (Tam Sinh Tam Thế), it symbolizes unbreakable affinity, predestined connection, and eternal romance. The three intertwined rings signify the seamless binding of Past, Present, and Future, accentuating the gentle grace and charm of womanhood. Designed for daily styling across casual and formal wardrobes, it makes a romantic gift for birthdays, anniversaries, or celebrating true love.",
+      "variants": [
+        "Length: 5.9 inches + 1.4-inch extension (15cm + 3.5cm)"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Includes silk storage pouch and gift box.",
+      "size_guide": "Length: 15cm + 3.5cm extender (fits wrists 5.9\" - 7.3\"). Weight: 4.9g.",
+      "url": null,
+      "notes": "Inspired by the poetic concept of 'Three Lifetimes of Affinity' (Tam Sinh Tam Thế). The three interlocking rings symbolize past, present, and future bound together in unbreakable love and destiny.",
+      "image_url": "/static/products/L0006-00-S-WH.png",
+      "image_path": "knowledge/catalogue/images/L0006-00-S-WH.png"
+    },
+    {
+      "id": "B0011-00-S-WH",
+      "name": "S999 Pure Fine Silver Eye of Horus Talisman Earrings",
+      "aliases": [
+        "eye of horus earrings",
+        "horus pure silver earrings",
+        "s999 talisman earrings",
+        "bông tai mắt thần horus",
+        "khuyên tai mắt thần horus",
+        "hoa tai mắt thần horus s999",
+        "B0011-00-S-WH"
+      ],
+      "price": 185.0,
+      "currency": "USD",
+      "material": "Pure S999 fine silver (99.9% purity) with pavé crystal accents",
+      "description": "Forged in pure S999 fine silver (99.9% purity), measuring 15.9mm x 3.82mm per earring with a total pair weight of 3.2g. Embellished with shimmering crystal pave accents. In ancient culture, the sacred Eye of Horus symbol represents divine spiritual serenity, faith, and abundant positive energy. It stands for the supernatural ability to deflect negativity and grant steadfast composure to its owner. When paired with pure silver's natural white luster and radiant stones, it exudes both modern avant-garde edge and spiritual protection. Suitable for both men and women, it pairs naturally with street style, contemporary chic, or everyday casuals. A great gift for friends, family, or self-protection on special milestones.",
+      "variants": [
+        "Dimensions: 15.9mm x 3.82mm"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days. Presentation jewelry box included.",
+      "size_guide": "Dimensions: 15.9mm length x 3.82mm width. Weight: 3.2g per pair.",
+      "url": null,
+      "notes": "Sacred Eye of Horus amulet crafted from pure S999 silver. Represents divine spiritual protection, inner grounding, and repelling negative energies. Unisex contemporary design.",
+      "image_url": "/static/products/B0011-00-S-WH.png",
+      "image_path": "knowledge/catalogue/images/B0011-00-S-WH.png"
+    },
+    {
+      "id": "VCB_SP_TEST_NOPRICE",
+      "name": "Natural Gold Rutilated Quartz Ring (Test Missing Price)",
+      "aliases": [
+        "gold rutilated quartz ring",
+        "rutilated quartz ring",
+        "quartz ring",
+        "nhẫn thạch anh",
+        "nhẫn thạch anh tóc vàng",
+        "nhẫn test thiếu giá"
+      ],
+      "price": null,
+      "currency": "USD",
+      "material": "Antique oxidized S925 sterling silver set with natural golden rutilated quartz",
+      "description": "Internal test product for missing price guardrail validation. Handcrafted in oxidized S925 silver set with natural golden rutilated quartz. Designed to test that when price is null, the pipeline safely returns fallback without inventing numbers and triggers human handover.",
+      "variants": [
+        "US Size 7",
+        "US Size 8"
+      ],
+      "in_stock": true,
+      "ship_note": "Standard US delivery in 3-5 business days",
+      "size_guide": "Measure finger circumference in mm",
+      "url": null,
+      "notes": "Test product for missing price guardrail -> pipeline triggers fallback from fallbacks.md and human handover flag.",
+      "image_url": null,
+      "image_path": null
+    }
+  ]
+}

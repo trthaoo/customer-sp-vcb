@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vien Chi Bao - Brand Testing Playground (US Market)</title>
+  <link rel="stylesheet" href="/static/playground.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="playground-header">
+    <div class="brand-section">
+      <div class="brand-logo-icon">VCB</div>
+      <div class="brand-title-wrap">
+        <h1>Vien Chi Bao · Studio Playground</h1>
+        <div class="sub">US Market Customer Concierge · Meta &amp; TikTok AI Funnels</div>
+      </div>
+    </div>
+
+    <!-- Header Actions & Model Status -->
+    <div class="header-actions">
+      <div class="model-status-pill" id="model-pill">
+        <span id="model-dot">●</span>
+        <span id="model-text">Checking Model API...</span>
+      </div>
+      <div class="model-status-pill available" id="rag-pill" onclick="triggerRagReindex()" style="cursor:pointer;" title="Click to view RAG stats or re-index">
+        <span id="rag-dot" style="color:#10b981;">⚡</span>
+        <span id="rag-text">Loading RAG...</span>
+      </div>
+      <button class="btn-header btn-rate-pass" id="btn-rate-pass-hdr" onclick="openPassModal()" title="Đánh giá phiên chat này Đạt & Lưu làm Golden Example">
+        ✓ Đạt (Lưu Example)
+      </button>
+      <button class="btn-header btn-rate-fail" id="btn-rate-fail-hdr" onclick="openFailModal()" title="Đánh giá phiên chat Fail, phân tích lỗi & đề xuất fix">
+        ✕ Fail (Báo Lỗi)
+      </button>
+      <button class="btn-header btn-case-hub" id="btn-case-hub" onclick="openCaseHubModal()" title="Xem danh sách Golden Examples và Case Lỗi đã lưu">
+        📋 Thư Viện Case <span class="badge-counter" id="cases-count-badge">0</span>
+      </button>
+      <button class="btn-header btn-gold" id="btn-export-csv" onclick="exportSessionCsv()" title="Tải xuống CSV toàn bộ phiên chat">
+        📥 Export CSV
+      </button>
+      <button class="btn-header" onclick="resetSession()" title="Bắt đầu phiên chat mới">
+        🔄 Phiên Mới
+      </button>
+      <a href="/" class="btn-header" title="Return to Ops Console">
+        ← Ops Console
+      </a>
+    </div>
+  </header>
+
+  <!-- Funnel & Context Control Bar -->
+  <div class="config-bar">
+    <!-- Channel Picker -->
+    <div class="config-group">
+      <span class="config-label">Funnel:</span>
+      <div class="pill-segmented">
+        <button class="pill-option active" id="btn-chan-meta" onclick="setChannel('meta')">Meta</button>
+        <button class="pill-option" id="btn-chan-tiktok" onclick="setChannel('tiktok')">TikTok</button>
+      </div>
+    </div>
+
+    <!-- Platform Picker -->
+    <div class="config-group">
+      <span class="config-label">Platform:</span>
+      <div class="pill-segmented" id="platform-segmented">
+        <button class="pill-option active" id="btn-plat-ig" onclick="setPlatform('ig')">Instagram (ig)</button>
+        <button class="pill-option" id="btn-plat-fb" onclick="setPlatform('fb')">Facebook (fb)</button>
+      </div>
+    </div>
+
+    <!-- Surface Picker -->
+    <div class="config-group">
+      <span class="config-label">Surface:</span>
+      <div class="pill-segmented">
+        <button class="pill-option active" id="btn-surf-comment" onclick="setSurface('comment')">Comments (comment)</button>
+        <button class="pill-option" id="btn-surf-dm" onclick="setSurface('dm')">Direct Messages (dm)</button>
+      </div>
+    </div>
+
+    <!-- Post / Video Caption & Media Upload -->
+    <div class="caption-input-wrap" style="display:flex; flex:1; gap:0.5rem; align-items:center;">
+      <input 
+        type="text" 
+        id="post-caption-input" 
+        class="caption-input" 
+        placeholder="Paste post or video caption (e.g. 'Handcrafted S925 Sterling Silver Four-Leaf Clover Spinning Ring ✨')">
+      
+      <!-- Upload MP4 or images -->
+      <label class="btn-media-upload" title="Upload MP4 video or images to extract frames (~1 frame/2s, max 8, width 512)">
+        📹 <span>Upload MP4 / Images</span>
+        <input 
+          type="file" 
+          id="media-file-input" 
+          accept="video/mp4,video/quicktime,video/webm,image/*" 
+          multiple 
+          style="display:none;" 
+          onchange="handleMediaUpload(event)">
+      </label>
+      <button class="btn-media-upload" id="btn-clear-media" style="display:none; color:#ef4444;" onclick="clearAttachedMedia()" title="Clear uploaded media">
+        ✕ Clear Media
+      </button>
+    </div>
+  </div>
+
+  <!-- Media Frames Preview Strip -->
+  <div id="media-preview-container" style="display:none; padding: 0.5rem 1.5rem; background:#f8fafc; border-bottom:1px solid var(--panel-border);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+      <span style="font-size:0.75rem; color:var(--brand-gold); font-weight:700;" id="media-preview-status">
+        🎬 Extracted video frames (~1 frame / 2s):
+      </span>
+      <span style="font-size:0.7rem; color:var(--text-dim);" id="media-preview-count">0 frames</span>
+    </div>
+    <div class="media-preview-strip" id="media-preview-strip"></div>
+  </div>
+
+  <!-- Dynamic Session Rating Prompt Bar (Visible when session has turns) -->
+  <div id="session-rating-bar" class="session-rating-bar" style="display:none;">
+    <div class="session-rating-info">
+      <span>⭐ <strong>Đánh giá phiên chat:</strong></span>
+      <span id="session-rating-summary" style="color:var(--text-muted);">Chưa có lượt chat</span>
+    </div>
+    <div class="session-rating-buttons">
+      <button class="btn-rate-mini pass" onclick="openPassModal()">✓ Đạt (Lưu Example)</button>
+      <button class="btn-rate-mini fail" onclick="openFailModal()">✕ Fail (Phân Tích Lỗi)</button>
+      <button class="btn-rate-mini new" onclick="resetSession()">🔄 Bắt đầu phiên mới</button>
+    </div>
+  </div>
+
+  <!-- Main Split Layout -->
+  <div class="playground-main">
+    <!-- Left: Multi-turn Chat Thread -->
+    <div class="thread-container">
+      <div class="messages-scroll" id="chat-messages">
+        <!-- Welcome Initial Message -->
+        <div class="message-row bot" id="welcome-message">
+          <div class="message-sender-meta">
+            <span>✨ Studio Host (Vien Chi Bao US)</span>
+          </div>
+          <div class="message-bubble">
+            hey! welcome to the Vien Chi Bao studio ✨
+          </div>
+          <div class="message-bubble">
+            feel free to ask about our S925 sterling silver pieces, US sizing, or free US shipping
+          </div>
+          <div class="message-bubble">
+            what piece can I show you today? 🤍
+          </div>
+          <div class="bot-turn-footer">
+            <span class="status-badge-inline badge-handled">Active</span>
+            <span style="color:var(--text-dim);">RAG System Ready · US Market Concierge</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="chat-input-area">
+        <!-- Quick Product Questions (US Market English) -->
+        <div class="quick-prompts-row">
+          <button class="prompt-pill" onclick="sendQuickPrompt('How much is the Four-Leaf Clover Spinning Ring?')">💍 Clover Ring Price</button>
+          <button class="prompt-pill" onclick="sendQuickPrompt('What material is the lotus petal pendant made of?')">🌿 Lotus Pendant Craft</button>
+          <button class="prompt-pill" onclick="sendQuickPrompt('Do you have size 8 for the spinning meditation ring?')">📏 US Ring Sizing</button>
+          <button class="prompt-pill" onclick="sendQuickPrompt('How long does shipping take to California and what are the fees?')">🚚 US Shipping &amp; Delivery</button>
+          <button class="prompt-pill" onclick="sendQuickPrompt('How much is the gold rutilated quartz ring?')">⚠️ Test Missing Price</button>
+        </div>
+
+        <div class="input-box-row">
+          <textarea 
+            id="chat-input" 
+            class="chat-textarea" 
+            rows="1" 
+            placeholder="Chat as a US customer... (Press Enter to send, Shift+Enter for new line)"></textarea>
+          <button class="btn-send" id="btn-send-message" onclick="handleSendClick()">
+            <span>Send</span> ➤
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Inspection Side Panel -->
+    <div class="side-panel">
+      <div class="side-panel-header">
+        <h2>
+          <span>🔍</span> Pipeline Diagnostics
+        </h2>
+        <span id="diag-turn-label" style="font-size:0.75rem; color:var(--brand-gold); font-weight:700;">No turn selected</span>
+      </div>
+
+      <div class="side-panel-scroll" id="side-panel-content">
+        <div class="empty-turn-diag">
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">💬</div>
+          Send a message or click any reply in the thread to view pipeline diagnostics.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State management
+    let state = {
+      channel: 'meta',
+      platform: 'ig',
+      surface: 'comment',
+      sessionId: 'session_' + Math.random().toString(36).substring(2, 9),
+      turns: [], // full turn objects with diagnostics
+      history: [], // [{role: 'user', content: '...'}, {role: 'assistant', content: '...'}]
+      selectedTurnIndex: null,
+      modelConfig: null,
+      mediaCacheId: null,
+      attachedFrames: []
+    };
+
+    async function handleMediaUpload(event) {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+
+      const statusEl = document.getElementById('media-preview-status');
+      const container = document.getElementById('media-preview-container');
+      const countEl = document.getElementById('media-preview-count');
+      const strip = document.getElementById('media-preview-strip');
+      const clearBtn = document.getElementById('btn-clear-media');
+
+      container.style.display = 'block';
+      statusEl.textContent = '⏳ Extracting visual frames via ffmpeg (~1 frame / 2s, width 512, drop audio)...';
+      strip.innerHTML = '<span style="font-size:0.75rem; color:#94a3b8;">Processing media...</span>';
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      try {
+        const res = await fetch('/api/playground/upload_media', {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`);
+        const data = await res.json();
+        state.mediaCacheId = data.media_cache_id;
+        state.attachedFrames = data.frames || [];
+
+        statusEl.innerHTML = `🎬 Successfully extracted <strong>${data.frame_count} frames</strong> (${(data.timestamps || []).join(', ')}):`;
+        countEl.textContent = `${data.frame_count} frames`;
+        clearBtn.style.display = 'inline-flex';
+
+        strip.innerHTML = '';
+        (data.frames || []).forEach(f => {
+          const card = document.createElement('div');
+          card.className = 'media-frame-card';
+          card.title = `Frame ${f.label} (${f.timestamp}s)`;
+          card.innerHTML = `
+            <img src="data:${f.mime_type || 'image/jpeg'};base64,${f.base64_data}" alt="${f.label}" />
+            <span class="media-frame-badge">${f.label}</span>
+          `;
+          strip.appendChild(card);
+        });
+      } catch (err) {
+        statusEl.textContent = `❌ Media processing error: ${err.message}`;
+        strip.innerHTML = '';
+      }
+    }
+
+    function clearAttachedMedia() {
+      state.mediaCacheId = null;
+      state.attachedFrames = [];
+      const fileInput = document.getElementById('media-file-input');
+      if (fileInput) fileInput.value = '';
+      document.getElementById('media-preview-container').style.display = 'none';
+      document.getElementById('btn-clear-media').style.display = 'none';
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadModelConfig();
+      loadRagStats();
+      setupInputHandlers();
+      updateCasesBadge();
+      updateSessionRatingBar();
+    });
+
+    // Model Config Check
+    async function loadModelConfig() {
+      const pill = document.getElementById('model-pill');
+      const dot = document.getElementById('model-dot');
+      const text = document.getElementById('model-text');
+      try {
+        const res = await fetch('/api/playground/config');
+        const data = await res.json();
+        state.modelConfig = data;
+        if (data.is_available) {
+          pill.className = 'model-status-pill available';
+          dot.textContent = '●';
+          text.textContent = `Model: ${data.model_name}`;
+          pill.title = `Model Provider: ${data.provider} | Base URL: ${data.base_url || 'Default'}`;
+        } else {
+          pill.className = 'model-status-pill unavailable';
+          dot.textContent = '○';
+          text.textContent = 'No Model Key';
+          pill.title = 'MODEL_API_KEY is not configured in .env. The pipeline returns a safe notice without inventing facts.';
+        }
+      } catch (err) {
+        pill.className = 'model-status-pill unavailable';
+        text.textContent = 'Config Error';
+      }
+    }
+
+    // Google AI Studio RAG Stats & Reindex
+    async function loadRagStats() {
+      const pill = document.getElementById('rag-pill');
+      const text = document.getElementById('rag-text');
+      try {
+        const res = await fetch('/api/rag/stats');
+        const data = await res.json();
+        if (data.total_chunks > 0) {
+          pill.className = 'model-status-pill available';
+          text.textContent = `⚡ RAG: ${data.total_chunks} Chunks (Google AI Studio)`;
+          const cat = data.categories || {};
+          pill.title = `Embedded on Google AI Studio (${data.embedding_model}, ${data.dimension} dims)\n` +
+            `• Products / Catalogue: ${cat.catalogue || 0}\n` +
+            `• Policies (Ship/Warranty/Pay): ${cat.policy || 0}\n` +
+            `• Brand & Texting Rules: ${cat.shared || 0}\n` +
+            `• Meta Rules & Edge Cases: ${(cat.meta_rule || 0) + (cat.meta_edge_case || 0)}\n` +
+            `• TikTok Rules & Edge Cases: ${(cat.tiktok_rule || 0) + (cat.tiktok_edge_case || 0)}\n` +
+            `Click to re-index all chunks`;
+        } else {
+          pill.className = 'model-status-pill unavailable';
+          text.textContent = '⚡ RAG: Not Indexed';
+        }
+      } catch (err) {
+        if (pill) pill.className = 'model-status-pill unavailable';
+      }
+    }
+
+    async function triggerRagReindex() {
+      if (!confirm('Re-index toàn bộ tri thức dự án lên server Google AI Studio (gemini-embedding-001)?')) return;
+      const text = document.getElementById('rag-text');
+      if (text) text.textContent = '⏳ Đang embedding lên Google AI Studio...';
+      try {
+        const res = await fetch('/api/rag/reindex', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force: false })
+        });
+        const data = await res.json();
+        alert(`Đã hoàn tất embedding trên Google AI Studio!\n` +
+          `• Tổng số chunks: ${data.total_chunks}\n` +
+          `• Đã embed mới: ${data.embedded_new}\n` +
+          `• Đã tái sử dụng cache: ${data.reused_cached}\n` +
+          `• Thời gian xử lý: ${data.duration_seconds}s\n` +
+          `• Embedding Model: ${data.embedding_model} (${data.dimension} dims)`);
+        loadRagStats();
+      } catch (err) {
+        alert('Lỗi re-index: ' + err.message);
+        loadRagStats();
+      }
+    }
+
+    // Channel Switching
+    function setChannel(channel) {
+      state.channel = channel;
+      document.getElementById('btn-chan-meta').classList.toggle('active', channel === 'meta');
+      document.getElementById('btn-chan-tiktok').classList.toggle('active', channel === 'tiktok');
+
+      const platContainer = document.getElementById('platform-segmented');
+      if (channel === 'tiktok') {
+        platContainer.innerHTML = '<button class="pill-option active active-tiktok" id="btn-plat-tiktok" onclick="setPlatform(\'tiktok\')">TikTok (tiktok)</button>';
+        state.platform = 'tiktok';
+      } else {
+        platContainer.innerHTML = `
+          <button class="pill-option ${state.platform === 'ig' ? 'active' : ''}" id="btn-plat-ig" onclick="setPlatform('ig')">Instagram (ig)</button>
+          <button class="pill-option ${state.platform === 'fb' ? 'active' : ''}" id="btn-plat-fb" onclick="setPlatform('fb')">Facebook (fb)</button>
+        `;
+        if (state.platform === 'tiktok') state.platform = 'ig';
+      }
+    }
+
+    function setPlatform(platform) {
+      state.platform = platform;
+      const ig = document.getElementById('btn-plat-ig');
+      const fb = document.getElementById('btn-plat-fb');
+      const tt = document.getElementById('btn-plat-tiktok');
+      if (ig) ig.classList.toggle('active', platform === 'ig');
+      if (fb) fb.classList.toggle('active', platform === 'fb');
+      if (tt) tt.classList.toggle('active', platform === 'tiktok');
+    }
+
+    function setSurface(surface) {
+      state.surface = surface;
+      document.getElementById('btn-surf-comment').classList.toggle('active', surface === 'comment');
+      document.getElementById('btn-surf-dm').classList.toggle('active', surface === 'dm');
+    }
+
+    function setupInputHandlers() {
+      const input = document.getElementById('chat-input');
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendClick();
+        }
+      });
+      input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+      });
+    }
+
+    function sendQuickPrompt(text) {
+      document.getElementById('chat-input').value = text;
+      handleSendClick();
+    }
+
+    async function handleSendClick() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const captionInput = document.getElementById('post-caption-input');
+      const postContext = captionInput.value.trim() || null;
+
+      input.value = '';
+      input.style.height = '44px';
+
+      const sendBtn = document.getElementById('btn-send-message');
+      sendBtn.disabled = true;
+
+      // Render customer message
+      appendMessageToThread({
+        role: 'user',
+        text: text,
+        sender: 'Customer (You)'
+      });
+
+      // Show typing indicator
+      const typingEl = appendTypingIndicator();
+
+      try {
+        const payload = {
+          channel: state.channel,
+          platform: state.platform,
+          surface: state.surface,
+          text: text,
+          post_context: postContext,
+          media_cache_id: state.mediaCacheId,
+          history: state.history
+        };
+
+        const res = await fetch('/api/playground/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        typingEl.remove();
+
+        const turnIndex = state.turns.length + 1;
+        const turnData = {
+          turnIndex: turnIndex,
+          timestamp: new Date().toLocaleTimeString('en-US'),
+          customerMessage: text,
+          botReply: data.reply,
+          channel: state.channel,
+          platform: state.platform,
+          surface: state.surface,
+          postContext: postContext,
+          ...data
+        };
+
+        state.turns.push(turnData);
+
+        // Update multi-turn history
+        state.history.push({ role: 'user', content: text });
+        state.history.push({ role: 'assistant', content: data.reply });
+
+        // Render Bot Reply with human sequential texting rhythm
+        await appendBotReplyWithHumanRhythm({
+          text: data.reply,
+          sender: 'Vien Chi Bao Studio Concierge (AI)',
+          turnIndex: turnIndex,
+          statusBadge: data.status_badge,
+          attachedImageUrl: data.attached_image_url
+        });
+
+        // Focus & display diagnostics in side panel
+        selectTurn(turnIndex - 1);
+        updateSessionRatingBar();
+
+      } catch (err) {
+        typingEl.remove();
+        appendMessageToThread({
+          role: 'bot',
+          text: `[System Error]: ${err.message}`,
+          sender: 'Gateway System',
+          isError: true
+        });
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    // Smart multi-bubble parser for human texting architecture
+    function parseBubbles(text) {
+      if (!text) return [""];
+      const cleaned = text.trim();
+      // 1. Try double newline (\n\n)
+      const doubleChunks = cleaned.split(/\n\s*\n/).map(t => t.trim()).filter(Boolean);
+      if (doubleChunks.length >= 2 && doubleChunks.length <= 4) {
+        return doubleChunks;
+      }
+      // 2. Try single newlines (\n)
+      const singleLines = cleaned.split(/\n+/).map(t => t.trim()).filter(Boolean);
+      if (singleLines.length >= 2 && singleLines.length <= 4) {
+        return singleLines;
+      }
+      // 3. Try numbered lists (1) ... 2) ... 3) ...)
+      if (/\b[1-3]\)\s+/.test(cleaned)) {
+        const numbered = cleaned.split(/\b[1-3]\)\s+/).map(t => t.trim()).filter(Boolean);
+        if (numbered.length >= 2) return numbered;
+      }
+      // 4. If long paragraph with 2-3 distinct sentences (ending in . or ? or !)
+      if (cleaned.length > 70) {
+        const sentences = cleaned.match(/[^.!?]+[.!?]+(?:\s+|$)/g);
+        if (sentences && sentences.length >= 2 && sentences.length <= 3) {
+          return sentences.map(s => s.trim()).filter(Boolean);
+        }
+      }
+      return doubleChunks.length > 0 ? doubleChunks : [cleaned];
+    }
+
+    // Render Bot Reply with human-like sequential delivery and typing dots
+    async function appendBotReplyWithHumanRhythm({ text, sender, turnIndex, statusBadge, attachedImageUrl }) {
+      const container = document.getElementById('chat-messages');
+      const row = document.createElement('div');
+      row.className = 'message-row bot';
+      if (turnIndex !== undefined) {
+        row.setAttribute('data-turn-idx', turnIndex - 1);
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'message-sender-meta';
+      meta.textContent = sender;
+      row.appendChild(meta);
+      container.appendChild(row);
+
+      const bubbles = parseBubbles(text);
+
+      for (let i = 0; i < bubbles.length; i++) {
+        const bubbleText = bubbles[i];
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.textContent = bubbleText;
+        if (turnIndex !== undefined) {
+          bubble.onclick = () => selectTurn(turnIndex - 1);
+        }
+        row.appendChild(bubble);
+        container.scrollTop = container.scrollHeight;
+
+        // If another bubble follows, show mini typing dots for 600ms - 800ms (human rhythm)
+        if (i < bubbles.length - 1) {
+          const miniTyping = document.createElement('div');
+          miniTyping.className = 'mini-typing-bubble';
+          miniTyping.innerHTML = `
+            <div class="mini-typing-dot"></div>
+            <div class="mini-typing-dot"></div>
+            <div class="mini-typing-dot"></div>
+          `;
+          row.appendChild(miniTyping);
+          container.scrollTop = container.scrollHeight;
+
+          await new Promise(r => setTimeout(r, 700));
+          miniTyping.remove();
+        }
+      }
+
+      // If official product studio photo is attached, deliver it as a distinct media bubble
+      if (attachedImageUrl) {
+        const miniTyping = document.createElement('div');
+        miniTyping.className = 'mini-typing-bubble';
+        miniTyping.innerHTML = `
+          <div class="mini-typing-dot"></div>
+          <div class="mini-typing-dot"></div>
+          <div class="mini-typing-dot"></div>
+        `;
+        row.appendChild(miniTyping);
+        container.scrollTop = container.scrollHeight;
+
+        await new Promise(r => setTimeout(r, 650));
+        miniTyping.remove();
+
+        const imgBubble = document.createElement('div');
+        imgBubble.className = 'message-bubble image-bubble';
+        imgBubble.style.padding = '4px';
+        imgBubble.style.cursor = 'pointer';
+        imgBubble.style.background = '#ffffff';
+        imgBubble.style.border = '1px solid #e2e8f0';
+        imgBubble.style.maxWidth = '280px';
+        imgBubble.innerHTML = `
+          <div style="position:relative; overflow:hidden; border-radius:12px;">
+            <img src="${attachedImageUrl}" alt="Official Product Studio Photo" style="width:100%; height:auto; max-height:260px; object-fit:cover; display:block; border-radius:10px; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" />
+            <div style="font-size:0.68rem; color:#64748b; padding:4px 6px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:600; color:#0f766e;">✨ Official Studio Photo</span>
+              <span style="color:#6366f1;">Tap to open ↗</span>
+            </div>
+          </div>
+        `;
+        imgBubble.onclick = () => window.open(attachedImageUrl, '_blank');
+        row.appendChild(imgBubble);
+        container.scrollTop = container.scrollHeight;
+      }
+
+      if (statusBadge) {
+        const footer = document.createElement('div');
+        footer.className = 'bot-turn-footer';
+        footer.innerHTML = `
+          <span class="status-badge-inline badge-${statusBadge}">${statusBadge}</span>
+          <span class="view-diag-link" onclick="selectTurn(${turnIndex - 1})">Turn #${turnIndex} · Diagnostics</span>
+        `;
+        row.appendChild(footer);
+        container.scrollTop = container.scrollHeight;
+      }
+
+      return row;
+    }
+
+    function appendMessageToThread({ role, text, sender, turnIndex, statusBadge, isError, attachedImageUrl }) {
+      const container = document.getElementById('chat-messages');
+      const row = document.createElement('div');
+      row.className = `message-row ${role}`;
+      if (turnIndex !== undefined) {
+        row.setAttribute('data-turn-idx', turnIndex - 1);
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'message-sender-meta';
+      meta.textContent = sender;
+      row.appendChild(meta);
+
+      const bubbles = parseBubbles(text);
+
+      bubbles.forEach(bubbleText => {
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.textContent = bubbleText;
+
+        if (role === 'bot' && turnIndex !== undefined) {
+          bubble.onclick = () => selectTurn(turnIndex - 1);
+        }
+        row.appendChild(bubble);
+      });
+
+      if (attachedImageUrl) {
+        const imgBubble = document.createElement('div');
+        imgBubble.className = 'message-bubble image-bubble';
+        imgBubble.style.padding = '4px';
+        imgBubble.style.cursor = 'pointer';
+        imgBubble.style.background = '#ffffff';
+        imgBubble.style.border = '1px solid #e2e8f0';
+        imgBubble.style.maxWidth = '280px';
+        imgBubble.innerHTML = `
+          <div style="position:relative; overflow:hidden; border-radius:12px;">
+            <img src="${attachedImageUrl}" alt="Official Product Studio Photo" style="width:100%; height:auto; max-height:260px; object-fit:cover; display:block; border-radius:10px;" />
+            <div style="font-size:0.68rem; color:#64748b; padding:4px 6px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:600; color:#0f766e;">✨ Official Studio Photo</span>
+              <span style="color:#6366f1;">Tap to open ↗</span>
+            </div>
+          </div>
+        `;
+        imgBubble.onclick = () => window.open(attachedImageUrl, '_blank');
+        row.appendChild(imgBubble);
+      }
+
+      if (role === 'bot' && statusBadge) {
+        const footer = document.createElement('div');
+        footer.className = 'bot-turn-footer';
+        footer.innerHTML = `
+          <span class="status-badge-inline badge-${statusBadge}">${statusBadge}</span>
+          <span class="view-diag-link" onclick="selectTurn(${turnIndex - 1})">Turn #${turnIndex} · Diagnostics</span>
+        `;
+        row.appendChild(footer);
+      }
+
+      container.appendChild(row);
+      container.scrollTop = container.scrollHeight;
+      return row;
+    }
+
+    function appendTypingIndicator() {
+      const container = document.getElementById('chat-messages');
+      const row = document.createElement('div');
+      row.className = 'message-row bot';
+      row.innerHTML = `
+        <div class="message-sender-meta">Studio Concierge is typing...</div>
+        <div class="message-bubble" style="opacity:0.75; font-style:italic;">
+          Querying RAG knowledge & invoking model...
+        </div>
+      `;
+      container.appendChild(row);
+      container.scrollTop = container.scrollHeight;
+      return row;
+    }
+
+    // Select and inspect a specific turn in the side panel
+    function selectTurn(index) {
+      if (index < 0 || index >= state.turns.length) return;
+      state.selectedTurnIndex = index;
+      const turn = state.turns[index];
+
+      // Update highlight in chat thread
+      document.querySelectorAll('.message-row.bot').forEach(el => el.classList.remove('selected'));
+      const activeEl = document.querySelector(`.message-row.bot[data-turn-idx="${index}"]`);
+      if (activeEl) activeEl.classList.add('selected');
+
+      document.getElementById('diag-turn-label').textContent = `Turn #${turn.turnIndex} (${turn.timestamp})`;
+
+      renderDiagnosticSidePanel(turn);
+    }
+
+    function renderDiagnosticSidePanel(turn) {
+      const container = document.getElementById('side-panel-content');
+
+      const badgeInfo = {
+        handled: {
+          icon: '✅',
+          title: 'HANDLED (Automated Reply)',
+          desc: 'Complete verified facts from catalogue and brand guidelines. Safely generated automated response.'
+        },
+        partial: {
+          icon: 'ℹ️',
+          title: 'PARTIAL (Partial Reply)',
+          desc: 'Partial verified knowledge available; remainder awaiting staff follow-up.'
+        },
+        fallback: {
+          icon: '⚠️',
+          title: 'FALLBACK (Standard Fallback)',
+          desc: 'Missing verified facts or ambiguous catalogue match. Safe fallback triggered with handover flag.'
+        },
+        handover: {
+          icon: '🚨',
+          title: 'HANDOVER (Human Staff Escalation)',
+          desc: 'Complaint, scam allegation, AI identity probe, or out-of-scope query. Routed to human concierge.'
+        }
+      }[turn.status_badge] || { icon: '⚙️', title: turn.status_badge, desc: '' };
+
+      const missingFields = turn.missing_fields || [];
+      const hasMissing = missingFields.length > 0;
+
+      const chunks = turn.retrieved_chunks || [];
+      const filesUsed = turn.knowledge_files || [];
+
+      let productHtml = '<div style="color:var(--text-dim); font-size:0.78rem;">No catalogue product detected in this message.</div>';
+      if (turn.matched_product) {
+        const p = turn.matched_product;
+        const formattedPrice = p.price !== null 
+          ? (p.currency === 'USD' ? `$${Number(p.price).toFixed(2)}` : `${Number(p.price).toLocaleString()} ${p.currency || 'VND'}`)
+          : '<span style="color:#ef4444; font-weight:700;">NULL (Missing Price)</span>';
+        const imgBlock = p.image_url 
+          ? `<div style="margin-bottom:12px; display:flex; align-items:center; gap:12px; background:#f8fafc; padding:8px; border-radius:8px; border:1px solid var(--panel-border);">
+               <img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" style="width:72px; height:72px; object-fit:cover; border-radius:6px; border:1px solid var(--panel-border);" onerror="this.style.display='none'"/>
+               <div style="font-size:0.75rem; color:var(--text-dim); line-height:1.4;">
+                 <strong style="color:var(--text-main);">${escapeHtml(p.name)}</strong><br/>
+                 <span style="color:var(--primary); font-family:monospace; font-weight:600;">${escapeHtml(p.id)}</span>
+               </div>
+             </div>`
+          : '';
+        productHtml = `
+          ${imgBlock}
+          <div class="kv-table">
+            <span class="kv-key">Product ID:</span><span class="kv-val highlight">${escapeHtml(p.id)}</span>
+            <span class="kv-key">Official Name:</span><span class="kv-val">${escapeHtml(p.name)}</span>
+            <span class="kv-key">Listed Price:</span><span class="kv-val highlight">${formattedPrice}</span>
+            <span class="kv-key">Material:</span><span class="kv-val">${escapeHtml(p.material || 'N/A')}</span>
+            <span class="kv-key">Inventory:</span><span class="kv-val">${p.in_stock ? '🟢 In Stock (Ready to ship)' : '🔴 Made to Order / Out of stock'}</span>
+            <span class="kv-key">Variants / Sizes:</span><span class="kv-val">${escapeHtml((p.variants || []).join(', ') || 'N/A')}</span>
+          </div>
+        `;
+      } else if (turn.ambiguous_products && turn.ambiguous_products.length > 1) {
+        productHtml = `
+          <div style="color:var(--brand-gold); font-size:0.78rem; font-weight:600;">
+            ⚠️ Found ${turn.ambiguous_products.length} matching products (Ambiguity):
+          </div>
+          <ul style="padding-left:1.2rem; font-size:0.76rem; color:var(--text-muted); margin-top:4px;">
+            ${turn.ambiguous_products.map(p => `<li>${escapeHtml(p.name)} (${p.id})</li>`).join('')}
+          </ul>
+        `;
+      }
+
+      let exampleGoodReplyHtml = '';
+      if (turn.example_good_reply) {
+        exampleGoodReplyHtml = `
+          <div class="sample-gold-card">
+            <div class="sample-gold-title">✨ Reference Benchmark (example_good_reply)</div>
+            <div class="sample-gold-content">"${escapeHtml(turn.example_good_reply)}"</div>
+            <div class="sample-gold-disclaimer">
+              * Internal benchmark reference for brand testing only. Not sent automatically and not a fact source.
+            </div>
+          </div>
+        `;
+      }
+
+      let chunksHtml = '<div style="color:var(--text-dim); font-size:0.75rem;">No knowledge chunks retrieved.</div>';
+      if (chunks.length > 0) {
+        chunksHtml = `
+          <div class="chunks-accordion">
+            ${chunks.map((c, i) => `
+              <div class="chunk-item">
+                <div class="chunk-header" onclick="toggleChunk(${i})">
+                  <span>📄 ${escapeHtml(c.title || c.file)}</span>
+                  <span id="chunk-toggle-${i}">▼</span>
+                </div>
+                <div class="chunk-body" id="chunk-body-${i}">
+                  <div style="color:var(--brand-gold); margin-bottom:4px; font-weight:700;">File: ${escapeHtml(c.file)}</div>
+                  ${escapeHtml(c.content)}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <!-- Card 1: Status Badge -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>Turn Status</span>
+            <span class="status-badge-inline badge-${turn.status_badge}">${turn.status_badge}</span>
+          </div>
+          <div class="status-hero">
+            <div class="status-hero-icon">${badgeInfo.icon}</div>
+            <div class="status-hero-text">
+              <h3>${badgeInfo.title}</h3>
+              <p>${badgeInfo.desc}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Post & Visual Context -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>🎬 Post & Visual Context</span>
+            <span>${turn.frame_count ? (turn.frame_count + ' frames') : 'No media'}</span>
+          </div>
+          <div class="kv-table">
+            <span class="kv-key">Post Caption:</span>
+            <span class="kv-val" style="font-style:italic;">${escapeHtml(turn.caption || turn.postContext || 'No caption provided')}</span>
+            
+            <span class="kv-key">Extracted Frames:</span>
+            <span class="kv-val">${turn.frame_count ? (turn.frame_count + ' frames (~1 frame/2s, width 512, no audio)') : '0'}</span>
+            
+            <span class="kv-key">Timeline:</span>
+            <span class="kv-val" style="font-family:monospace; color:var(--primary);">${(turn.frame_timestamps && turn.frame_timestamps.length) ? turn.frame_timestamps.join(' → ') : 'N/A'}</span>
+            
+            <span class="kv-key">Visual Detection:</span>
+            <span class="kv-val highlight">${escapeHtml(turn.visual_product_guess || 'Not detected')}</span>
+            
+            <span class="kv-key">Matched Catalogue ID:</span>
+            <span class="kv-val">
+              ${turn.catalogue_id_matched ? 
+                `<span class="status-badge-inline badge-handled">✓ ${escapeHtml(turn.catalogue_id_matched)}</span>` : 
+                `<span class="status-badge-inline badge-handover">Unmatched / Unlisted</span>`}
+            </span>
+
+            <span class="kv-key">Key Frame Used:</span>
+            <span class="kv-val highlight">${escapeHtml(turn.frame_used || 'N/A')}</span>
+
+            <span class="kv-key">Diagnostic Summary:</span>
+            <span class="kv-val" style="color:var(--brand-gold); font-weight:600;">${escapeHtml(turn.short_reason || 'N/A')}</span>
+          </div>
+
+          ${turn.context_missing ? `
+            <div style="margin-top:6px; padding:6px 8px; background:#fef2f2; border:1px solid #fecaca; border-radius:6px; font-size:0.75rem; color:#b91c1c;">
+              ⚠️ <strong>context_missing</strong>: Comment depends on visual media but no media URL was provided -> Human handover.
+            </div>
+          ` : ''}
+
+          ${turn.vision_unsupported ? `
+            <div style="margin-top:6px; padding:6px 8px; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; font-size:0.75rem; color:#b45309;">
+              ⚠️ <strong>vision_unsupported</strong>: Model does not support image input -> Human handover.
+            </div>
+          ` : ''}
+
+          ${(turn.frames && turn.frames.length > 0) ? `
+            <div style="margin-top:10px;">
+              <div style="font-size:0.74rem; color:var(--text-muted); font-weight:600; margin-bottom:4px;">Frames submitted to model (chronological order):</div>
+              <div class="visual-gallery">
+                ${turn.frames.map(f => `
+                  <div class="visual-thumb ${turn.frame_used === f.label ? 'highlight' : ''}" title="${f.label}">
+                    <img src="data:image/jpeg;base64,${f.base64_data}" alt="${f.label}" />
+                    <span class="thumb-tag">${f.label}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- Card 3: Matched Product -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>Identified Product (Catalogue)</span>
+            <span>${turn.matched_product ? 'Exact Match' : 'None'}</span>
+          </div>
+          ${productHtml}
+        </div>
+
+        <!-- Card 4: Rule / Edge Case -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>Rule & Edge Case Matching</span>
+            <span>Funnel: ${escapeHtml(turn.channel)}</span>
+          </div>
+          <div class="kv-table">
+            <span class="kv-key">Edge Case:</span>
+            <span class="kv-val ${turn.matched_edge_case ? 'highlight' : ''}">${escapeHtml(turn.matched_edge_case || 'None')}</span>
+            <span class="kv-key">Matched Rule:</span>
+            <span class="kv-val ${turn.matched_rule ? 'highlight' : ''}">${escapeHtml(turn.matched_rule || 'None')}</span>
+            <span class="kv-key">Detected Intent:</span>
+            <span class="kv-val">${escapeHtml(turn.intent || 'other')}</span>
+            <span class="kv-key">Pipeline Decision:</span>
+            <span class="kv-val">${escapeHtml(turn.decision)} (Flag: ${escapeHtml(turn.flag)})</span>
+            <span class="kv-key">Human Escalation:</span>
+            <span class="kv-val">${turn.needs_human ? '🚨 YES (Handover)' : '🟢 NO'}</span>
+          </div>
+          ${exampleGoodReplyHtml}
+        </div>
+
+        <!-- Card 5: Missing Fields -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>Missing Knowledge Fields</span>
+            <span>${hasMissing ? '⚠️ Missing Fields' : '🟢 Complete'}</span>
+          </div>
+          <div class="missing-tags-wrap">
+            ${hasMissing ? 
+              missingFields.map(f => `<span class="missing-tag">✕ ${escapeHtml(f)}</span>`).join('') : 
+              '<span class="missing-tag none">✓ All required knowledge fields verified</span>'}
+          </div>
+        </div>
+
+        <!-- Card 6: Reason -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>Decision Rationale</span>
+          </div>
+          <div style="font-size:0.8rem; line-height:1.45; color:var(--text-main); background:#f8fafc; padding:0.6rem 0.8rem; border-radius:6px; border:1px solid var(--panel-border);">
+            ${escapeHtml(turn.escalate_reason || 'Automated response generated conforming to US Brand Voice and verified facts.')}
+          </div>
+        </div>
+
+        <!-- Card 7: Files & Chunks RAG -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>Knowledge Chunks & Files (RAG)</span>
+            <span>${chunks.length} chunks</span>
+          </div>
+          <div style="font-size:0.74rem; color:var(--text-muted); margin-bottom:4px;">
+            <strong>Files:</strong> ${filesUsed.map(f => `<code style="background:#f1f5f9; padding:2px 5px; border-radius:4px; border:1px solid var(--panel-border); color:var(--text-main);">${escapeHtml(f)}</code>`).join(', ') || 'None'}
+          </div>
+          ${chunksHtml}
+        </div>
+
+        <!-- Card 8: Model Call Status -->
+        <div class="diag-card">
+          <div class="diag-card-title">
+            <span>LLM Execution Status</span>
+            <span>${turn.model_called ? '🟢 Model Invoked' : '⚪ Model Not Invoked'}</span>
+          </div>
+          <div class="kv-table">
+            <span class="kv-key">Model Provider:</span><span class="kv-val">${escapeHtml(state.modelConfig?.provider || 'gemini')}</span>
+            <span class="kv-key">Model Name:</span><span class="kv-val">${escapeHtml(turn.model_used || state.modelConfig?.model_name || 'N/A')}</span>
+            <span class="kv-key">Live Send:</span><span class="kv-val">🚫 BLOCKED (Internal playground session - will never post live)</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleChunk(index) {
+      const body = document.getElementById(`chunk-body-${index}`);
+      const toggle = document.getElementById(`chunk-toggle-${index}`);
+      if (!body) return;
+      if (body.style.display === 'none') {
+        body.style.display = 'block';
+        toggle.textContent = '▲';
+      } else {
+        body.style.display = 'none';
+        toggle.textContent = '▼';
+      }
+    }
+
+    // Reset Chat Session
+    function resetSession(force = false) {
+      if (!force && state.turns.length > 0 && !confirm('Bắt đầu phiên chat mới? Lịch sử đối thoại hiện tại sẽ được làm mới.')) {
+        return;
+      }
+      state.sessionId = 'session_' + Math.random().toString(36).substring(2, 9);
+      state.turns = [];
+      state.history = [];
+      state.selectedTurnIndex = null;
+      clearAttachedMedia();
+
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = `
+        <div class="message-row bot" id="welcome-message">
+          <div class="message-sender-meta">
+            <span>✨ Vien Chi Bao Studio Concierge</span>
+          </div>
+          <div class="message-bubble">
+            Phiên mới đã khởi tạo (${state.sessionId}).<br>
+            Bạn có thể bắt đầu chat với tư cách khách hàng thị trường Mỹ để kiểm tra phản hồi của bot!
+          </div>
+          <div class="bot-turn-footer">
+            <span class="status-badge-inline badge-handled">Sẵn sàng</span>
+            <span style="color:#64748b;">US Market Studio Playground</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('diag-turn-label').textContent = 'Chưa chọn lượt chat';
+      document.getElementById('side-panel-content').innerHTML = `
+        <div class="empty-turn-diag">
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">💬</div>
+          Gửi tin nhắn hoặc click vào phản hồi của bot trong luồng chat để xem phân tích Pipeline Diagnostics.
+        </div>
+      `;
+      updateSessionRatingBar();
+    }
+
+    // Export CSV of the session
+    async function exportSessionCsv() {
+      if (state.turns.length === 0) {
+        alert('No conversation turns in this session yet to export. Send at least one test message first!');
+        return;
+      }
+
+      const turnsPayload = state.turns.map(t => ({
+        turn_index: t.turnIndex,
+        timestamp: t.timestamp,
+        channel: t.channel,
+        platform: t.platform,
+        surface: t.surface,
+        post_context: t.postContext || '',
+        customer_message: t.customerMessage,
+        bot_reply: t.botReply,
+        status_badge: t.status_badge,
+        matched_product: t.matched_product ? `${t.matched_product.name} (${t.matched_product.id})` : '',
+        matched_rule: t.matched_rule || t.matched_edge_case || '',
+        files_used: t.knowledge_files || [],
+        missing_fields: t.missing_fields || [],
+        reason: t.escalate_reason || '',
+        example_good_reply: t.example_good_reply || '',
+        decision: t.decision || '',
+        flag: t.flag || ''
+      }));
+
+      try {
+        const res = await fetch('/api/playground/export_csv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: state.sessionId,
+            turns: turnsPayload
+          })
+        });
+
+        if (!res.ok) throw new Error('Failed to generate CSV export from server');
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `playground_session_${state.sessionId}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      } catch (err) {
+        // Client-side fallback CSV download
+        generateClientCsv(turnsPayload);
+      }
+    }
+
+    function generateClientCsv(turns) {
+      let csv = '\ufeff'; // UTF-8 BOM
+      csv += 'Turn #,Timestamp,Channel,Platform,Surface,Post Context,Customer Message,Bot Reply,Status Badge,Matched Product,Matched Rule/Edge Case,Files Used,Missing Fields,Reason,Example Good Reply\n';
+      turns.forEach(t => {
+        const row = [
+          t.turn_index,
+          `"${t.timestamp}"`,
+          `"${t.channel}"`,
+          `"${t.platform}"`,
+          `"${t.surface}"`,
+          `"${(t.post_context || '').replace(/"/g, '""')}"`,
+          `"${(t.customer_message || '').replace(/"/g, '""')}"`,
+          `"${(t.bot_reply || '').replace(/"/g, '""')}"`,
+          `"${t.status_badge}"`,
+          `"${(t.matched_product || '').replace(/"/g, '""')}"`,
+          `"${(t.matched_rule || '').replace(/"/g, '""')}"`,
+          `"${(t.files_used || []).join('; ')}"`,
+          `"${(t.missing_fields || []).join('; ')}"`,
+          `"${(t.reason || '').replace(/"/g, '""')}"`,
+          `"${(t.example_good_reply || '').replace(/"/g, '""')}"`
+        ];
+        csv += row.join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `playground_session_${state.sessionId}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      a.remove();
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* ==========================================================================
+       Session Rating & Case Classification Logic
+       ========================================================================== */
+    let passSelectedTags = [];
+    let currentHubTab = 'golden';
+    let cachedCasesData = { golden_examples: [], failed_cases: [], stats: {} };
+
+    // Update floating session rating bar
+    function updateSessionRatingBar() {
+      const bar = document.getElementById('session-rating-bar');
+      const summary = document.getElementById('session-rating-summary');
+      if (!bar || !summary) return;
+
+      if (state.turns.length === 0) {
+        bar.style.display = 'none';
+      } else {
+        bar.style.display = 'flex';
+        const lastTurn = state.turns[state.turns.length - 1];
+        summary.innerHTML = `<strong>${state.turns.length} lượt chat</strong> &bull; Kênh: <code style="color:#38bdf8;">${state.channel.toUpperCase()}/${state.platform.toUpperCase()} (${state.surface})</code> &bull; Trạng thái lượt cuối: <span class="status-badge-inline badge-${lastTurn.status_badge}">${lastTurn.status_badge}</span>`;
+      }
+    }
+
+    // Fetch and update cases badge in header
+    async function updateCasesBadge() {
+      try {
+        const res = await fetch('/api/playground/session/cases');
+        if (!res.ok) return;
+        const data = await res.json();
+        cachedCasesData = data;
+        const total = (data.stats && data.stats.total_rated) || 0;
+        const badge = document.getElementById('cases-count-badge');
+        if (badge) {
+          badge.textContent = total;
+          badge.title = `${data.stats.golden_count || 0} Golden Examples · ${data.stats.failed_count || 0} Case Lỗi (${data.stats.open_failed_count || 0} chờ fix)`;
+        }
+      } catch (err) {
+        console.error('Failed to update cases badge:', err);
+      }
+    }
+
+    // Modal 1: Open Pass Modal (Golden Example)
+    function openPassModal() {
+      if (state.turns.length === 0) {
+        showToast('Chưa có lượt đối thoại nào trong phiên để đánh giá! Hãy gửi ít nhất 1 tin nhắn test.', 'error');
+        return;
+      }
+
+      const metaEl = document.getElementById('pass-session-meta');
+      const titleInput = document.getElementById('pass-case-title');
+      const notesInput = document.getElementById('pass-case-notes');
+
+      metaEl.textContent = `${state.sessionId} &bull; ${state.channel.toUpperCase()} / ${state.platform.toUpperCase()} (${state.surface}) &bull; ${state.turns.length} lượt đối thoại`;
+
+      // Pre-fill title from first customer message
+      const firstMsg = state.turns[0].customerMessage || state.turns[0].customer_message || '';
+      titleInput.value = firstMsg ? (firstMsg.length > 60 ? firstMsg.substring(0, 60) + '...' : firstMsg) : `Example ${state.sessionId}`;
+      notesInput.value = '';
+      passSelectedTags = [state.channel, state.platform, state.surface];
+
+      document.querySelectorAll('#pass-tags-container .quick-chip').forEach(el => el.classList.remove('selected'));
+      document.getElementById('modal-rate-pass').style.display = 'flex';
+    }
+
+    function closePassModal() {
+      document.getElementById('modal-rate-pass').style.display = 'none';
+    }
+
+    function togglePassChip(el, tag) {
+      el.classList.toggle('selected');
+      if (el.classList.contains('selected')) {
+        if (!passSelectedTags.includes(tag)) passSelectedTags.push(tag);
+      } else {
+        passSelectedTags = passSelectedTags.filter(t => t !== tag);
+      }
+    }
+
+    async function submitPassRating() {
+      const title = document.getElementById('pass-case-title').value.trim();
+      const notes = document.getElementById('pass-case-notes').value.trim();
+      const autoReset = document.getElementById('pass-auto-reset').checked;
+      const btn = document.getElementById('btn-submit-pass');
+
+      if (!title) {
+        showToast('Vui lòng nhập tiêu đề gợi nhớ cho case đạt!', 'error');
+        document.getElementById('pass-case-title').focus();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Đang lưu...';
+
+      try {
+        const payload = {
+          session_id: state.sessionId,
+          rating: 'pass',
+          channel: state.channel,
+          platform: state.platform,
+          surface: state.surface,
+          title: title,
+          notes: notes,
+          tags: passSelectedTags,
+          turns: state.turns
+        };
+
+        const res = await fetch('/api/playground/session/rate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Lỗi khi lưu case');
+        }
+
+        showToast('🎉 Đã lưu phiên chat vào bộ Golden Examples chuẩn!', 'success');
+        closePassModal();
+        await updateCasesBadge();
+
+        if (autoReset) {
+          resetSession(true);
+        }
+      } catch (err) {
+        showToast(`❌ Không thể lưu: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🌟 Lưu Golden Example';
+      }
+    }
+
+    // Modal 2: Open Fail Modal
+    function openFailModal() {
+      if (state.turns.length === 0) {
+        showToast('Chưa có lượt đối thoại nào trong phiên để đánh giá! Hãy gửi ít nhất 1 tin nhắn test.', 'error');
+        return;
+      }
+
+      const turnSelect = document.getElementById('fail-turn-select');
+      turnSelect.innerHTML = '';
+
+      const allOpt = document.createElement('option');
+      allOpt.value = 'all';
+      allOpt.textContent = `Toàn bộ phiên chat (${state.turns.length} lượt)`;
+      turnSelect.appendChild(allOpt);
+
+      state.turns.forEach((t, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        const snippet = (t.customerMessage || '').substring(0, 45);
+        opt.textContent = `Turn #${i + 1}: "${snippet}..."`;
+        turnSelect.appendChild(opt);
+      });
+
+      // Default select the active or last turn
+      const defaultIdx = state.selectedTurnIndex !== null ? state.selectedTurnIndex : (state.turns.length - 1);
+      turnSelect.value = defaultIdx;
+
+      document.getElementById('fail-root-cause').value = '';
+      document.getElementById('fail-suggested-fix').value = '';
+
+      selectFailCategory('sai_chinh_sach');
+      selectTargetFileChip('knowledge/policies/returns.md');
+
+      onFailTurnSelect();
+      document.getElementById('modal-rate-fail').style.display = 'flex';
+    }
+
+    function closeFailModal() {
+      document.getElementById('modal-rate-fail').style.display = 'none';
+    }
+
+    function selectFailCategory(category) {
+      const select = document.getElementById('fail-category-select');
+      if (select) select.value = category;
+      document.querySelectorAll('.cat-pill-card').forEach(card => {
+        card.classList.toggle('selected', card.getAttribute('data-cat') === category);
+      });
+    }
+
+    function selectTargetFileChip(filePath) {
+      const select = document.getElementById('fail-target-file');
+      if (select) select.value = filePath;
+      document.querySelectorAll('.target-file-chip').forEach(chip => {
+        chip.classList.toggle('selected', chip.getAttribute('data-file') === filePath);
+      });
+    }
+
+    function onFailTurnSelect() {
+      const val = document.getElementById('fail-turn-select').value;
+      const previewText = document.getElementById('fail-turn-preview-text');
+      if (val === 'all') {
+        previewText.innerHTML = `<div style="font-weight:600; color:var(--text-main); margin-bottom:4px;">Toàn bộ phiên gồm ${state.turns.length} lượt đối thoại:</div>` +
+          state.turns.map((t, idx) => `<div style="margin-bottom:3px;">&bull; <strong>Turn #${idx+1}:</strong> "${escapeHtml(t.customerMessage)}" &rarr; AI: "${escapeHtml(t.botReply)}"</div>`).join('');
+      } else {
+        const turn = state.turns[parseInt(val, 10)];
+        if (turn) {
+          previewText.innerHTML = `
+            <div style="margin-bottom:6px;"><strong style="color:var(--text-main);">👤 Khách hỏi:</strong> <span style="color:var(--text-main); font-weight:500;">"${escapeHtml(turn.customerMessage)}"</span></div>
+            <div style="background:#fff1f2; border:1px solid #fecdd3; padding:8px 10px; border-radius:6px; margin-bottom:6px;">
+              <strong style="color:#be123c;">🤖 Bot phản hồi:</strong> <span style="color:#881337;">"${escapeHtml(turn.botReply)}"</span>
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-dim); display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <span>Badge: <span class="status-badge-inline badge-${turn.status_badge}">${turn.status_badge}</span></span>
+              ${turn.matched_product ? `<span>SP: <strong>${escapeHtml(turn.matched_product.name)}</strong> (${escapeHtml(turn.matched_product.id)})</span>` : ''}
+              ${turn.matched_rule ? `<span>Rule: <strong>${escapeHtml(turn.matched_rule)}</strong></span>` : ''}
+            </div>
+          `;
+        }
+      }
+    }
+
+    function copyTurnToAnalysis() {
+      const val = document.getElementById('fail-turn-select').value;
+      const causeArea = document.getElementById('fail-root-cause');
+      if (val === 'all') {
+        causeArea.value = `Toàn bộ ${state.turns.length} lượt chat:\n` +
+          state.turns.map((t, idx) => `Turn ${idx+1}: Khách: "${t.customerMessage}" -> AI: "${t.botReply}"`).join('\n') +
+          `\n\n[Nguyên nhân bot phản hồi chưa đúng]: `;
+      } else {
+        const turn = state.turns[parseInt(val, 10)];
+        if (turn) {
+          causeArea.value = `Khách hỏi: "${turn.customerMessage}"\nBot trả lời: "${turn.botReply}"\n\n[Nguyên nhân bot phản hồi chưa đúng]: `;
+        }
+      }
+      causeArea.focus();
+    }
+
+    async function submitFailRating() {
+      const turnVal = document.getElementById('fail-turn-select').value;
+      const category = document.getElementById('fail-category-select').value;
+      const rootCause = document.getElementById('fail-root-cause').value.trim();
+      const suggestedFix = document.getElementById('fail-suggested-fix').value.trim();
+      const targetFile = document.getElementById('fail-target-file').value;
+      const autoReset = document.getElementById('fail-auto-reset').checked;
+      const btn = document.getElementById('btn-submit-fail');
+
+      if (!rootCause) {
+        showToast('Vui lòng nhập phân tích nguyên nhân tại sao bot không đạt!', 'error');
+        document.getElementById('fail-root-cause').focus();
+        return;
+      }
+
+      if (!suggestedFix) {
+        showToast('Vui lòng nhập giải pháp / rule cần cập nhật để không bao giờ mắc lại lỗi này!', 'error');
+        document.getElementById('fail-suggested-fix').focus();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Đang lưu...';
+
+      try {
+        const failedTurnIdx = turnVal === 'all' ? null : (parseInt(turnVal, 10) + 1);
+        const payload = {
+          session_id: state.sessionId,
+          rating: 'fail',
+          channel: state.channel,
+          platform: state.platform,
+          surface: state.surface,
+          error_category: category,
+          failed_turn_index: failedTurnIdx,
+          root_cause: rootCause,
+          suggested_fix: suggestedFix,
+          target_file_to_fix: targetFile,
+          turns: state.turns
+        };
+
+        const res = await fetch('/api/playground/session/rate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Lỗi khi lưu case');
+        }
+
+        showToast('⚠️ Đã ghi nhận Case Lỗi cùng phân tích khắc phục!', 'error');
+        closeFailModal();
+        await updateCasesBadge();
+
+        if (autoReset) {
+          resetSession(true);
+        }
+      } catch (err) {
+        showToast(`❌ Không thể lưu: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Lưu Case Lỗi & Khắc Phục';
+      }
+    }
+
+    // Modal 3: Case Hub (Review & Management)
+    async function openCaseHubModal(initialTab = 'golden') {
+      currentHubTab = initialTab;
+      document.getElementById('modal-case-hub').style.display = 'flex';
+      await refreshCaseHubData();
+      switchCaseHubTab(initialTab);
+    }
+
+    function closeCaseHubModal() {
+      document.getElementById('modal-case-hub').style.display = 'none';
+    }
+
+    async function refreshCaseHubData() {
+      try {
+        const res = await fetch('/api/playground/session/cases');
+        if (!res.ok) return;
+        cachedCasesData = await res.json();
+        const goldCount = (cachedCasesData.stats && cachedCasesData.stats.golden_count) || 0;
+        const failCount = (cachedCasesData.stats && cachedCasesData.stats.failed_count) || 0;
+
+        document.getElementById('hub-gold-count').textContent = goldCount;
+        document.getElementById('hub-fail-count').textContent = failCount;
+        updateCasesBadge();
+      } catch (err) {
+        console.error('Error fetching cases in hub:', err);
+      }
+    }
+
+    function switchCaseHubTab(tab) {
+      currentHubTab = tab;
+      const goldBtn = document.getElementById('tab-btn-golden');
+      const failBtn = document.getElementById('tab-btn-failed');
+      const statusWrap = document.getElementById('hub-status-filter-wrap');
+
+      if (tab === 'golden') {
+        goldBtn.classList.add('active');
+        failBtn.classList.remove('active');
+        statusWrap.style.display = 'none';
+      } else {
+        goldBtn.classList.remove('active');
+        failBtn.classList.add('active');
+        statusWrap.style.display = 'flex';
+      }
+      renderCaseHub();
+    }
+
+    function renderCaseHub() {
+      const container = document.getElementById('hub-cases-list');
+      const search = (document.getElementById('hub-search-input').value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('hub-status-filter').value;
+
+      container.innerHTML = '';
+
+      if (currentHubTab === 'golden') {
+        let items = cachedCasesData.golden_examples || [];
+        if (search) {
+          items = items.filter(c => 
+            (c.title || '').toLowerCase().includes(search) ||
+            (c.notes || '').toLowerCase().includes(search) ||
+            (c.session_id || '').toLowerCase().includes(search) ||
+            (c.turns || []).some(t => (t.customerMessage || t.customer_message || '').toLowerCase().includes(search) || (t.botReply || t.bot_reply || '').toLowerCase().includes(search))
+          );
+        }
+
+        if (items.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:3rem 1rem; color:var(--text-dim);">
+              <div style="font-size:2.5rem; margin-bottom:0.5rem;">🌟</div>
+              <strong style="color:var(--text-main);">Chưa có Golden Example nào phù hợp</strong><br>
+              <span style="font-size:0.78rem;">Sau khi test phiên chat bot xử lý đạt, hãy bấm nút <strong>[✓ Đạt (Lưu Example)]</strong> để lưu làm mẫu benchmark!</span>
+            </div>
+          `;
+          return;
+        }
+
+        items.forEach((c) => {
+          const card = document.createElement('div');
+          card.className = 'case-card';
+          const tags = c.tags || [];
+          const turns = c.turns || [];
+
+          card.innerHTML = `
+            <div class="case-card-header">
+              <div>
+                <div class="case-card-title">${escapeHtml(c.title || 'Golden Example')}</div>
+                <div class="case-meta-row">
+                  <span class="case-pill pass">✓ ĐẠT (GOLD)</span>
+                  <span>ID: <code>${escapeHtml(c.id)}</code></span>
+                  <span>&bull; Kênh: <strong>${escapeHtml((c.channel || '').toUpperCase())}/${escapeHtml((c.platform || '').toUpperCase())} (${escapeHtml(c.surface)})</strong></span>
+                  <span>&bull; ${c.turn_count || turns.length} lượt chat</span>
+                  <span>&bull; ${new Date(c.created_at).toLocaleString('vi-VN')}</span>
+                </div>
+              </div>
+              <button class="btn-action-small danger" onclick="deleteCaseItem('golden', '${c.id}')" title="Xóa example này">✕ Xóa</button>
+            </div>
+
+            ${c.notes ? `<div class="case-body-snippet" style="border-left:3px solid var(--status-handled); background:#f0fdf4;"><strong>Đánh giá của Tester:</strong> ${escapeHtml(c.notes)}</div>` : ''}
+
+            <!-- Tags -->
+            <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">
+              ${tags.map(t => `<span style="font-size:0.68rem; background:#f1f5f9; color:var(--primary); padding:2px 8px; border-radius:9999px; border:1px solid #e2e8f0; font-weight:500;">#${escapeHtml(t)}</span>`).join('')}
+            </div>
+
+            <!-- Dialogue Accordion -->
+            <details style="margin-top:6px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid var(--panel-border);">
+              <summary style="font-size:0.76rem; color:var(--brand-gold); cursor:pointer; font-weight:700;">
+                💬 Xem chi tiết ${turns.length} lượt đối thoại
+              </summary>
+              <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                ${turns.map((t, idx) => `
+                  <div style="font-size:0.78rem; padding:8px 10px; background:#ffffff; border-radius:6px; border:1px solid var(--panel-border);">
+                    <div style="color:var(--primary); font-weight:600;">Turn #${idx+1} · Khách: "${escapeHtml(t.customerMessage || t.customer_message)}"</div>
+                    <div style="color:var(--text-main); margin-top:4px; line-height:1.45;">AI: "${escapeHtml(t.botReply || t.bot_reply)}"</div>
+                    <div style="font-size:0.7rem; color:var(--text-dim); margin-top:4px;">
+                      Badge: <span class="status-badge-inline badge-${t.status_badge}">${t.status_badge}</span>
+                      ${t.matched_product ? `&bull; SP: <strong>${escapeHtml(t.matched_product.name || t.matched_product)}</strong>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </details>
+          `;
+          container.appendChild(card);
+        });
+
+      } else {
+        // Failed Cases Tab
+        let items = cachedCasesData.failed_cases || [];
+        if (statusFilter !== 'all') {
+          items = items.filter(c => (c.status || 'open') === statusFilter);
+        }
+        if (search) {
+          items = items.filter(c => 
+            (c.root_cause || '').toLowerCase().includes(search) ||
+            (c.suggested_fix || '').toLowerCase().includes(search) ||
+            (c.error_category_label || '').toLowerCase().includes(search) ||
+            (c.target_file_to_fix || '').toLowerCase().includes(search) ||
+            (c.session_id || '').toLowerCase().includes(search) ||
+            (c.turns || []).some(t => (t.customerMessage || t.customer_message || '').toLowerCase().includes(search) || (t.botReply || t.bot_reply || '').toLowerCase().includes(search))
+          );
+        }
+
+        if (items.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:3rem 1rem; color:var(--text-dim);">
+              <div style="font-size:2.5rem; margin-bottom:0.5rem;">🎉</div>
+              <strong style="color:var(--text-main);">Không có Case Lỗi nào trong bộ lọc hiện tại!</strong><br>
+              <span style="font-size:0.78rem;">Khi phát hiện bot trả lời sai chính sách, sai sản phẩm hay bịa thông tin, hãy bấm <strong>[✕ Fail (Báo Lỗi)]</strong> để lưu phân tích và cập nhật rule!</span>
+            </div>
+          `;
+          return;
+        }
+
+        items.forEach((c) => {
+          const card = document.createElement('div');
+          card.className = 'case-card';
+          const isFixed = c.status === 'fixed';
+          const turns = c.turns || [];
+
+          card.innerHTML = `
+            <div class="case-card-header">
+              <div>
+                <div class="case-card-title" style="display:flex; align-items:center; gap:0.5rem;">
+                  <span class="case-pill fail">${escapeHtml(c.error_category_label || c.error_category)}</span>
+                  <span class="case-pill ${isFixed ? 'fixed' : 'open'}">${isFixed ? '🟢 ĐÃ FIX' : '🔴 CHỜ FIX'}</span>
+                </div>
+                <div class="case-meta-row" style="margin-top:4px;">
+                  <span>ID: <code>${escapeHtml(c.id)}</code></span>
+                  <span>&bull; Kênh: <strong>${escapeHtml((c.channel || '').toUpperCase())}/${escapeHtml((c.platform || '').toUpperCase())} (${escapeHtml(c.surface)})</strong></span>
+                  ${c.failed_turn_index ? `<span>&bull; Turn lỗi: <strong>#${c.failed_turn_index}</strong></span>` : ''}
+                  <span>&bull; ${new Date(c.created_at).toLocaleString('vi-VN')}</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:0.4rem;">
+                <button class="btn-action-small ${isFixed ? '' : 'success'}" onclick="toggleCaseItemStatus('${c.id}', '${c.status || 'open'}')">
+                  ${isFixed ? '🔄 Mở lại' : '✓ Đã Fix'}
+                </button>
+                <button class="btn-action-small danger" onclick="deleteCaseItem('failed', '${c.id}')" title="Xóa case này">✕ Xóa</button>
+              </div>
+            </div>
+
+            <div class="case-body-snippet" style="border-left:3px solid #e11d48; background:#fff1f2; margin-bottom:8px;">
+              <div style="color:#be123c; font-weight:700; font-size:0.74rem; margin-bottom:3px;">🚨 TẠI SAO KHÔNG ĐẠT (Root Cause):</div>
+              <div style="color:#881337; font-size:0.8rem; line-height:1.45;">${escapeHtml(c.root_cause)}</div>
+            </div>
+
+            <div class="case-body-snippet" style="border-left:3px solid #0284c7; background:#f0f9ff; margin-bottom:8px;">
+              <div style="color:#0369a1; font-weight:700; font-size:0.74rem; margin-bottom:3px;">🛠️ BIỆN PHÁP KHẮC PHỤC ĐỂ KHÔNG MẮC LẠI:</div>
+              <div style="color:#075985; font-size:0.8rem; line-height:1.45;">${escapeHtml(c.suggested_fix)}</div>
+              ${c.target_file_to_fix ? `
+                <div style="margin-top:6px; font-size:0.74rem; color:var(--brand-gold);">
+                  📄 File cần sửa: <code style="background:#ffffff; border:1px solid #cbd5e1; padding:2px 6px; border-radius:4px; color:var(--text-main); font-weight:600;">${escapeHtml(c.target_file_to_fix)}</code>
+                </div>
+              ` : ''}
+            </div>
+
+            ${isFixed && c.fixed_at ? `
+              <div style="font-size:0.72rem; color:var(--status-handled); margin-top:4px; font-weight:600;">
+                ✓ Đã khắc phục vào lúc ${new Date(c.fixed_at).toLocaleString('vi-VN')}
+              </div>
+            ` : ''}
+
+            <!-- Dialogue Accordion -->
+            <details style="margin-top:6px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid var(--panel-border);">
+              <summary style="font-size:0.76rem; color:var(--brand-gold); cursor:pointer; font-weight:700;">
+                💬 Xem chi tiết đối thoại của phiên (${turns.length} lượt)
+              </summary>
+              <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                ${turns.map((t, idx) => `
+                  <div style="font-size:0.78rem; padding:8px 10px; background:#ffffff; border-radius:6px; border:1px solid var(--panel-border); ${c.failed_turn_index === (idx+1) ? 'border-color:#fca5a5; background:#fff1f2;' : ''}">
+                    <div style="color:var(--primary); font-weight:600;">
+                      Turn #${idx+1} ${c.failed_turn_index === (idx+1) ? '<span style="color:#e11d48; font-weight:700;">(LƯỢT BÁO LỖI)</span>' : ''} · Khách: "${escapeHtml(t.customerMessage || t.customer_message)}"
+                    </div>
+                    <div style="color:var(--text-main); margin-top:4px; line-height:1.45;">AI: "${escapeHtml(t.botReply || t.bot_reply)}"</div>
+                    <div style="font-size:0.7rem; color:var(--text-dim); margin-top:4px;">
+                      Badge: <span class="status-badge-inline badge-${t.status_badge}">${t.status_badge}</span>
+                      ${t.matched_rule ? `&bull; Rule: <strong>${escapeHtml(t.matched_rule)}</strong>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </details>
+          `;
+          container.appendChild(card);
+        });
+      }
+    }
+
+    async function toggleCaseItemStatus(caseId, currentStatus) {
+      const newStatus = currentStatus === 'fixed' ? 'open' : 'fixed';
+      try {
+        const res = await fetch(`/api/playground/session/cases/${caseId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) throw new Error('Không thể cập nhật trạng thái case');
+        showToast(newStatus === 'fixed' ? '🟢 Đã đánh dấu Case Lỗi là ĐÃ FIX!' : '🔴 Đã mở lại Case Lỗi!', 'success');
+        await refreshCaseHubData();
+        renderCaseHub();
+      } catch (err) {
+        showToast(`❌ Lỗi: ${err.message}`, 'error');
+      }
+    }
+
+    async function deleteCaseItem(caseType, caseId) {
+      if (!confirm(`Bạn có chắc chắn muốn xóa case ${caseType} này (${caseId}) không?`)) {
+        return;
+      }
+      try {
+        const res = await fetch(`/api/playground/session/cases/${caseType}/${caseId}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) throw new Error('Không thể xóa case');
+        showToast('🗑️ Đã xóa case thành công!', 'info');
+        await refreshCaseHubData();
+        renderCaseHub();
+      } catch (err) {
+        showToast(`❌ Lỗi: ${err.message}`, 'error');
+      }
+    }
+
+    function downloadCurrentCasesJson() {
+      const dataToDownload = currentHubTab === 'golden' ? (cachedCasesData.golden_examples || []) : (cachedCasesData.failed_cases || []);
+      const filename = currentHubTab === 'golden' ? 'golden_examples.json' : 'failed_cases.json';
+      const jsonStr = JSON.stringify(dataToDownload, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      a.remove();
+      showToast(`📥 Đã tải xuống file ${filename}!`, 'success');
+    }
+
+    // Floating Toast Notification
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+      toast.innerHTML = `<span style="font-weight:700;">${icon}</span> <span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.25s, transform 0.25s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 250);
+      }, 3500);
+    }
+  </script>
+
+  <!-- ==========================================================================
+       MODAL 1: Đánh Giá ĐẠT (Golden Example Modal) - Clean Light Theme
+       ========================================================================== -->
+  <div id="modal-rate-pass" class="modal-backdrop" style="display:none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3 style="color:#059669;"><span>✨</span> Đánh Giá Đạt (Lưu Golden Example)</h3>
+          <div class="modal-subtitle">Lưu phiên đối thoại mẫu chuẩn vào bộ benchmark tham chiếu cho AI</div>
+        </div>
+        <button class="modal-close-btn" onclick="closePassModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-banner gold">
+          <strong>🌟 Mẫu chuẩn chất lượng cao:</strong> Đoạn hội thoại này sẽ được lưu làm mẫu Benchmark để huấn luyện và kiểm thử hồi quy (regression test).
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">
+            <span>Phiên đối thoại</span>
+            <span class="hint" id="pass-session-meta" style="font-weight:600; color:var(--text-muted);">session_id · meta/ig · comment</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pass-case-title">
+            <span>Tiêu đề gợi nhớ case này <span class="req">*</span></span>
+            <span class="hint">Tóm tắt ngắn gọn câu hỏi của khách</span>
+          </label>
+          <input type="text" id="pass-case-title" class="form-input" placeholder="VD: Hỏi giá Nhẫn cỏ 4 lá và ship California..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pass-case-notes">
+            <span>Ghi chú đánh giá / Điểm bot xử lý tốt</span>
+            <span class="hint">Tùy chọn</span>
+          </label>
+          <textarea id="pass-case-notes" class="form-textarea" rows="2" placeholder="VD: Bot trả lời đúng giá $48.00 USD, nêu rõ chất liệu bạc S925, xưng hô tinh tế theo US Brand Voice..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span>Nhãn phân loại (Tags)</span>
+            <span class="hint">Click để chọn nhanh</span>
+          </label>
+          <div class="quick-chip-container" id="pass-tags-container">
+            <span class="quick-chip" onclick="togglePassChip(this, 'Giá USD & S925')">Giá USD &amp; S925</span>
+            <span class="quick-chip" onclick="togglePassChip(this, 'Đổi trả 7 ngày')">Đổi trả 7 ngày</span>
+            <span class="quick-chip" onclick="togglePassChip(this, 'Phí ship & Thời gian US')">Phí ship &amp; Thời gian US</span>
+            <span class="quick-chip" onclick="togglePassChip(this, 'Kích cỡ US Ring Size')">Kích cỡ US Ring Size</span>
+            <span class="quick-chip" onclick="togglePassChip(this, 'Bảo hành & Giả bạc đền 10x')">Bảo hành &amp; Giả bạc đền 10x</span>
+            <span class="quick-chip" onclick="togglePassChip(this, 'US Brand Voice')">US Brand Voice</span>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.4rem; padding:0.5rem 0.75rem; background:#f8fafc; border-radius:6px; border:1px solid var(--panel-border);">
+          <input type="checkbox" id="pass-auto-reset" checked style="accent-color:#059669; width:16px; height:16px; cursor:pointer;" />
+          <label for="pass-auto-reset" style="font-size:0.78rem; color:var(--text-main); font-weight:500; cursor:pointer;">
+            Tự động làm mới và mở phiên chat mới ngay sau khi lưu để test tiếp
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closePassModal()">Hủy bỏ</button>
+        <button class="btn-action-small success" id="btn-submit-pass" onclick="submitPassRating()" style="padding:0.45rem 1.1rem; font-weight:700;">
+          🌟 Lưu Golden Example
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 2: Đánh Giá FAIL (Fail Audit & Analysis Modal) - Redesigned & Uncluttered
+       ========================================================================== -->
+  <div id="modal-rate-fail" class="modal-backdrop" style="display:none;">
+    <div class="modal-dialog large">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3 style="color:#e11d48;"><span>⚠️</span> Báo Lỗi &amp; Phân Tích Khắc Phục (Fail Audit)</h3>
+          <div class="modal-subtitle">Ghi nhận nguyên nhân sai lệch và đề xuất rule để AI không bao giờ mắc lại</div>
+        </div>
+        <button class="modal-close-btn" onclick="closeFailModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Mục 1: Lượt đối thoại & Trích đoạn câu thoại -->
+        <div class="form-group">
+          <label class="form-label" for="fail-turn-select">
+            <span>1. Chọn lượt chat bị lỗi <span class="req">*</span></span>
+            <span class="hint">Chọn lượt thoại cụ thể hoặc toàn bộ phiên</span>
+          </label>
+          <select id="fail-turn-select" class="form-select" onchange="onFailTurnSelect()"></select>
+        </div>
+
+        <!-- Trích đoạn đối thoại xem trước -->
+        <div id="fail-turn-preview-wrap" style="background:#f8fafc; border:1px solid var(--panel-border); border-radius:8px; padding:0.75rem 0.9rem; font-size:0.78rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+            <span style="font-weight:700; color:var(--text-main);">🔍 Đoạn thoại của lượt được chọn:</span>
+            <button class="btn-action-small" onclick="copyTurnToAnalysis()" title="Chép câu hỏi & câu trả lời bot vào ô phân tích">
+              📋 Dán vào ô phân tích
+            </button>
+          </div>
+          <div id="fail-turn-preview-text" style="color:var(--text-muted); line-height:1.5;">
+            Đang tải dữ liệu lượt chat...
+          </div>
+        </div>
+
+        <!-- Mục 2: Phân loại nhóm lỗi với Interactive Cards -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>2. Phân loại nhóm lỗi <span class="req">*</span></span>
+            <span class="hint">Click chọn danh mục phù hợp</span>
+          </label>
+          <!-- Hidden select for form compatibility -->
+          <select id="fail-category-select" class="form-select" style="display:none;">
+            <option value="sai_chinh_sach">🛡️ Sai chính sách (Returns 7 ngày, Ship US, Bảo hành, Thanh toán)</option>
+            <option value="sai_san_pham">💍 Sai sản phẩm / Sai giá USD / Sai chất liệu / Bịa phụ kiện</option>
+            <option value="khong_dat_tieu_chuan">⚡ Không đạt tiêu chuẩn / Bịa thông tin (Hallucination) / Sai giọng điệu</option>
+            <option value="sai_handover">🚨 Xử lý sai Handover (Không chuyển người hoặc chuyển nhầm)</option>
+            <option value="khac">❓ Lỗi khác</option>
+          </select>
+
+          <!-- Interactive Category Grid -->
+          <div class="category-pills-grid">
+            <div class="cat-pill-card selected" data-cat="sai_chinh_sach" onclick="selectFailCategory('sai_chinh_sach')">
+              <div class="cat-pill-title">🛡️ Sai chính sách</div>
+              <div class="cat-pill-desc">Đổi trả 7 ngày, bảo hành S925, ship US, thanh toán</div>
+            </div>
+            <div class="cat-pill-card" data-cat="sai_san_pham" onclick="selectFailCategory('sai_san_pham')">
+              <div class="cat-pill-title">💍 Sai thông tin SP</div>
+              <div class="cat-pill-desc">Nhầm mẫu, sai giá USD, sai bạc S925, bịa phụ kiện</div>
+            </div>
+            <div class="cat-pill-card" data-cat="khong_dat_tieu_chuan" onclick="selectFailCategory('khong_dat_tieu_chuan')">
+              <div class="cat-pill-title">⚡ Bịa tin / Sai Tone</div>
+              <div class="cat-pill-desc">Hallucination, sai Brand voice, xưng hô chưa chuẩn</div>
+            </div>
+            <div class="cat-pill-card" data-cat="sai_handover" onclick="selectFailCategory('sai_handover')">
+              <div class="cat-pill-title">🚨 Sai Handover</div>
+              <div class="cat-pill-desc">Không chuyển nhân viên khi khách khiếu nại</div>
+            </div>
+            <div class="cat-pill-card" data-cat="khac" onclick="selectFailCategory('khac')">
+              <div class="cat-pill-title">❓ Lỗi khác</div>
+              <div class="cat-pill-desc">Các trường hợp nghiệp vụ đặc thù khác</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mục 3: Phân tích nguyên nhân gốc rễ -->
+        <div class="form-group">
+          <label class="form-label" for="fail-root-cause">
+            <span>3. Bot đã phản hồi sai điều gì? (Root cause) <span class="req">*</span></span>
+            <span class="hint">Nêu cụ thể điểm bot nói sai so với chính sách thật</span>
+          </label>
+          <textarea id="fail-root-cause" class="form-textarea" rows="2" placeholder="VD: Bot trả lời là hỗ trợ đổi trả trong 30 ngày, trong khi chính sách của HuyK Jewelry chỉ chấp nhận thông báo đổi trả trong 7 ngày đầu đối với hàng lỗi do NSX..."></textarea>
+        </div>
+
+        <!-- Mục 4: Đề xuất giải pháp / Rule cần cập nhật -->
+        <div class="form-group">
+          <label class="form-label" for="fail-suggested-fix">
+            <span>4. Cần bổ sung rule gì để KHÔNG BAO GIỜ bị mắc lại? <span class="req">*</span></span>
+            <span class="hint">Quy tắc / ràng buộc bắt buộc cho AI</span>
+          </label>
+          <textarea id="fail-suggested-fix" class="form-textarea" rows="2" placeholder="VD: Bổ sung rule nghiêm ngặt vào knowledge/policies/returns.md: Tuyệt đối không được nhắc đến 30 ngày; mọi yêu cầu đổi trả phải trong 7 ngày và liên hệ order@huykjeweler.com..."></textarea>
+        </div>
+
+        <!-- File Knowledge mục tiêu -->
+        <div class="form-group">
+          <label class="form-label" for="fail-target-file">
+            <span>Tài liệu / File Knowledge cần cập nhật</span>
+            <span class="hint">Click chọn nhanh file</span>
+          </label>
+          <select id="fail-target-file" class="form-select" style="display:none;">
+            <option value="knowledge/policies/returns.md">knowledge/policies/returns.md</option>
+            <option value="knowledge/policies/warranty.md">knowledge/policies/warranty.md</option>
+            <option value="knowledge/policies/shipping.md">knowledge/policies/shipping.md</option>
+            <option value="knowledge/policies/payment.md">knowledge/policies/payment.md</option>
+            <option value="knowledge/catalogue/products.json">knowledge/catalogue/products.json</option>
+            <option value="knowledge/meta/edge_cases.md">knowledge/meta/edge_cases.md</option>
+            <option value="knowledge/tiktok/edge_cases.md">knowledge/tiktok/edge_cases.md</option>
+            <option value="knowledge/shared/brand_voice.md">knowledge/shared/brand_voice.md</option>
+            <option value="knowledge/shared/escalation.md">knowledge/shared/escalation.md</option>
+          </select>
+
+          <!-- Quick File Chips -->
+          <div class="quick-chip-container">
+            <span class="quick-chip target-file-chip selected" data-file="knowledge/policies/returns.md" onclick="selectTargetFileChip('knowledge/policies/returns.md')">📄 returns.md (Đổi trả 7 ngày)</span>
+            <span class="quick-chip target-file-chip" data-file="knowledge/policies/warranty.md" onclick="selectTargetFileChip('knowledge/policies/warranty.md')">📄 warranty.md (Bảo hành &amp; S925)</span>
+            <span class="quick-chip target-file-chip" data-file="knowledge/policies/shipping.md" onclick="selectTargetFileChip('knowledge/policies/shipping.md')">📄 shipping.md (Vận chuyển US)</span>
+            <span class="quick-chip target-file-chip" data-file="knowledge/policies/payment.md" onclick="selectTargetFileChip('knowledge/policies/payment.md')">📄 payment.md (Thanh toán US)</span>
+            <span class="quick-chip target-file-chip" data-file="knowledge/catalogue/products.json" onclick="selectTargetFileChip('knowledge/catalogue/products.json')">💎 products.json (Sản phẩm &amp; Giá USD)</span>
+            <span class="quick-chip target-file-chip" data-file="knowledge/meta/edge_cases.md" onclick="selectTargetFileChip('knowledge/meta/edge_cases.md')">⚡ meta/edge_cases.md</span>
+            <span class="quick-chip target-file-chip" data-file="knowledge/tiktok/edge_cases.md" onclick="selectTargetFileChip('knowledge/tiktok/edge_cases.md')">⚡ tiktok/edge_cases.md</span>
+            <span class="quick-chip target-file-chip" data-file="knowledge/shared/brand_voice.md" onclick="selectTargetFileChip('knowledge/shared/brand_voice.md')">🤍 brand_voice.md</span>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.4rem; padding:0.5rem 0.75rem; background:#f8fafc; border-radius:6px; border:1px solid var(--panel-border);">
+          <input type="checkbox" id="fail-auto-reset" checked style="accent-color:#e11d48; width:16px; height:16px; cursor:pointer;" />
+          <label for="fail-auto-reset" style="font-size:0.78rem; color:var(--text-main); font-weight:500; cursor:pointer;">
+            Tự động làm mới và mở phiên chat mới ngay sau khi lưu để test tiếp
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closeFailModal()">Hủy bỏ</button>
+        <button class="btn-action-small danger" id="btn-submit-fail" onclick="submitFailRating()" style="padding:0.45rem 1.1rem; font-weight:700;">
+          💾 Lưu Case Lỗi &amp; Khắc Phục
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 3: Quản Lý Case (Case Hub Modal) - Clean Light Theme
+       ========================================================================== -->
+  <div id="modal-case-hub" class="modal-backdrop" style="display:none;">
+    <div class="modal-dialog large" style="max-width:920px; height:85vh;">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3><span>📋</span> Thư Viện Case Test (Golden Examples &amp; Audit Lỗi)</h3>
+          <div class="modal-subtitle">Bộ lưu trữ các trường hợp đối thoại đạt chuẩn và các case lỗi đã được phân tích</div>
+        </div>
+        <button class="modal-close-btn" onclick="closeCaseHubModal()">&times;</button>
+      </div>
+
+      <!-- Tabs Header -->
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" id="tab-btn-golden" onclick="switchCaseHubTab('golden')">
+          <span>🌟</span> Golden Examples (<span id="hub-gold-count">0</span>)
+        </button>
+        <button class="modal-tab-btn" id="tab-btn-failed" onclick="switchCaseHubTab('failed')">
+          <span>⚠️</span> Case Lỗi Cần Fix (<span id="hub-fail-count">0</span>)
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding-top:0.85rem;">
+        <!-- Filter & Export Controls -->
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+          <input 
+            type="text" 
+            id="hub-search-input" 
+            class="form-input" 
+            style="flex:1; min-width:220px;" 
+            placeholder="🔍 Tìm kiếm theo câu hỏi khách, sản phẩm, nguyên nhân lỗi..." 
+            oninput="renderCaseHub()" />
+          
+          <div id="hub-status-filter-wrap" style="display:none; align-items:center; gap:0.4rem;">
+            <span style="font-size:0.74rem; color:var(--text-dim); font-weight:500;">Trạng thái:</span>
+            <select id="hub-status-filter" class="form-select" style="padding:0.4rem 0.6rem; font-size:0.74rem;" onchange="renderCaseHub()">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="open">🔴 Chờ fix (Open)</option>
+              <option value="fixed">🟢 Đã fix (Fixed)</option>
+            </select>
+          </div>
+
+          <button class="btn-action-small" onclick="downloadCurrentCasesJson()">
+            📥 Tải file JSON
+          </button>
+        </div>
+
+        <!-- Scrollable list of cases -->
+        <div class="cases-list-scroll" id="hub-cases-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closeCaseHubModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+</body>
+</html>

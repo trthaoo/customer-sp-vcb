@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Service Auto-Reply - Ops Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+      <span class="logo-title">Auto-Reply Ops Console</span>
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span>STREAM LIVE</span>
+      </div>
+    </div>
+    <nav class="tab-bar">
+      <button class="tab-btn active" id="tab-btn-meta" onclick="switchTab('meta')">
+        Meta (IG + FB)
+      </button>
+      <button class="tab-btn" id="tab-btn-tiktok" onclick="switchTab('tiktok')">
+        TikTok
+      </button>
+      <button class="tab-btn" id="tab-btn-handover" onclick="switchTab('handover')">
+        Handover
+        <span class="badge" id="handover-badge" style="display:none;">0</span>
+      </button>
+      <a href="/playground" class="tab-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; background:rgba(234, 179, 8, 0.15); border-color:rgba(234, 179, 8, 0.4); color:#fde047; font-weight:600;">
+        🎮 Brand Playground
+      </a>
+    </nav>
+  </header>
+
+  <main class="content-area">
+    <!-- Meta View -->
+    <div id="view-meta" class="tab-view">
+      <div class="sub-header">
+        <h2>Meta Funnel (Instagram & Facebook)</h2>
+        <div class="platform-filters">
+          <button class="filter-btn active" onclick="setMetaFilter('all')">Tất cả</button>
+          <button class="filter-btn" onclick="setMetaFilter('ig')">Instagram (IG)</button>
+          <button class="filter-btn" onclick="setMetaFilter('fb')">Facebook (FB)</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-title">Inbound Count</span>
+          <span class="metric-value" id="meta-inbound">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Auto-Replied</span>
+          <span class="metric-value" id="meta-replied">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Handover Open</span>
+          <span class="metric-value" id="meta-handover-open">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Resolved</span>
+          <span class="metric-value" id="meta-resolved">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Fallback Count</span>
+          <span class="metric-value" id="meta-fallback">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Last Event At</span>
+          <span class="metric-value" id="meta-last-event" style="font-size: 1.1rem; line-height: 2.2rem;">chưa có data</span>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Top Matched Rules</h3>
+        <div id="meta-top-rules-container">
+          <div class="empty-state">Chưa có event live. Case test và dry-run không hiện ở đây.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TikTok View -->
+    <div id="view-tiktok" class="tab-view" style="display: none;">
+      <div class="sub-header">
+        <h2>TikTok Funnel</h2>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-title">Inbound Count</span>
+          <span class="metric-value" id="tiktok-inbound">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Auto-Replied</span>
+          <span class="metric-value" id="tiktok-replied">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Handover Open</span>
+          <span class="metric-value" id="tiktok-handover-open">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Resolved</span>
+          <span class="metric-value" id="tiktok-resolved">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Fallback Count</span>
+          <span class="metric-value" id="tiktok-fallback">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Last Event At</span>
+          <span class="metric-value" id="tiktok-last-event" style="font-size: 1.1rem; line-height: 2.2rem;">chưa có data</span>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Top Matched Rules</h3>
+        <div id="tiktok-top-rules-container">
+          <div class="empty-state">Chưa có event live. Case test và dry-run không hiện ở đây.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Handover View -->
+    <div id="view-handover" class="tab-view" style="display: none;">
+      <div class="sub-header">
+        <h2>Cross-Channel Handover Queue</h2>
+        <div class="platform-filters">
+          <button class="filter-btn active" onclick="setHandoverFilter('all')">Tất cả</button>
+          <button class="filter-btn" onclick="setHandoverFilter('open')">Open</button>
+          <button class="filter-btn" onclick="setHandoverFilter('claimed')">Claimed</button>
+          <button class="filter-btn" onclick="setHandoverFilter('waiting_on_us')">Waiting On Us</button>
+          <button class="filter-btn" onclick="setHandoverFilter('resolved')">Resolved</button>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div id="handover-table-container">
+          <div class="empty-state">Chưa có event live. Case test và dry-run không hiện ở đây.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/rule.schema.json",
+  "title": "ReplyRule",
+  "description": "Schema for an auto-reply rule in the customer service system",
+  "type": "object",
+  "required": ["id", "channel", "surface", "when", "use_knowledge", "if_missing", "reply_guide"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique rule identifier"
+    },
+    "channel": {
+      "type": "string",
+      "enum": ["meta", "tiktok", "shared"],
+      "description": "Target communication channel"
+    },
+    "surface": {
+      "type": "string",
+      "enum": ["comment", "dm", "any"],
+      "description": "Surface where rule applies"
+    },
+    "when": {
+      "type": "object",
+      "required": ["intent"],
+      "properties": {
+        "intent": {
+          "type": "string",
+          "description": "Classified intent name matching intents.md"
+        },
+        "contains_any": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of keywords or substrings to match"
+        },
+        "product_required": {
+          "type": "boolean",
+          "description": "Whether a catalogue product must be matched for this rule to trigger"
+        }
+      },
+      "additionalProperties": false
+    },
+    "use_knowledge": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Allowed knowledge fields cited by this rule (e.g. catalogue.price, policies.shipping)"
+    },
+    "if_missing": {
+      "type": "string",
+      "enum": ["escalate", "fallback", "ignore"],
+      "description": "Action to take if any required knowledge field is null or empty"
+    },
+    "reply_guide": {
+      "type": "string",
+      "description": "Instructions on how to phrase the reply, without injecting unverified facts"
+    }
+  },
+  "additionalProperties": false
+}

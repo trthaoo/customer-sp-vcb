@@ -1,0 +1,6 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProductCatalogue",
+  "description": "Template catalogue for products. The live products array starts empty and will be filled by the operator.",
+  "products": []
+}

@@ -1,0 +1,29 @@
+# Environment variables & secrets (CRITICAL: DO NOT COMMIT)
+.env
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Pytest & IDE
+.pytest_cache/
+.vscode/
+.idea/
+
+# Local data, sqlite databases, caches & large media
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.log
+*.mp4
+*.webm
+
+# Scratch scripts & temporary test artifacts
+scratch/
+.system_generated/
+

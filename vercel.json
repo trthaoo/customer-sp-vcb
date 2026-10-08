@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "public": true,
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/playground",
+      "dest": "/src/web/static/playground.html"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/src/web/static/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/src/web/static/index.html"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/product.schema.json",
+  "title": "Product",
+  "description": "Schema for a product in the customer service catalogue",
+  "type": "object",
+  "required": ["id", "name"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique product identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Official product name"
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Alternative names or keywords used by customers to refer to this product"
+    },
+    "price": {
+      "type": ["number", "null"],
+      "description": "Price of the product. Null if unknown or not set."
+    },
+    "currency": {
+      "type": ["string", "null"],
+      "description": "Currency code (e.g. VND, USD). Null if price is null."
+    },
+    "material": {
+      "type": ["string", "null"],
+      "description": "Material of the product (e.g. Bạc S925, Vàng 18k). Null if unknown."
+    },
+    "variants": {
+      "type": ["array", "null"],
+      "items": { "type": ["string", "object"] },
+      "description": "Available variants (sizes, colors). Null if none."
+    },
+    "in_stock": {
+      "type": ["boolean", "null"],
+      "description": "Stock status. True if in stock, False if pre-order/out of stock, null if unknown."
+    },
+    "ship_note": {
+      "type": ["string", "null"],
+      "description": "Specific shipping instructions or delivery timeline for this item."
+    },
+    "size_guide": {
+      "type": ["string", "null"],
+      "description": "Size measurement instructions or size chart link."
+    },
+    "url": {
+      "type": ["string", "null"],
+      "description": "Official product URL."
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "description": "Internal staff notes."
+    }
+  },
+  "additionalProperties": false
+}
