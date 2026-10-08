@@ -134,25 +134,6 @@
     <!-- Left: Multi-turn Chat Thread -->
     <div class="thread-container">
       <div class="messages-scroll" id="chat-messages">
-        <!-- Welcome Initial Message -->
-        <div class="message-row bot" id="welcome-message">
-          <div class="message-sender-meta">
-            <span>✨ Studio Host (Vien Chi Bao US)</span>
-          </div>
-          <div class="message-bubble">
-            hey! welcome to the Vien Chi Bao studio ✨
-          </div>
-          <div class="message-bubble">
-            feel free to ask about our S925 sterling silver pieces, US sizing, or free US shipping
-          </div>
-          <div class="message-bubble">
-            what piece can I show you today? 🤍
-          </div>
-          <div class="bot-turn-footer">
-            <span class="status-badge-inline badge-handled">Active</span>
-            <span style="color:var(--text-dim);">RAG System Ready · US Market Concierge</span>
-          </div>
-        </div>
       </div>
 
       <!-- Chat Input Area -->
@@ -1005,21 +986,7 @@
       clearAttachedMedia();
 
       const container = document.getElementById('chat-messages');
-      container.innerHTML = `
-        <div class="message-row bot" id="welcome-message">
-          <div class="message-sender-meta">
-            <span>✨ Vien Chi Bao Studio Concierge</span>
-          </div>
-          <div class="message-bubble">
-            Phiên mới đã khởi tạo (${state.sessionId}).<br>
-            Bạn có thể bắt đầu chat với tư cách khách hàng thị trường Mỹ để kiểm tra phản hồi của bot!
-          </div>
-          <div class="bot-turn-footer">
-            <span class="status-badge-inline badge-handled">Sẵn sàng</span>
-            <span style="color:#64748b;">US Market Studio Playground</span>
-          </div>
-        </div>
-      `;
+      container.innerHTML = '';
 
       document.getElementById('diag-turn-label').textContent = 'Chưa chọn lượt chat';
       document.getElementById('side-panel-content').innerHTML = `
