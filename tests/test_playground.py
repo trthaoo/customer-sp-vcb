@@ -271,6 +271,20 @@ def test_playground_media_upload_endpoint(client, tmp_path):
     assert len(data["frames"]) == 1
     assert data["frames"][0]["base64_data"] != ""
 
+def test_upload_filename_cannot_escape_upload_dir(client):
+    from src.pipeline.media import get_media_processor
+    cache_dir = get_media_processor().cache_dir
+    escaped = cache_dir.parent / "escape_probe.txt"
+    files = [("files", ("../../escape_probe.txt", b"x", "text/plain"))]
+    data = client.post("/api/playground/upload_media", files=files).json()
+    assert not escaped.exists()
+    assert (cache_dir / data["media_cache_id"] / "escape_probe.txt").exists()
+
+def test_webhook_rejected_when_secret_unset(client, monkeypatch):
+    monkeypatch.setattr("src.adapters.zernio.ZERNIO_WEBHOOK_SECRET", "")
+    response = client.post("/webhooks/zernio", json={"event": "comment.created"})
+    assert response.status_code == 401
+
 # 11. Deictic comment resolution using caption + frames
 def test_deictic_resolution_with_caption(client, monkeypatch):
     class MockVisionAdapter(ModelAdapter):

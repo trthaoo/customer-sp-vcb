@@ -214,7 +214,7 @@ Truy cập Dashboard tại trình duyệt: **`http://localhost:8000/`**
 
 Để nhận sự kiện comment và inbox từ Zernio:
 - **Webhook Endpoint**: `POST https://your-domain.com/webhooks/zernio`
-- **Xác thực chữ ký**: Tự động xác thực `HMAC-SHA256` qua header `X-Zernio-Signature` (hoặc `X-Webhook-Signature`) khi cấu hình `ZERNIO_WEBHOOK_SECRET`.
+- **Xác thực chữ ký**: Xác thực `HMAC-SHA256` qua header `X-Zernio-Signature` (hoặc `X-Webhook-Signature`). Bắt buộc phải đặt `ZERNIO_WEBHOOK_SECRET`; nếu để trống, mọi request tới webhook đều bị từ chối.
 - **Idempotency**: Tự động lọc trùng lặp theo `event.id` và `message.id`.
 
 ---

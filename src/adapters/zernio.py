@@ -31,10 +31,10 @@ class ZernioClient:
         """
         Verifies HMAC-SHA256 signature using ZERNIO_WEBHOOK_SECRET.
         Headers: X-Zernio-Signature or X-Webhook-Signature.
-        If secret is not set, verification passes.
+        If the secret is not set, every request is rejected.
         """
         if not self.webhook_secret:
-            return True
+            return False
         if not signature_header:
             return False
 

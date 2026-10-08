@@ -292,7 +292,8 @@ async def playground_upload_media(
 
     saved_paths: List[Path] = []
     for f in files:
-        file_path = upload_temp_dir / (f.filename or "upload.raw")
+        # Keep only the base name: the client controls filename and could send "../../x".
+        file_path = upload_temp_dir / (Path(f.filename or "").name or "upload.raw")
         with open(file_path, "wb") as out:
             shutil.copyfileobj(f.file, out)
         saved_paths.append(file_path)
