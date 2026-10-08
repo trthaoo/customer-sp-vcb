@@ -380,7 +380,7 @@ class ReplyComposer:
             "3. SLANG SAFE VS SKIP: Safe: 'obsessed', 'so good on you', 'it's giving', 'love this for you'. Mirroring only if they use it first: 'girl', 'lowkey', 'ngl', 'fr'. BANNED: 'no cap', 'bussin', 'rizz', 'ate and left no crumbs', 'periodt', and no 'hey bestie' for refunds/shipping. Bridal / >$500 = zero slang.\n"
             "4. EMOJI: Max 1 emoji per bubble, usually at the end of the last bubble (✨ 🤍 💛 💍). No stacks (😍😍😍). No opening emoji. Zero to minimal on complaints/refunds.\n"
             "5. PUNCTUATION IS TONE: No period on short casual lines = friendly. Period on short line = cold/annoyed. Mostly natural lowercase/casing.\n"
-            "6. COMMENTS VS DMS: Comments are 1-2 lines on stage, move to DM for order details. DMs are 2-3 bubbles where orders close. Never pull off-platform to WhatsApp/email.\n"
+            "6. COMMENTS VS DMS (QUY TẮC 1 - PUBLIC COMMENT REPLY): Comments MUST be under 15 words (< 15 words). BẢO MẬT GIÁ CẢ: Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền, không dùng ký hiệu '$'. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền. DMs are 2-3 bubbles where orders close. Never pull off-platform to WhatsApp/email.\n"
             "7. JEWELRY SCRIPTS: Name the exact piece. Never say 'the item'. In compliments, never upsell.\n"
             "8. COMPLAINTS: Person first, not corporate policy. Never say 'as per our policy' or 'a lot of customers love this'. Direct empathy + quick resolution.\n"
             "9. ONE QUESTION ONLY: Ask at most ONE question per message. Never bombard with multiple questions. If they say 'I will think about it', one light bubble and silence."
@@ -393,10 +393,19 @@ class ReplyComposer:
         chunks: List[Dict[str, Any]],
         attached_image_url: Optional[str] = None
     ) -> Tuple[str, bool, Optional[str], Optional[str]]:
+        comment_instruction = ""
+        if inbound.surface == "comment":
+            comment_instruction = (
+                "QUY TẮC 1: PHẢN HỒI BÌNH LUẬN CÔNG KHAI (PUBLIC COMMENT REPLY):\n"
+                "- Bắt buộc dưới 15 từ (< 15 words).\n"
+                "- BẢO MẬT GIÁ CẢ: Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền, không dùng ký hiệu '$'. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.\n"
+            )
+
         system_prompt = (
             f"You are customer support staff replying to a customer for Vien Chi Bao jewelry on {inbound.platform} ({inbound.surface}).\n"
             f"Persona: The Mindful Studio Host, speaking with warmth and respect from Master Jeweler Huy K's workshop.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
+            f"{comment_instruction}"
             f"Strict Edge Case instructions:\n"
             f"- DO: {edge_case.do}\n"
             f"- DO NOT: {edge_case.do_not}\n"
@@ -462,10 +471,20 @@ class ReplyComposer:
                 f"- Or: \"here she is! ✨\\n\\nlet me know if you want to see the clasp or chain detail 🤍\"\n"
             )
 
+        comment_instruction = ""
+        if inbound.surface == "comment":
+            comment_instruction = (
+                "CRITICAL QUY TẮC 1: PHẢN HỒI BÌNH LUẬN CÔNG KHAI (PUBLIC COMMENT REPLY):\n"
+                "- Độ dài: Bắt buộc dưới 15 từ (< 15 words).\n"
+                "- BẢO MẬT GIÁ CẢ: Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền, không dùng ký hiệu '$'. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.\n"
+                "- PRICE CONFIDENTIALITY: Strictly NEVER reveal or quote any price in public comments, no dollar amounts, no '$' symbol. Always direct the user to check DM/inbox for pricing and exclusive details.\n\n"
+            )
+
         system_prompt = (
             f"You are page staff replying to customers for Vien Chi Bao jewelry on {inbound.platform} ({inbound.surface}).\n"
             f"Persona: The Mindful Studio Host, speaking warmly from Master Jeweler Huy K's atelier.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
+            f"{comment_instruction}"
             f"{caption_info}{media_info}{photo_info}\n\n"
             f"GROUNDING KNOWLEDGE CHUNKS (ONLY ALLOWED FACTS):\n"
             f"{chunks_text}\n\n"

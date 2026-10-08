@@ -3,6 +3,10 @@
 ## Purpose
 Defines automated response rules specifically for the Meta funnel (Instagram and Facebook). These rules are isolated from the TikTok funnel.
 
+## QUY TẮC 1: PHẢN HỒI BÌNH LUẬN CÔNG KHAI (PUBLIC COMMENT REPLY)
+- **Độ dài**: Bắt buộc dưới 15 từ (< 15 words).
+- **BẢO MẬT GIÁ CẢ**: Tuyệt đối **KHÔNG BÁO GIÁ CÔNG KHAI**, không viết số tiền, không dùng ký hiệu `$`. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.
+
 ## Rules Specification
 
 ```yaml
@@ -26,7 +30,7 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
     product_required: true
   use_knowledge: ["catalogue.price", "catalogue.currency"]
   if_missing: escalate
-  reply_guide: "Keep to 1–2 short lines: state the verified price ($[price]) and invite them to DM or tap our bio link for sizing and close-ups ✨"
+  reply_guide: "QUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Luôn hướng dẫn khách check DM/inbox nhận giá và ưu đãi độc quyền ✨ (Ví dụ: 'mình gửi giá và chi tiết qua inbox cho bạn rồi nha ✨' hoặc 'check your DM for exclusive pricing and details ✨')"
 
 - id: meta_ask_material_any
   channel: meta
@@ -136,7 +140,7 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
     product_required: true
   use_knowledge: ["catalogue.price", "catalogue.currency", "catalogue.variants", "policies.shipping"]
   if_missing: escalate
-  reply_guide: "Keep to 1–2 short lines: $[price] with free US shipping—tap our bio link or send us a quick DM with your size and we'll send the direct link ✨"
+  reply_guide: "QUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Hướng dẫn khách check DM hoặc bio link để nhận báo giá và hướng dẫn đặt hàng ✨ (Ví dụ: 'check your DM or bio link for direct order details ✨')"
 
 - id: meta_ask_order_general_dm
   channel: meta

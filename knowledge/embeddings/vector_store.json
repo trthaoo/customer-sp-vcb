@@ -1236,7 +1236,7 @@
       "category": "meta_rule",
       "source_file": "meta/rules.md",
       "title": "Meta Rule: meta_ask_price_comment (ask_price)",
-      "content": "Channel: META\nRule ID: meta_ask_price_comment\nSurface: comment\nIntent: ask_price\nReply Guidance:\nKeep to 1–2 short lines: state the verified price ($[price]) and invite them to DM or tap our bio link for sizing and close-ups ✨\n",
+      "content": "Channel: META\nRule ID: meta_ask_price_comment\nSurface: comment\nIntent: ask_price\nReply Guidance:\nQUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Luôn hướng dẫn khách check DM/inbox nhận giá và ưu đãi độc quyền ✨\n",
       "metadata": {
         "channel": "meta",
         "surface": "comment",
@@ -1534,7 +1534,7 @@
       "category": "tiktok_rule",
       "source_file": "tiktok/rules.md",
       "title": "Tiktok Rule: tiktok_ask_price_comment (ask_price)",
-      "content": "Channel: TIKTOK\nRule ID: tiktok_ask_price_comment\nSurface: comment\nIntent: ask_price\nReply Guidance:\nKeep to 1–2 short lines: $[price]! Tap our bio link or orange showcase cart, or drop a DM for your size ✨\n",
+      "content": "Channel: TIKTOK\nRule ID: tiktok_ask_price_comment\nSurface: comment\nIntent: ask_price\nReply Guidance:\nQUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Luôn điều hướng khách check DM/inbox nhận giá và ưu đãi độc quyền ✨\n",
       "metadata": {
         "channel": "tiktok",
         "surface": "comment",

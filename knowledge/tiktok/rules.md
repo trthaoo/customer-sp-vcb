@@ -3,6 +3,10 @@
 ## Purpose
 Defines automated response rules specifically for the TikTok funnel. These rules are isolated from the Meta funnel.
 
+## QUY TẮC 1: PHẢN HỒI BÌNH LUẬN CÔNG KHAI (PUBLIC COMMENT REPLY)
+- **Độ dài**: Bắt buộc dưới 15 từ (< 15 words).
+- **BẢO MẬT GIÁ CẢ**: Tuyệt đối **KHÔNG BÁO GIÁ CÔNG KHAI**, không viết số tiền, không dùng ký hiệu `$`. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.
+
 ## Rules Specification
 
 ```yaml
@@ -15,7 +19,7 @@ Defines automated response rules specifically for the TikTok funnel. These rules
     product_required: true
   use_knowledge: ["catalogue.price", "catalogue.currency"]
   if_missing: escalate
-  reply_guide: "Keep to 1–2 short lines: $[price]! Tap our bio link or orange showcase cart, or drop a DM for your size ✨"
+  reply_guide: "QUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Luôn điều hướng khách check DM/inbox nhận giá và ưu đãi độc quyền ✨ (Ví dụ: 'mình nhắn giá qua inbox cho bạn rồi nha ✨' hoặc 'check your DM for exclusive pricing and details ✨')"
 
 - id: tiktok_ask_price_dm
   channel: tiktok
@@ -136,7 +140,7 @@ Defines automated response rules specifically for the TikTok funnel. These rules
     product_required: true
   use_knowledge: ["catalogue.price", "catalogue.currency", "catalogue.variants", "policies.shipping"]
   if_missing: escalate
-  reply_guide: "Keep to 1–2 short lines: $[price] with free US shipping—tap our showcase link in bio or DM us with your size for direct checkout ✨"
+  reply_guide: "QUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Điều hướng khách vào DM hoặc tap bio showcase để nhận báo giá và hướng dẫn đặt hàng ✨ (Ví dụ: 'check your DM or bio showcase for direct order link ✨')"
 
 - id: tiktok_ask_order_general_dm
   channel: tiktok

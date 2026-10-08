@@ -95,16 +95,19 @@ In modern American messaging, punctuation conveys subtle emotional weight:
 ---
 
 ### Rule 6: Public Comment vs. Private DM
+- **QUY TẮC 1: PHẢN HỒI BÌNH LUẬN CÔNG KHAI (PUBLIC COMMENT REPLY):**
+  - **Độ dài**: Bắt buộc dưới 15 từ (< 15 words).
+  - **BẢO MẬT GIÁ CẢ**: Tuyệt đối **KHÔNG BÁO GIÁ CÔNG KHAI**, không viết số tiền, không dùng ký hiệu `$`. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.
 - **The Comment is a Stage:**
   - Reply quickly (within minutes on Live/TikTok, within an hour on IG).
-  - Keep it to 1–2 short lines.
-  - Answer the immediate FAQ (length, waterproof, silver vs plated, US shipping time).
-  - Move to DM if you need private info (order number, address, custom size, or photo):
-    > *"yes, shower and pool are fine"*
-    > *"if it ever dulls just DM us, we replace it ✨"*
+  - Strictly under 15 words (< 15 words).
+  - Never reveal price or money publicly on comments.
+  - Answer general FAQ (waterproof, solid S925 silver vs plated) or gently move to DM for pricing/details:
+    > *"check your DM for exclusive pricing and details ✨"*
+    > *"mình gửi giá và chi tiết qua inbox cho bạn rồi nha ✨"*
 - **The DM is Where the Order Closes:**
   - Maintain the natural 2–3 bubble rhythm.
-  - Guide directly to the native product tag, bio link, or secure PayPal checkout.
+  - Share verified price, ring sizing assistance, and secure PayPal checkout.
   - **NEVER drag them to WhatsApp or personal email to close.** Both Meta and TikTok algorithms penalize external link off-ramping.
 - **Story Replies:** Even shorter than comments. 1 bubble is often perfect: *"the 16" — want the link?"*
 
