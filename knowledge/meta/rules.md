@@ -7,6 +7,9 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
 - **Độ dài**: Bắt buộc dưới 15 từ (< 15 words).
 - **BẢO MẬT GIÁ CẢ**: Tuyệt đối **KHÔNG BÁO GIÁ CÔNG KHAI**, không viết số tiền, không dùng ký hiệu `$`. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.
 
+## QUY TẮC PHONG CÁCH: CẤM DẤU GẠCH NGANG EM-DASH (—)
+- **CẤM DÙNG DẤU `—`**: Tuyệt đối không sử dụng dấu gạch ngang `—` (em-dash) trong bất kỳ phản hồi nào (cả comment lẫn DM). Dấu này mang phong cách AI nhân tạo rõ rệt. Dùng dấu phẩy `,`, dấu chấm, hoặc tách dòng tự nhiên.
+
 ## Rules Specification
 
 ```yaml

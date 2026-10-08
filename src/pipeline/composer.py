@@ -379,7 +379,7 @@ class ReplyComposer:
             "2. MATCH THEIR ENERGY: If excited ('omg so cute'), match excitement. If short/spec-oriented ('real gold or plated'), be direct and crisp. If formal, be warm and clean. NEVER open with 'hey bestie' for spec questions.\n"
             "3. SLANG SAFE VS SKIP: Safe: 'obsessed', 'so good on you', 'it's giving', 'love this for you'. Mirroring only if they use it first: 'girl', 'lowkey', 'ngl', 'fr'. BANNED: 'no cap', 'bussin', 'rizz', 'ate and left no crumbs', 'periodt', and no 'hey bestie' for refunds/shipping. Bridal / >$500 = zero slang.\n"
             "4. EMOJI: Max 1 emoji per bubble, usually at the end of the last bubble (✨ 🤍 💛 💍). No stacks (😍😍😍). No opening emoji. Zero to minimal on complaints/refunds.\n"
-            "5. PUNCTUATION IS TONE: No period on short casual lines = friendly. Period on short line = cold/annoyed. Mostly natural lowercase/casing.\n"
+            "5. PUNCTUATION IS TONE & BANNED EM-DASH: No period on short casual lines = friendly. Period on short line = cold/annoyed. BANNED: NEVER use the em-dash '—'. It looks robotic, unnatural, and screams AI. Use commas, natural line breaks, or separate bubbles instead.\n"
             "6. COMMENTS VS DMS (QUY TẮC 1 - PUBLIC COMMENT REPLY): Comments MUST be under 15 words (< 15 words). BẢO MẬT GIÁ CẢ: Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền, không dùng ký hiệu '$'. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền. DMs are 2-3 bubbles where orders close. Never pull off-platform to WhatsApp/email.\n"
             "7. JEWELRY SCRIPTS: Name the exact piece. Never say 'the item'. In compliments, never upsell.\n"
             "8. COMPLAINTS: Person first, not corporate policy. Never say 'as per our policy' or 'a lot of customers love this'. Direct empathy + quick resolution.\n"
@@ -419,6 +419,7 @@ class ReplyComposer:
             f"3. Never admit being an AI or bot.\n"
             f"4. Keep comments 1–2 short lines. Keep DMs concise.\n"
             f"5. Vary wording naturally. Do not use canned scripts.\n"
+            f"6. BANNED PUNCTUATION: Strictly NEVER use the em-dash '—'. Do not connect clauses with dashes. It looks robotic and screams AI. Use commas, periods, or short separate bubbles.\n"
             f"At the very end of your response, output on a new line: [REASON: EdgeCase {edge_case.id}]"
         )
 
@@ -499,7 +500,7 @@ class ReplyComposer:
             f"3. Match customer energy. Name the exact piece. Never say 'the item'.\n"
             f"4. Slang safe vs skip: Safe: 'obsessed', 'love this for you', 'the cutest'. NEVER use 'no cap', 'bussin', 'rizz', 'periodt', and NEVER open with 'hey bestie' for specs.\n"
             f"5. Emoji: Max ONE emoji at the end of the last bubble (✨, 🤍, 💍). Never stack emojis.\n"
-            f"6. Punctuation: Friendly natural casing. No cold period at the end of short lines.\n"
+            f"6. Punctuation: Friendly natural casing. No cold period at the end of short lines. BANNED PUNCTUATION: Strictly NEVER use the em-dash '—'. It looks artificial and screams AI. Use commas, periods, or new bubbles instead.\n"
             f"7. Never say you are an AI, bot, or virtual assistant. Never invent unconfirmed discounts.\n"
             f"8. Comments: 1–2 short lines. DMs: 1–3 short bubbles.\n"
             f"At the very end of your response, output on a new line: [REASON: product={product.id if product else 'None'}, frame={frame_used or 'N/A'}, chunks=catalogue/{rule.id}]"
@@ -536,6 +537,8 @@ class ReplyComposer:
     def _enforce_limits(self, text: str, platform: str, surface: str) -> str:
         if not text or text == "chưa gắn API model":
             return text
+        if "—" in text:
+            text = re.sub(r'\s*—\s*', ', ', text)
         limits = PLATFORM_LIMITS.get(platform, PLATFORM_LIMITS.get("ig", {}))
         if surface == "comment":
             max_chars = limits.get("comment_max_chars", 150)
