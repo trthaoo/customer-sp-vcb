@@ -342,6 +342,7 @@ class ReplyComposer:
 
         # Check Model Key
         # No model key = show "chưa gắn API model" and do not invent a reply.
+        custom_reason = None
         if not self.model_adapter.is_available():
             reply = "chưa gắn API model"
             model_called = False
@@ -354,13 +355,22 @@ class ReplyComposer:
                 short_reason = custom_reason
             reply = self._enforce_limits(reply, inbound.platform, inbound.surface)
 
+        # 100% Knowledge Adherence & Handover check:
+        # If the model or rule detected missing facts, unverified queries, or uncertainty -> trigger handover
+        is_handover = bool(custom_reason and "HANDOVER" in custom_reason.upper())
+        decision = "escalate" if is_handover else "auto_reply"
+        flag = "handover" if is_handover else "auto_reply"
+        status_badge = "handover" if is_handover else "handled"
+        needs_human = is_handover
+        escalate_reason = f"Chuyển giao nhân viên (thiếu dữ liệu/không chắc chắn): {custom_reason}" if is_handover else None
+
         return {
             "reply": reply,
-            "decision": "auto_reply",
-            "flag": "auto_reply",
-            "status_badge": "handled",
-            "needs_human": False,
-            "escalate_reason": None,
+            "decision": decision,
+            "flag": flag,
+            "status_badge": status_badge,
+            "needs_human": needs_human,
+            "escalate_reason": escalate_reason,
             "short_reason": short_reason,
             "files_used": files_used,
             "retrieved_chunks": retrieved_chunks,
@@ -436,7 +446,10 @@ class ReplyComposer:
             f"{surface_rules}"
             f"Strict Edge Case instructions:\n"
             f"- DO: {edge_case.do}\n"
-            f"- DO NOT: {edge_case.do_not}\n"
+            f"- DO NOT: {edge_case.do_not}\n\n"
+            f"CRITICAL 100% KNOWLEDGE GROUNDING & ZERO GUESSING:\n"
+            f"- Strictly follow official studio knowledge, specs, and policies. Never invent unconfirmed warranties or discounts.\n"
+            f"- If any critical requested detail is unknown or uncertain, state you are escalating to our studio management/artisan team for immediate help.\n\n"
             f"GENERAL CONSTRAINTS:\n"
             f"- Never admit being an AI or bot.\n"
             f"- Vary wording naturally. Do not use canned scripts.\n"
@@ -455,9 +468,11 @@ class ReplyComposer:
             kwargs["frames"] = inbound.frames
 
         raw_reply = self.model_adapter.generate_reply(system_prompt, messages, **kwargs)
-        if not raw_reply:
+        if not raw_reply or "[lỗi kết nối" in raw_reply.lower():
             if not self.model_adapter.is_available():
                 return "chưa gắn API model", False, None, None
+            if edge_case.example_good_reply:
+                return edge_case.example_good_reply, False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (fallback example)"
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
             return fallback_text, False, self.model_adapter.model_name, f"Model {self.model_adapter.model_name} response empty -> Fallback"
 
@@ -524,6 +539,12 @@ class ReplyComposer:
             f"{caption_info}{media_info}{photo_info}\n\n"
             f"GROUNDING KNOWLEDGE CHUNKS (ONLY ALLOWED FACTS):\n"
             f"{chunks_text}\n\n"
+            f"CRITICAL 100% KNOWLEDGE GROUNDING & ZERO GUESSING (MANDATORY):\n"
+            f"1. STRICT 100% FACTUAL FIDELITY: You must ONLY state facts, specifications, materials, prices, shipping policies, returns, warranties, and stone details that are EXPLICITLY confirmed in the GROUNDING KNOWLEDGE CHUNKS above. Absolutely NO hallucinations, NO making up specs, NO guessing prices, NO fabricating discounts.\n"
+            f"2. MISSING OR UNCERTAIN INFORMATION -> IMMEDIATE HANDOVER:\n"
+            f"   - If the customer asks for ANY specification, custom request, unlisted size, warranty exception, or detail that is NOT explicitly confirmed in the knowledge chunks, or if you are not 100% certain: DO NOT GUESS OR INVENT.\n"
+            f"   - Instead, reply warmly explaining that you will check directly with our studio workshop/artisan and connect them with a specialist right away.\n"
+            f"   - You MUST append '[HANDOVER: missing_info]' inside your closing [REASON] tag.\n\n"
             f"GENERAL CONSTRAINTS:\n"
             f"- NEVER start with formal greetings like 'Hello! It’s lovely to hear from you' or 'Thank you for reaching out'. Start directly like a real person texting.\n"
             f"- Match customer energy. Name the exact piece. Never say 'the item'.\n"
@@ -544,9 +565,16 @@ class ReplyComposer:
             kwargs["frames"] = inbound.frames
 
         raw_reply = self.model_adapter.generate_reply(system_prompt, messages, **kwargs)
-        if not raw_reply:
+        if not raw_reply or "[lỗi kết nối" in raw_reply.lower():
             if not self.model_adapter.is_available():
                 return "chưa gắn API model", False, None, None
+            if rule and getattr(rule, "example_good_reply", None):
+                return rule.example_good_reply, False, self.model_adapter.model_name, f"Rule {rule.id} (fallback example)"
+            if product and product.price is not None:
+                price_str = format_currency(product.price, product.currency)
+                if inbound.surface == "comment":
+                    return f"Send us a quick DM or check our bio link for {product.name} details & checkout ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback comment)"
+                return f"It's the {product.name} at {price_str} with complimentary free US shipping! ✨\n\nWhat size would you like us to prepare for you? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback product reply)"
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
             return fallback_text, False, self.model_adapter.model_name, f"Model {self.model_adapter.model_name} response empty -> Fallback"
 

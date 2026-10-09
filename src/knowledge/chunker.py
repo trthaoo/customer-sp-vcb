@@ -305,4 +305,30 @@ class KnowledgeChunker:
                     except Exception as e:
                         print(f"Warning: Error parsing {channel} edge case block: {e}")
 
+            # Channel Funnel Specifications & Channel Policies
+            for doc_name in ["funnel", "policies"]:
+                doc_path = self.knowledge_dir / channel / f"{doc_name}.md"
+                if doc_path.exists():
+                    try:
+                        with open(doc_path, "r", encoding="utf-8", errors="ignore") as f:
+                            raw_doc = f.read()
+                        cleaned_doc = strip_example_blocks(raw_doc)
+                        if is_meaningful_content(cleaned_doc):
+                            sections = re.split(r'\n(?=##\s+)', cleaned_doc)
+                            for idx, sec in enumerate(sections):
+                                sec_trimmed = sec.strip()
+                                if not sec_trimmed:
+                                    continue
+                                first_line = sec_trimmed.splitlines()[0].replace("#", "").strip()
+                                chunks.append(KnowledgeChunk(
+                                    id=f"{channel}::{doc_name}::{idx+1}",
+                                    category=f"{channel}_{doc_name}",
+                                    source_file=f"{channel}/{doc_name}.md",
+                                    title=f"{channel.capitalize()} ({doc_name.capitalize()}): {first_line}",
+                                    content=sec_trimmed,
+                                    metadata={"channel": channel, "doc": doc_name, "section": first_line}
+                                ))
+                    except Exception as e:
+                        print(f"Warning: Error chunking {channel}/{doc_name}.md: {e}")
+
         return chunks

@@ -51,6 +51,8 @@ class FunnelEngine:
 
         # Fast intent-based edge case mapping
         for ec in edge_cases:
+            if "scam_legitimacy" in ec.id and any(k in text_lower for k in ["is this legit", "are you a scam", "is it a scam", "scam website", "where are you located", "real store", "fake website", "uy tín không", "có lừa đảo không", "shop ở đâu", "legit"]):
+                return ec, None
             if ec.id in ("meta_edge_angry_complaint", "tiktok_edge_scam_allegation") and intent == "complaint_angry":
                 return ec, None
             if ec.id == "meta_edge_ai_bot_question" and intent == "demand_human":
