@@ -136,7 +136,7 @@ class ReplyComposer:
             retrieved_chunks.append({
                 "file": "shared/brand_voice.md",
                 "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
-                "content": self._get_brand_voice_summary()
+                "content": self._get_brand_voice_summary(surface=inbound.surface)
             })
 
             # Semantic Knowledge Chunks from Google AI Studio Embeddings
@@ -267,7 +267,7 @@ class ReplyComposer:
         retrieved_chunks.append({
             "file": "shared/brand_voice.md",
             "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
-            "content": self._get_brand_voice_summary()
+            "content": self._get_brand_voice_summary(surface=inbound.surface)
         })
 
         # Chunk 2: Product Catalogue Facts (ONLY allowed product facts)
@@ -306,11 +306,14 @@ class ReplyComposer:
                         "content": pol_content[:600]
                     })
 
-        # Chunk 4: Rule Guidance
+        # Chunk 4: Rule Guidance (adapted for comment if needed)
+        rule_guide = rule.reply_guide
+        if inbound.surface == "comment" and ("bubbles" in rule_guide.lower() or "$" in rule_guide):
+            rule_guide = f"SURFACE IS PUBLIC COMMENT (< 15 words, strictly 1 line, no price/$): {rule_guide}. Adapt for comment: reply briefly in 1 line (<15 words) and guide to DM/inbox."
         retrieved_chunks.append({
             "file": f"{inbound.channel}/rules.md",
             "title": f"Quy tắc phản hồi: {rule.id}",
-            "content": f"Kênh: {rule.channel} | Bề mặt: {rule.surface}\nHướng dẫn trả lời: {rule.reply_guide}"
+            "content": f"Kênh: {rule.channel} | Bề mặt: {rule.surface}\nHướng dẫn trả lời: {rule_guide}"
         })
 
         # Chunk 5: Dynamic Semantic Knowledge from Google AI Studio Embeddings
@@ -367,12 +370,24 @@ class ReplyComposer:
             "model_used": model_used
         }
 
-    def _get_brand_voice_summary(self) -> str:
+    def _get_brand_voice_summary(self, surface: str = "dm") -> str:
+        if surface == "comment":
+            return (
+                "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market Concierge - HuyK Jewelry).\n"
+                "Persona: The Mindful Studio Host, speaking with warmth and quiet pride from Master Jeweler Huy K's workshop.\n"
+                "Target Audience: United States shoppers (roughly 18–34).\n"
+                "CRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n"
+                "1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n"
+                "2. STRICTLY UNDER 15 WORDS (< 15 words): Brevity is mandatory. Keep it punchy, warm, and natural.\n"
+                "3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly guide them to check DM/inbox or bio link for pricing and exclusive details.\n"
+                "4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n"
+                "5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
+            )
         return (
             "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market Concierge - HuyK Jewelry).\n"
             "Persona: The Mindful Studio Host, speaking with warmth and quiet pride from Master Jeweler Huy K's workshop.\n"
             "Target Audience: United States shoppers (roughly 18–34). Reply in 100% natural, human American texting style.\n"
-            "HUMAN TEXTING CONVERSATIONAL ARCHITECTURE (9 NON-NEGOTIABLE RULES):\n"
+            "HUMAN TEXTING CONVERSATIONAL ARCHITECTURE (9 NON-NEGOTIABLE RULES FOR PRIVATE DMS):\n"
             "1. DYNAMIC 1–3 BUBBLES RHYTHM: Send 1 to 3 short bubbles (separated by double newlines '\\n\\n'), NOT a giant block of text and NOT robotic 3 bubbles every single turn.\n"
             "   - Quick answers / photo shares / compliments: 1 or 2 short punchy bubbles.\n"
             "   - Consultations / sizing guidance / closing an order: 2 to 3 bubbles (Acknowledge -> Answer -> Hook).\n"
@@ -380,7 +395,7 @@ class ReplyComposer:
             "3. SLANG SAFE VS SKIP: Safe: 'obsessed', 'so good on you', 'it's giving', 'love this for you'. Mirroring only if they use it first: 'girl', 'lowkey', 'ngl', 'fr'. BANNED: 'no cap', 'bussin', 'rizz', 'ate and left no crumbs', 'periodt', and no 'hey bestie' for refunds/shipping. Bridal / >$500 = zero slang.\n"
             "4. EMOJI: Max 1 emoji per bubble, usually at the end of the last bubble (✨ 🤍 💛 💍). No stacks (😍😍😍). No opening emoji. Zero to minimal on complaints/refunds.\n"
             "5. PUNCTUATION IS TONE & BANNED EM-DASH: No period on short casual lines = friendly. Period on short line = cold/annoyed. BANNED: NEVER use the em-dash '—'. It looks robotic, unnatural, and screams AI. Use commas, natural line breaks, or separate bubbles instead.\n"
-            "6. COMMENTS VS DMS (QUY TẮC 1 - PUBLIC COMMENT REPLY): Comments MUST be under 15 words (< 15 words). BẢO MẬT GIÁ CẢ: Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền, không dùng ký hiệu '$'. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền. DMs are 2-3 bubbles where orders close. Never pull off-platform to WhatsApp/email.\n"
+            "6. PRIVACY & DMS: DMs are 1–3 bubbles where orders close. Never pull off-platform to WhatsApp/email.\n"
             "7. JEWELRY SCRIPTS: Name the exact piece. Never say 'the item'. In compliments, never upsell.\n"
             "8. COMPLAINTS: Person first, not corporate policy. Never say 'as per our policy' or 'a lot of customers love this'. Direct empathy + quick resolution.\n"
             "9. ONE QUESTION ONLY: Ask at most ONE question per message. Never bombard with multiple questions. If they say 'I will think about it', one light bubble and silence."
@@ -393,33 +408,38 @@ class ReplyComposer:
         chunks: List[Dict[str, Any]],
         attached_image_url: Optional[str] = None
     ) -> Tuple[str, bool, Optional[str], Optional[str]]:
-        comment_instruction = ""
         if inbound.surface == "comment":
-            comment_instruction = (
-                "QUY TẮC 1: PHẢN HỒI BÌNH LUẬN CÔNG KHAI (PUBLIC COMMENT REPLY):\n"
-                "- Bắt buộc dưới 15 từ (< 15 words).\n"
-                "- BẢO MẬT GIÁ CẢ: Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền, không dùng ký hiệu '$'. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.\n"
+            surface_rules = (
+                "CRITICAL PUBLIC COMMENT REPLY RULES (EXACTLY 1 SINGLE COMMENT - NEVER MULTI-BUBBLE):\n"
+                "1. OUTPUT EXACTLY ONE SINGLE LINE: NEVER output multiple bubbles, NEVER use double newlines '\\n\\n'. This is a public comment reply under a post/video.\n"
+                "2. QUY TẮC 1: STRICTLY UNDER 15 WORDS (< 15 words total). Keep it punchy, warm, and concise.\n"
+                "3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER quote any price, no dollar amounts, no '$' symbol in public comments. Always warmly direct the customer to check DM/inbox for exclusive pricing.\n"
+                "4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n"
+                "5. EMOJI: At most 1 emoji at the end (✨ or 🤍).\n"
+            )
+        else:
+            surface_rules = (
+                "CRITICAL BE HUMAN TEXTING RULES (DYNAMIC 1 TO 3 BUBBLES FOR DMS):\n"
+                "1. Format as 1 to 3 SHORT BUBBLES, separated by '\\n\\n'. ONE thought per bubble. Maximum 15 words per bubble.\n"
+                "   - Do NOT rigidly generate 3 bubbles if 1 or 2 bubbles are clearer and more natural.\n"
+                "   - Bubble 1: Acknowledge & direct empathy.\n"
+                "   - Bubble 2: Clear answer / resolution.\n"
+                "   - Bubble 3 (if needed): Next step or single clarifying question.\n"
+                "2. For complaints: Person first, NOT clauses. Never say 'as per policy' or 'a lot of customers love this'. Minimal or zero emojis.\n"
+                "3. BANNED PUNCTUATION: Strictly NEVER use the em-dash '—'. Do not connect clauses with dashes. Use commas, periods, or short separate bubbles.\n"
             )
 
         system_prompt = (
             f"You are customer support staff replying to a customer for Vien Chi Bao jewelry on {inbound.platform} ({inbound.surface}).\n"
             f"Persona: The Mindful Studio Host, speaking with warmth and respect from Master Jeweler Huy K's workshop.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
-            f"{comment_instruction}"
+            f"{surface_rules}"
             f"Strict Edge Case instructions:\n"
             f"- DO: {edge_case.do}\n"
             f"- DO NOT: {edge_case.do_not}\n"
-            f"CRITICAL BE HUMAN TEXTING RULES (DYNAMIC 1 TO 3 BUBBLES):\n"
-            f"1. Format as 1 to 3 SHORT BUBBLES, separated by '\\n\\n'. ONE thought per bubble. Maximum 15 words per bubble.\n"
-            f"   - Do NOT rigidly generate 3 bubbles if 1 or 2 bubbles are clearer and more natural.\n"
-            f"   - Bubble 1: Acknowledge & direct empathy.\n"
-            f"   - Bubble 2: Clear answer / resolution.\n"
-            f"   - Bubble 3 (if needed): Next step or single clarifying question.\n"
-            f"2. For complaints: Person first, NOT clauses. Never say 'as per policy' or 'a lot of customers love this'. Minimal or zero emojis.\n"
-            f"3. Never admit being an AI or bot.\n"
-            f"4. Keep comments 1–2 short lines. Keep DMs concise.\n"
-            f"5. Vary wording naturally. Do not use canned scripts.\n"
-            f"6. BANNED PUNCTUATION: Strictly NEVER use the em-dash '—'. Do not connect clauses with dashes. It looks robotic and screams AI. Use commas, periods, or short separate bubbles.\n"
+            f"GENERAL CONSTRAINTS:\n"
+            f"- Never admit being an AI or bot.\n"
+            f"- Vary wording naturally. Do not use canned scripts.\n"
             f"At the very end of your response, output on a new line: [REASON: EdgeCase {edge_case.id}]"
         )
 
@@ -472,37 +492,43 @@ class ReplyComposer:
                 f"- Or: \"here she is! ✨\\n\\nlet me know if you want to see the clasp or chain detail 🤍\"\n"
             )
 
-        comment_instruction = ""
         if inbound.surface == "comment":
-            comment_instruction = (
-                "CRITICAL QUY TẮC 1: PHẢN HỒI BÌNH LUẬN CÔNG KHAI (PUBLIC COMMENT REPLY):\n"
-                "- Độ dài: Bắt buộc dưới 15 từ (< 15 words).\n"
-                "- BẢO MẬT GIÁ CẢ: Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền, không dùng ký hiệu '$'. Luôn điều hướng khách vào kiểm tra hộp thư riêng (DM/inbox) để xem báo giá và chi tiết độc quyền.\n"
-                "- PRICE CONFIDENTIALITY: Strictly NEVER reveal or quote any price in public comments, no dollar amounts, no '$' symbol. Always direct the user to check DM/inbox for pricing and exclusive details.\n\n"
+            surface_rules = (
+                "CRITICAL PUBLIC COMMENT REPLY RULES (EXACTLY 1 SINGLE COMMENT - NEVER MULTI-BUBBLE):\n"
+                "1. OUTPUT FORMAT: Exactly ONE single comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n"
+                "2. QUY TẮC 1: STRICTLY UNDER 15 WORDS (< 15 words total). Brevity is mandatory.\n"
+                "3. PRICE CONFIDENTIALITY: Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly invite the customer to check DM/inbox for exclusive pricing.\n"
+                "4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n"
+                "5. EMOJI: At most 1 emoji at the end (✨ or 🤍).\n"
+            )
+        else:
+            surface_rules = (
+                "CRITICAL PRIVATE DM CHAT RULES (DYNAMIC 1 TO 3 SHORT BUBBLES):\n"
+                "1. DYNAMIC BUBBLE COUNT (1 TO 3 BUBBLES MAX), separated by double newlines '\\n\\n'. ONE thought per bubble (under 15 words each):\n"
+                "   - DO NOT rigidly force 3 bubbles every time! Real people text naturally based on the question:\n"
+                "   - Quick facts, photo sharing, compliments, or single spec queries: send 1 or 2 short bubbles.\n"
+                "   - Detailed styling advice, ring sizing, or closing an order: send 2 or 3 bubbles (Acknowledge -> Answer -> Gentle Hook).\n"
+                "   - NEVER send a wall of text. Keep each bubble punchy (under 15 words).\n"
+                "   - Never add filler or repeat fake questions just to stretch out 3 bubbles.\n"
+                "2. EXCLUSIVE PRICING IN DMS: State verified price '$' USD with free US shipping.\n"
+                "3. CLOSING QUESTION: Conclude with at most ONE gentle clarifying question to assist their order.\n"
+                "4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or new bubbles instead.\n"
+                "5. EMOJI: Max ONE emoji at the end of the last bubble (✨, 🤍, 💍). Never stack emojis.\n"
             )
 
         system_prompt = (
             f"You are page staff replying to customers for Vien Chi Bao jewelry on {inbound.platform} ({inbound.surface}).\n"
             f"Persona: The Mindful Studio Host, speaking warmly from Master Jeweler Huy K's atelier.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
-            f"{comment_instruction}"
+            f"{surface_rules}"
             f"{caption_info}{media_info}{photo_info}\n\n"
             f"GROUNDING KNOWLEDGE CHUNKS (ONLY ALLOWED FACTS):\n"
             f"{chunks_text}\n\n"
-            f"CRITICAL BE HUMAN TEXTING RULES (DYNAMIC 1 TO 3 SHORT BUBBLES):\n"
-            f"1. DYNAMIC BUBBLE COUNT (1 TO 3 BUBBLES MAX), separated by double newlines '\\n\\n'. ONE thought per bubble:\n"
-            f"   - DO NOT rigidly force 3 bubbles every time! Real people text naturally based on the question:\n"
-            f"   - Quick facts, photo sharing, compliments, or single spec queries: send 1 or 2 short bubbles.\n"
-            f"   - Detailed styling advice, ring sizing, or closing an order: send 2 or 3 bubbles (Acknowledge -> Answer -> Gentle Hook).\n"
-            f"   - NEVER send a wall of text. Keep each bubble punchy (under 15 words).\n"
-            f"   - Never add filler or repeat fake questions just to stretch out 3 bubbles.\n"
-            f"2. NEVER start with formal greetings like 'Hello! It’s lovely to hear from you' or 'Thank you for reaching out'. Start directly like a real person texting.\n"
-            f"3. Match customer energy. Name the exact piece. Never say 'the item'.\n"
-            f"4. Slang safe vs skip: Safe: 'obsessed', 'love this for you', 'the cutest'. NEVER use 'no cap', 'bussin', 'rizz', 'periodt', and NEVER open with 'hey bestie' for specs.\n"
-            f"5. Emoji: Max ONE emoji at the end of the last bubble (✨, 🤍, 💍). Never stack emojis.\n"
-            f"6. Punctuation: Friendly natural casing. No cold period at the end of short lines. BANNED PUNCTUATION: Strictly NEVER use the em-dash '—'. It looks artificial and screams AI. Use commas, periods, or new bubbles instead.\n"
-            f"7. Never say you are an AI, bot, or virtual assistant. Never invent unconfirmed discounts.\n"
-            f"8. Comments: 1–2 short lines. DMs: 1–3 short bubbles.\n"
+            f"GENERAL CONSTRAINTS:\n"
+            f"- NEVER start with formal greetings like 'Hello! It’s lovely to hear from you' or 'Thank you for reaching out'. Start directly like a real person texting.\n"
+            f"- Match customer energy. Name the exact piece. Never say 'the item'.\n"
+            f"- Slang safe vs skip: Safe: 'obsessed', 'love this for you', 'the cutest'. NEVER use 'no cap', 'bussin', 'rizz', 'periodt', and NEVER open with 'hey bestie' for specs.\n"
+            f"- Never say you are an AI, bot, or virtual assistant. Never invent unconfirmed discounts.\n"
             f"At the very end of your response, output on a new line: [REASON: product={product.id if product else 'None'}, frame={frame_used or 'N/A'}, chunks=catalogue/{rule.id}]"
         )
 
@@ -539,8 +565,12 @@ class ReplyComposer:
             return text
         if "—" in text:
             text = re.sub(r'\s*—\s*', ', ', text)
+        
         limits = PLATFORM_LIMITS.get(platform, PLATFORM_LIMITS.get("ig", {}))
         if surface == "comment":
+            # 1. Collapse all newlines so comment is ALWAYS a single continuous line/sentence (never multi-bubble)
+            text = re.sub(r'[\r\n]+', ' ', text).strip()
+            # 2. Enforce comment limits
             max_chars = limits.get("comment_max_chars", 150)
             max_words = limits.get("comment_max_words", 25)
             words = text.split()
@@ -548,9 +578,10 @@ class ReplyComposer:
                 text = " ".join(words[:max_words])
             if len(text) > max_chars:
                 text = text[:max_chars].rsplit(" ", 1)[0]
+            return text.strip()
         else:
             max_chars = limits.get("dm_max_chars", 600)
             if len(text) > max_chars:
                 text = text[:max_chars].rsplit(" ", 1)[0]
-        return text.strip()
+            return text.strip()
 

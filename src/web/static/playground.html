@@ -633,10 +633,17 @@
       }
     }
 
-    // Smart multi-bubble parser for human texting architecture
+    // Smart multi-bubble parser for human texting architecture (Private DMs only)
     function parseBubbles(text) {
       if (!text) return [""];
       const cleaned = text.trim();
+      
+      // CRITICAL: Public comments are ALWAYS a single public comment (never split into bubbles)
+      if (state.surface === 'comment') {
+        return [cleaned.replace(/[\r\n]+/g, ' ')];
+      }
+
+      // Private DM: 1-3 bubbles rhythm
       // 1. Try double newline (\n\n)
       const doubleChunks = cleaned.split(/\n\s*\n/).map(t => t.trim()).filter(Boolean);
       if (doubleChunks.length >= 2 && doubleChunks.length <= 4) {
@@ -662,7 +669,7 @@
       return doubleChunks.length > 0 ? doubleChunks : [cleaned];
     }
 
-    // Render Bot Reply with human-like sequential delivery and typing dots
+    // Render Bot Reply: Single comment for public comments vs. human sequential bubbles for DMs
     async function appendBotReplyWithHumanRhythm({ text, sender, turnIndex, statusBadge, attachedImageUrl }) {
       const container = document.getElementById('chat-messages');
       const row = document.createElement('div');
@@ -677,33 +684,70 @@
       row.appendChild(meta);
       container.appendChild(row);
 
-      const bubbles = parseBubbles(text);
-
-      for (let i = 0; i < bubbles.length; i++) {
-        const bubbleText = bubbles[i];
+      // If surface is Public Comment: Render as 1 single comment block (no multi-bubble, no texting delays)
+      if (state.surface === 'comment') {
+        const commentText = text.trim().replace(/[\r\n]+/g, ' ');
         const bubble = document.createElement('div');
-        bubble.className = 'message-bubble';
-        bubble.textContent = bubbleText;
+        bubble.className = 'message-bubble comment-reply-bubble';
+        bubble.style.borderLeft = '3px solid #0d9488';
+        bubble.style.background = '#f0fdfa';
+        
+        const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+        let formattedText = escapeHtml(commentText);
+        if (urlRegex.test(commentText)) {
+          formattedText = formattedText.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#0d9488; text-decoration:underline;">${url} ↗</a>`);
+        }
+
+        bubble.innerHTML = `
+          <div style="font-size:0.68rem; color:#0f766e; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+            <span>💬 Public Comment Reply</span>
+            <span style="background:#ccfbf1; color:#115e59; padding:1px 6px; border-radius:4px; font-weight:600;">&lt; 15 words</span>
+          </div>
+          <div>${formattedText}</div>
+        `;
+
         if (turnIndex !== undefined) {
           bubble.onclick = () => selectTurn(turnIndex - 1);
         }
         row.appendChild(bubble);
         container.scrollTop = container.scrollHeight;
+      } else {
+        // Private DM: Render with human sequential bubble texting rhythm
+        const bubbles = parseBubbles(text);
 
-        // If another bubble follows, show mini typing dots for 600ms - 800ms (human rhythm)
-        if (i < bubbles.length - 1) {
-          const miniTyping = document.createElement('div');
-          miniTyping.className = 'mini-typing-bubble';
-          miniTyping.innerHTML = `
-            <div class="mini-typing-dot"></div>
-            <div class="mini-typing-dot"></div>
-            <div class="mini-typing-dot"></div>
-          `;
-          row.appendChild(miniTyping);
+        for (let i = 0; i < bubbles.length; i++) {
+          const bubbleText = bubbles[i];
+          const bubble = document.createElement('div');
+          bubble.className = 'message-bubble';
+          
+          const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+          if (urlRegex.test(bubbleText)) {
+            bubble.innerHTML = escapeHtml(bubbleText).replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#2563eb; text-decoration:underline; word-break:break-all;">${url} ↗</a>`);
+          } else {
+            bubble.textContent = bubbleText;
+          }
+
+          if (turnIndex !== undefined) {
+            bubble.onclick = () => selectTurn(turnIndex - 1);
+          }
+          row.appendChild(bubble);
           container.scrollTop = container.scrollHeight;
 
-          await new Promise(r => setTimeout(r, 700));
-          miniTyping.remove();
+          // If another bubble follows, show mini typing dots for 600ms - 800ms
+          if (i < bubbles.length - 1) {
+            const miniTyping = document.createElement('div');
+            miniTyping.className = 'mini-typing-bubble';
+            miniTyping.innerHTML = `
+              <div class="mini-typing-dot"></div>
+              <div class="mini-typing-dot"></div>
+              <div class="mini-typing-dot"></div>
+            `;
+            row.appendChild(miniTyping);
+            container.scrollTop = container.scrollHeight;
+
+            await new Promise(r => setTimeout(r, 700));
+            miniTyping.remove();
+          }
         }
       }
 
@@ -807,7 +851,13 @@
           return;
         }
         const bubble = document.createElement('div');
-        bubble.className = 'message-bubble';
+        if (role === 'bot' && state.surface === 'comment') {
+          bubble.className = 'message-bubble comment-reply-bubble';
+          bubble.style.borderLeft = '3px solid #0d9488';
+          bubble.style.background = '#f0fdfa';
+        } else {
+          bubble.className = 'message-bubble';
+        }
         
         // Auto-link URLs if message contains link
         const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
