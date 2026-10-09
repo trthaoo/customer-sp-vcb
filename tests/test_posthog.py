@@ -43,11 +43,17 @@ def test_posthog_html_injection(client, monkeypatch):
     assert "phc_live_sample" in resp_playground.text
     assert "/static/posthog-init.js" in resp_playground.text
 
-    # Dashboard root page
+    # Dashboard root page (follows redirect to /playground)
     resp_root = client.get("/")
     assert resp_root.status_code == 200
     assert "window.__POSTHOG_CONFIG__" in resp_root.text
     assert "/static/posthog-init.js" in resp_root.text
+
+    # Ops console page
+    resp_ops = client.get("/ops")
+    assert resp_ops.status_code == 200
+    assert "window.__POSTHOG_CONFIG__" in resp_ops.text
+    assert "/static/posthog-init.js" in resp_ops.text
 
 def test_posthog_config_public_under_basic_auth(client, monkeypatch):
     """Verify /api/posthog/config remains public when basic auth is active."""

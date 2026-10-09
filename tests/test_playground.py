@@ -60,7 +60,14 @@ def test_playground_page_renders(client):
     assert 'Ops Console' not in response.text
 
 def test_internal_logs_dashboard_routes(client):
+    # Main entry routes redirect directly to /playground
     for route in ["/", "/logs", "/dashboard", "/sessions"]:
+        resp = client.get(route, follow_redirects=False)
+        assert resp.status_code == 307
+        assert resp.headers["location"] == "/playground"
+
+    # Internal Ops Console remains accessible at /ops and /console
+    for route in ["/ops", "/console"]:
         resp = client.get(route)
         assert resp.status_code == 200
         assert "Chat Sessions" in resp.text

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List, Literal
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException, Header, Query, UploadFile, File
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, Response, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, Response, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -869,7 +869,14 @@ async def search_rag(body: RagSearchRequest):
 @app.get("/dashboard")
 @app.get("/logs")
 @app.get("/sessions")
-async def root():
+async def root_redirect():
+    """Redirect all main entry traffic directly to the Brand Testing Playground."""
+    return RedirectResponse(url="/playground", status_code=307)
+
+@app.get("/ops")
+@app.get("/console")
+async def ops_console():
+    """Internal Ops Console (Dashboard & Live Streams)."""
     index_file = STATIC_DIR / "index.html"
     if index_file.exists():
         with open(index_file, "r", encoding="utf-8") as f:
