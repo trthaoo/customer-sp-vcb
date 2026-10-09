@@ -16,7 +16,14 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, Res
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from src.config import ZERNIO_WEBHOOK_SECRET, BASE_DIR
+from src.config import (
+    ZERNIO_WEBHOOK_SECRET,
+    BASE_DIR,
+    POSTHOG_API_KEY,
+    POSTHOG_HOST,
+    POSTHOG_ENABLE_RECORDING,
+    POSTHOG_PROJECT_ID
+)
 from src.adapters.zernio import ZernioClient
 from src.adapters.model import get_model_adapter
 from src.knowledge.loader import get_knowledge_base
@@ -31,11 +38,24 @@ app = FastAPI(title="Customer Service Auto-Reply Gateway", version="1.0.0")
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
-# Password-protect everything except the health check (Render/UptimeRobot) and the
-# Zernio webhook (it has its own HMAC check). Disabled when BASIC_AUTH_PASS is unset.
+# Password-protect everything except the health check (Render/UptimeRobot), the
+# Zernio webhook (it has its own HMAC check), and public telemetry config. Disabled when BASIC_AUTH_PASS is unset.
 _AUTH_PASS = os.getenv("BASIC_AUTH_PASS", "")
 _AUTH_HEADER = "Basic " + base64.b64encode(f"{os.getenv('BASIC_AUTH_USER', '')}:{_AUTH_PASS}".encode()).decode()
-_PUBLIC_PATHS = {"/api/health", "/webhooks/zernio"}
+_PUBLIC_PATHS = {"/api/health", "/webhooks/zernio", "/api/posthog/config"}
+
+def _inject_posthog_runtime(html_content: str) -> str:
+    """Inject runtime PostHog configuration script tag into HTML head."""
+    cfg = {
+        "apiKey": POSTHOG_API_KEY,
+        "apiHost": POSTHOG_HOST,
+        "enableRecording": POSTHOG_ENABLE_RECORDING,
+        "projectId": POSTHOG_PROJECT_ID
+    }
+    script = f'<script>window.__POSTHOG_CONFIG__ = {json.dumps(cfg)};</script>'
+    if "</head>" in html_content:
+        return html_content.replace("</head>", f"  {script}\n</head>", 1)
+    return script + html_content
 
 @app.middleware("http")
 async def basic_auth(request: Request, call_next):
@@ -101,6 +121,7 @@ class SessionRatingRequest(BaseModel):
     suggested_fix: Optional[str] = None
     target_file_to_fix: Optional[str] = ""
     failed_turn_index: Optional[int] = None
+    posthog_replay_url: Optional[str] = None
 
 class CaseStatusUpdateRequest(BaseModel):
     status: Literal["open", "fixed"]
@@ -342,12 +363,23 @@ async def stream_events(request: Request):
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+@app.get("/api/posthog/config")
+async def get_posthog_config():
+    """Returns public PostHog telemetry and recording config."""
+    return {
+        "apiKey": POSTHOG_API_KEY,
+        "apiHost": POSTHOG_HOST,
+        "enableRecording": POSTHOG_ENABLE_RECORDING,
+        "projectId": POSTHOG_PROJECT_ID,
+        "enabled": bool(POSTHOG_API_KEY)
+    }
+
 @app.get("/playground")
 async def playground_page():
     playground_file = STATIC_DIR / "playground.html"
     if playground_file.exists():
         with open(playground_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+            return HTMLResponse(content=_inject_posthog_runtime(f.read()))
     return HTMLResponse("<h3>Playground UI not installed yet.</h3>")
 
 @app.get("/api/playground/media/{session_id}/{filename}")
@@ -668,7 +700,8 @@ async def rate_playground_session(body: SessionRatingRequest):
             "notes": record.get("notes"),
             "tags": record.get("tags") or [],
             "rated_at": record.get("created_at"),
-            "turn_count": len(body.turns)
+            "turn_count": len(body.turns),
+            "posthog_replay_url": body.posthog_replay_url
         }
         store.update_session_rating(body.session_id, "pass", rating_data)
         broadcast_sse({
@@ -718,7 +751,8 @@ async def rate_playground_session(body: SessionRatingRequest):
             "fixed_notes": record.get("fixed_notes"),
             "notes": record.get("notes"),
             "rated_at": record.get("created_at"),
-            "turn_count": len(body.turns)
+            "turn_count": len(body.turns),
+            "posthog_replay_url": body.posthog_replay_url
         }
         store.update_session_rating(body.session_id, "fail", rating_data)
         broadcast_sse({
@@ -839,5 +873,5 @@ async def root():
     index_file = STATIC_DIR / "index.html"
     if index_file.exists():
         with open(index_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+            return HTMLResponse(content=_inject_posthog_runtime(f.read()))
     return HTMLResponse("<h3>Customer Service Auto-Reply Gateway</h3><p>Dashboard UI not installed yet.</p>")

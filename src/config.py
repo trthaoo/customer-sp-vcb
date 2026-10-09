@@ -30,6 +30,12 @@ HOLD_ON_HANDOVER = os.getenv("HOLD_ON_HANDOVER", "true").lower() in ("true", "1"
 # Environment (prod, test, dev)
 APP_ENV = os.getenv("APP_ENV", "prod")
 
+# PostHog Analytics & Session Recording Configuration
+POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "").strip()
+POSTHOG_HOST = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com").strip().rstrip("/")
+POSTHOG_ENABLE_RECORDING = os.getenv("POSTHOG_ENABLE_RECORDING", "true").lower() in ("true", "1", "yes")
+POSTHOG_PROJECT_ID = os.getenv("POSTHOG_PROJECT_ID", "654868").strip()
+
 # Database configuration (PostgreSQL for Cloud/Render or SQLite local)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 if DATABASE_URL.startswith("postgres://"):

@@ -4,6 +4,9 @@ let currentHandoverFilter = 'all';
 
 function switchTab(tab) {
   currentTab = tab;
+  if (window.posthog && typeof window.posthog.capture === "function") {
+    try { window.posthog.capture('dashboard_tab_switched', { tab: tab }); } catch (e) {}
+  }
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-view').forEach(view => view.style.display = 'none');
 

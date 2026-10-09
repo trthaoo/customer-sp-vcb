@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vien Chi Bao - Brand Testing Playground (US Market)</title>
   <link rel="stylesheet" href="/static/playground.css">
+  <script src="/static/posthog-init.js"></script>
 </head>
 <body>
   <!-- Header -->
@@ -1486,6 +1487,7 @@
       btn.textContent = '⏳ Đang lưu...';
 
       try {
+        const replayUrl = window.PostHogHelper ? window.PostHogHelper.getReplayUrl() : null;
         const payload = {
           session_id: state.sessionId,
           rating: 'pass',
@@ -1495,7 +1497,8 @@
           title: title,
           notes: notes,
           tags: passSelectedTags,
-          turns: state.turns
+          turns: state.turns,
+          posthog_replay_url: replayUrl
         };
 
         const res = await fetch('/api/playground/session/rate', {
@@ -1507,6 +1510,15 @@
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.detail || 'Lỗi khi lưu case');
+        }
+
+        if (window.posthog) {
+          window.posthog.capture('playground_case_saved', {
+            rating: 'pass',
+            session_id: state.sessionId,
+            title: title,
+            replay_url: replayUrl
+          });
         }
 
         showToast('🎉 Đã lưu phiên chat vào bộ Golden Examples chuẩn!', 'success');
@@ -1647,6 +1659,7 @@
 
       try {
         const failedTurnIdx = turnVal === 'all' ? null : (parseInt(turnVal, 10) + 1);
+        const replayUrl = window.PostHogHelper ? window.PostHogHelper.getReplayUrl() : null;
         const payload = {
           session_id: state.sessionId,
           rating: 'fail',
@@ -1658,7 +1671,8 @@
           root_cause: rootCause,
           suggested_fix: suggestedFix,
           target_file_to_fix: targetFile,
-          turns: state.turns
+          turns: state.turns,
+          posthog_replay_url: replayUrl
         };
 
         const res = await fetch('/api/playground/session/rate', {
@@ -1670,6 +1684,16 @@
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.detail || 'Lỗi khi lưu case');
+        }
+
+        if (window.posthog) {
+          window.posthog.capture('playground_case_saved', {
+            rating: 'fail',
+            session_id: state.sessionId,
+            error_category: category,
+            root_cause: rootCause,
+            replay_url: replayUrl
+          });
         }
 
         showToast('⚠️ Đã ghi nhận Case Lỗi cùng phân tích khắc phục!', 'error');
