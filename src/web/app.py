@@ -256,22 +256,41 @@ async def delete_chat_session(session_id: str):
     success = store.delete_chat_session(session_id)
     return {"success": success}
 
+_sse_subscribers: List[asyncio.Queue] = []
+
+def broadcast_sse(event_data: dict):
+    for q in list(_sse_subscribers):
+        try:
+            q.put_nowait(event_data)
+        except Exception:
+            pass
+
 @app.get("/api/events/stream")
 async def stream_events(request: Request):
     """Server-Sent Events stream for real-time live updates without full page reload."""
+    q: asyncio.Queue = asyncio.Queue()
+    _sse_subscribers.append(q)
+
     async def event_generator():
         store = get_event_store()
         last_id = ""
-        while True:
-            if await request.is_disconnected():
-                break
-            recent = store.get_recent_events(limit=1)
-            if recent:
-                latest = recent[0]
-                if latest["id"] != last_id:
-                    last_id = latest["id"]
-                    yield f"data: {json.dumps(latest)}\n\n"
-            await asyncio.sleep(2.5)
+        try:
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    msg = await asyncio.wait_for(q.get(), timeout=2.0)
+                    yield f"data: {json.dumps(msg)}\n\n"
+                except asyncio.TimeoutError:
+                    recent = store.get_recent_events(limit=1)
+                    if recent:
+                        latest = recent[0]
+                        if latest["id"] != last_id:
+                            last_id = latest["id"]
+                            yield f"data: {json.dumps(latest)}\n\n"
+        finally:
+            if q in _sse_subscribers:
+                _sse_subscribers.remove(q)
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
@@ -452,6 +471,15 @@ async def playground_chat(body: PlaygroundChatRequest):
             user_name=body.user_name or "Khách Hàng (Brand Test)",
             status="handover" if result.flag == "handover" else "active"
         )
+        broadcast_sse({
+            "type": "chat_session_updated",
+            "session_id": sess_id,
+            "channel": body.channel,
+            "platform": body.platform,
+            "last_message": body.text,
+            "last_reply": result.draft_reply,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
     except Exception as e:
         print(f"Warning: Failed to save playground session turn: {e}")
 

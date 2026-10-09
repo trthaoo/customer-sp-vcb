@@ -124,52 +124,8 @@
 
       <!-- Chat Input Area -->
       <div class="chat-input-area" id="chat-input-area">
-        <!-- Quick Product Questions & Multimodal Test Presets -->
-        <div class="quick-prompts-row">
-          <button class="prompt-pill" onclick="sendQuickPrompt('How much is the Four-Leaf Clover Spinning Ring?')">💍 Clover Ring Price</button>
-          <button class="prompt-pill" onclick="sendQuickPrompt('What material is the lotus petal pendant made of?')">🌿 Lotus Pendant Craft</button>
-          <button class="prompt-pill" onclick="sendQuickPrompt('Do you have size 8 for the spinning meditation ring?')">📏 US Ring Sizing</button>
-          <button class="prompt-pill" onclick="sendQuickPrompt('How long does shipping take to California and what are the fees?')">🚚 US Shipping &amp; Delivery</button>
-          <label class="prompt-pill pill-media" style="cursor:pointer;" title="Mở thư viện ảnh trên máy tính để chọn ảnh upload">
-            🖼️ Tải Ảnh Từ Máy
-            <input type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" style="display:none;" onchange="handleChatImageUpload(this)">
-          </label>
-          <label class="prompt-pill pill-media" style="cursor:pointer;" title="Mở thư viện video trên máy tính để chọn video clip upload">
-            🎥 Tải Video Từ Máy
-            <input type="file" accept="video/*,.mp4,.mov,.webm,.mkv,.avi" style="display:none;" onchange="handleChatVideoUpload(this)">
-          </label>
-          <button class="prompt-pill pill-media" onclick="openMediaModal()" title="Mở thư viện ảnh &amp; video (tải từ máy hoặc chọn mẫu)">
-            📁 Thư Viện Media
-          </button>
-          <button class="prompt-pill pill-media" onclick="quickAttachProductImage('N0006-07-S-WH', 'Four-Leaf Clover Spinning Ring')" title="Đính kèm ảnh nhẫn cỏ 4 lá mẫu catalogue VCB">
-            💍 Ảnh Mẫu Nhẫn
-          </button>
-          <button class="prompt-pill pill-media" onclick="openLinkModal()" title="Gửi link sản phẩm / website / MXH">
-            🔗 Gửi Link Web
-          </button>
-        </div>
-
-        <!-- Attachment Preview Bar (Above Input Box) -->
-        <div id="chat-attachment-bar" class="chat-attachment-bar" style="display:none;">
-          <div class="attachment-preview-content">
-            <div id="attachment-preview-thumb" class="attachment-preview-thumb"></div>
-            <div class="attachment-meta">
-              <div class="attachment-badge-row">
-                <span id="attachment-type-badge" class="attachment-type-badge image">🖼️ Image</span>
-                <span id="attachment-status-text" class="attachment-status-text">Ready to send</span>
-              </div>
-              <div id="attachment-name-text" class="attachment-name-text">filename.jpg</div>
-            </div>
-          </div>
-          <button type="button" class="btn-clear-attachment" onclick="clearChatAttachment()" title="Bỏ đính kèm">
-            ✕ Bỏ đính kèm
-          </button>
-        </div>
-
-        <!-- Input Box Row -->
-        <div class="input-box-row">
           <!-- Attachment Buttons -->
-          <div class="chat-attach-btn-group" title="Đính kèm ảnh, video từ máy tính hoặc link">
+          <div class="chat-attach-btn-group" title="Tải ảnh hoặc video từ máy tính">
             <label class="btn-chat-attach" id="btn-attach-image" title="Mở thư viện trên máy tính để tải ảnh">
               <span class="attach-icon">🖼️</span>
               <span class="attach-label">Ảnh</span>
@@ -180,21 +136,13 @@
               <span class="attach-label">Video</span>
               <input type="file" id="chat-upload-vid" accept="video/*,.mp4,.mov,.webm,.mkv,.avi" style="display:none;" onchange="handleChatVideoUpload(this)">
             </label>
-            <button type="button" class="btn-chat-attach" id="btn-attach-media-hub" onclick="openMediaModal()" title="Mở Thư Viện Ảnh &amp; Video">
-              <span class="attach-icon">📁</span>
-              <span class="attach-label">Thư viện</span>
-            </button>
-            <button type="button" class="btn-chat-attach" id="btn-attach-link" onclick="openLinkModal()" title="Gửi link sản phẩm / website / MXH">
-              <span class="attach-icon">🔗</span>
-              <span class="attach-label">Link</span>
-            </button>
           </div>
 
           <textarea 
             id="chat-input" 
             class="chat-textarea" 
             rows="1" 
-            placeholder="Chat as customer... (Hỗ trợ text, link 🔗, gửi ảnh 🖼️, video 🎥 hoặc dán Ctrl+V)"></textarea>
+            placeholder="Nhập tin nhắn hoặc dán link sản phẩm / bài viết... (Tải ảnh 🖼️ / video 🎥 từ máy hoặc dán Ctrl+V)"></textarea>
           
           <button class="btn-send" id="btn-send-message" onclick="handleSendClick()">
             <span>Send</span> ➤
@@ -338,8 +286,7 @@
       document.getElementById('btn-surf-dm').classList.toggle('active', surface === 'dm');
     }
 
-    // ==========================================================================
-    // Multimodal Chat Attachments (Images, Videos, Links, Paste, Drag & Drop)
+    // Multimodal Chat Attachments (Images & Videos from Local Machine)
     // ==========================================================================
     function triggerChatUpload(type) {
       if (type === 'video') {
@@ -363,29 +310,6 @@
       if (!file) return;
       uploadChatMediaFile(file, 'video');
       inputEl.value = '';
-    }
-
-    function handleModalMediaUpload(inputEl, type) {
-      const file = inputEl.files && inputEl.files[0];
-      if (!file) return;
-      closeMediaModal();
-      uploadChatMediaFile(file, type);
-      inputEl.value = '';
-    }
-
-    function openMediaModal() {
-      const modal = document.getElementById('modal-attach-media');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    function closeMediaModal() {
-      const modal = document.getElementById('modal-attach-media');
-      if (modal) modal.style.display = 'none';
-    }
-
-    function selectSampleProductAndClose(productId, productName) {
-      quickAttachProductImage(productId, productName);
-      closeMediaModal();
     }
 
     async function uploadChatMediaFile(file, type) {
@@ -512,39 +436,7 @@
       };
     }
 
-    function openLinkModal() {
-      const modal = document.getElementById('modal-attach-link');
-      if (modal) modal.style.display = 'flex';
-      const urlInput = document.getElementById('input-custom-link-url');
-      if (urlInput) {
-        urlInput.value = '';
-        setTimeout(() => urlInput.focus(), 80);
-      }
-    }
 
-    function closeLinkModal() {
-      const modal = document.getElementById('modal-attach-link');
-      if (modal) modal.style.display = 'none';
-    }
-
-    function selectSampleLink(url, title) {
-      document.getElementById('input-custom-link-url').value = url;
-      document.getElementById('input-custom-link-title').value = title;
-    }
-
-    function confirmAttachLink() {
-      const url = document.getElementById('input-custom-link-url').value.trim();
-      const title = document.getElementById('input-custom-link-title').value.trim();
-      if (!url) {
-        alert('Vui lòng nhập đường dẫn liên kết (URL)!');
-        return;
-      }
-      attachLinkToChat(url, title);
-      closeLinkModal();
-      const input = document.getElementById('chat-input');
-      input.focus();
-      showToast('Đã đính kèm liên kết vào tin nhắn!', 'success');
-    }
 
     function setupInputHandlers() {
       const input = document.getElementById('chat-input');
@@ -892,12 +784,19 @@
 
       bubbles.forEach(bubbleText => {
         // If message is just placeholder for attachment and we already rendered the card, avoid duplicate text bubble
-        if (attachment && (bubbleText === '[Khách gửi 1 hình ảnh sản phẩm]' || bubbleText === '[Khách gửi 1 video clip]' || bubbleText.startsWith('[Khách gửi liên kết:'))) {
+        if (attachment && (bubbleText === '[Khách gửi 1 hình ảnh sản phẩm]' || bubbleText === '[Khách gửi 1 video clip]')) {
           return;
         }
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
-        bubble.textContent = bubbleText;
+        
+        // Auto-link URLs if message contains link
+        const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+        if (urlRegex.test(bubbleText)) {
+          bubble.innerHTML = escapeHtml(bubbleText).replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#2563eb; text-decoration:underline; word-break:break-all;">${url} ↗</a>`);
+        } else {
+          bubble.textContent = bubbleText;
+        }
 
         if (role === 'bot' && turnIndex !== undefined) {
           bubble.onclick = () => selectTurn(turnIndex - 1);
@@ -2304,150 +2203,6 @@
       <div class="modal-footer">
         <button class="btn-action-small" onclick="closeCaseHubModal()">Đóng</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Modal Đính Kèm Ảnh & Video (Mở Thư Viện Máy Tính & Chọn Mẫu) -->
-  <div id="modal-attach-media" class="modal-backdrop" style="display:none;">
-    <div class="modal-dialog" style="max-width:620px;">
-      <div class="modal-header">
-        <div class="modal-header-text">
-          <h3><span>🖼️</span> Thư Viện Ảnh &amp; Video Cho Tin Nhắn</h3>
-          <div class="modal-subtitle">Tải ảnh hoặc video clip từ máy tính cá nhân để test thị giác đa phương thức</div>
-        </div>
-        <button class="modal-close-btn" onclick="closeMediaModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <!-- Khu vực 1: Upload từ máy tính -->
-        <div style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:10px; padding:1.5rem; text-align:center; margin-bottom:1.25rem;">
-          <div style="font-size:2.2rem; margin-bottom:0.4rem;">💻</div>
-          <h4 style="margin:0 0 0.35rem 0; color:#0f172a; font-size:1.05rem;">Tải Lên File Từ Thư Viện Máy Tính</h4>
-          <p style="font-size:0.8rem; color:#64748b; margin-bottom:1rem;">
-            Chọn ảnh hoặc video từ máy tính của bạn (hỗ trợ JPG, PNG, WebP, GIF, MP4, MOV, WebM)
-          </p>
-          <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-            <label class="btn-action-small primary" style="background:#2563eb; color:#fff; cursor:pointer; font-size:0.85rem; padding:0.5rem 1rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem;">
-              <span>🖼️ Chọn Ảnh Từ Máy</span>
-              <input type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" style="display:none;" onchange="handleModalMediaUpload(this, 'image')">
-            </label>
-            <label class="btn-action-small" style="background:#475569; color:#fff; cursor:pointer; font-size:0.85rem; padding:0.5rem 1rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem;">
-              <span>🎥 Chọn Video Từ Máy</span>
-              <input type="file" accept="video/*,.mp4,.mov,.webm,.mkv,.avi" style="display:none;" onchange="handleModalMediaUpload(this, 'video')">
-            </label>
-          </div>
-          <div style="font-size:0.72rem; color:#94a3b8; margin-top:0.75rem;">
-            Mẹo: Bạn cũng có thể kéo thả trực tiếp file vào ô chat hoặc nhấn <strong>Ctrl+V</strong> để dán ảnh chụp màn hình.
-          </div>
-        </div>
-
-        <!-- Khu vực 2: Chọn nhanh ảnh sản phẩm có sẵn trong Catalogue VCB -->
-        <div>
-          <div style="font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:0.6rem;">
-            💎 Hoặc chọn ảnh mẫu sản phẩm VCB có sẵn:
-          </div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:0.6rem;">
-            <button type="button" class="sample-link-item" onclick="selectSampleProductAndClose('N0006-07-S-WH', 'Nhẫn Bạc Cỏ 4 Lá Xoay Trầm Hương')" style="align-items:center;">
-              <span class="sample-link-icon" style="font-size:1.4rem;">💍</span>
-              <div class="sample-link-info">
-                <strong>Nhẫn Cỏ 4 Lá Xoay</strong>
-                <small>SKU: N0006-07-S-WH</small>
-              </div>
-            </button>
-            <button type="button" class="sample-link-item" onclick="selectSampleProductAndClose('D0001-00-S-BL', 'Mặt Dây Chuyền Bạc Hoa Sen Khắc Chú')" style="align-items:center;">
-              <span class="sample-link-icon" style="font-size:1.4rem;">🌿</span>
-              <div class="sample-link-info">
-                <strong>Mặt Dây Chuyền Sen</strong>
-                <small>SKU: D0001-00-S-BL</small>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer" style="display:flex; justify-content:flex-end;">
-        <button class="btn-action-small" onclick="closeMediaModal()">Đóng</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Gửi Link Khách Hàng (Multimodal Link Input) -->
-  <div id="modal-attach-link" class="modal-backdrop" style="display:none;">
-    <div class="modal-dialog" style="max-width:560px;">
-      <div class="modal-header">
-        <div class="modal-header-text">
-          <h3><span>🔗</span> Gửi Link Khách Hàng (Sản Phẩm / MXH / Web)</h3>
-          <div class="modal-subtitle">Đính kèm URL sản phẩm, post Instagram/TikTok hoặc link website để AI phân tích</div>
-        </div>
-        <button class="modal-close-btn" onclick="closeLinkModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group" style="margin-bottom:1rem;">
-          <label class="form-label" for="input-custom-link-url">
-            <span>Đường dẫn liên kết (URL) <span class="req">*</span></span>
-          </label>
-          <input 
-            type="url" 
-            id="input-custom-link-url" 
-            class="form-input" 
-            placeholder="https://vienchibao.com/products/spinning-ring hoặc link bài viết..." 
-            style="width:100%;" />
-        </div>
-
-        <div class="form-group" style="margin-bottom:1rem;">
-          <label class="form-label" for="input-custom-link-title">
-            <span>Tiêu đề / Tên mô tả link (tùy chọn)</span>
-          </label>
-          <input 
-            type="text" 
-            id="input-custom-link-title" 
-            class="form-input" 
-            placeholder="Ví dụ: Nhẫn cỏ 4 lá xoay S925, Post Reel Instagram..." 
-            style="width:100%;" />
-        </div>
-
-        <!-- Gợi ý link mẫu catalogue để test nhanh -->
-        <div style="margin-top:1rem; border-top:1px solid var(--panel-border); padding-top:0.85rem;">
-          <div style="font-size:0.75rem; font-weight:700; color:var(--text-dim); margin-bottom:0.6rem;">
-            ⚡ Chọn nhanh link mẫu trong catalogue:
-          </div>
-          <div style="display:flex; flex-direction:column; gap:0.5rem;">
-            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/products/spinning-ring', 'Nhẫn Bạc Cỏ 4 Lá Xoay Trầm Hương')">
-              <span class="sample-link-icon">💍</span>
-              <div class="sample-link-info">
-                <strong>Nhẫn Cỏ 4 Lá Xoay Trầm Hương</strong>
-                <small>https://vienchibao.com/products/spinning-ring</small>
-              </div>
-            </button>
-            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/products/lotus-pendant', 'Mặt Dây Chuyền Bạc Hoa Sen Khắc Chú')">
-              <span class="sample-link-icon">🌿</span>
-              <div class="sample-link-info">
-                <strong>Mặt Dây Chuyền Bạc Hoa Sen</strong>
-                <small>https://vienchibao.com/products/lotus-pendant</small>
-              </div>
-            </button>
-            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/products/N0006-07-S-WH', 'Sản phẩm SKU: N0006-07-S-WH')">
-              <span class="sample-link-icon">🏷️</span>
-              <div class="sample-link-info">
-                <strong>Link theo Product ID (N0006-07-S-WH)</strong>
-                <small>https://vienchibao.com/products/N0006-07-S-WH</small>
-              </div>
-            </button>
-            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/policies/warranty', 'Chính Sách Bảo Hành & Đổi Trả US')">
-              <span class="sample-link-icon">📜</span>
-              <div class="sample-link-info">
-                <strong>Chính Sách Bảo Hành &amp; Đổi Trả</strong>
-                <small>https://vienchibao.com/policies/warranty</small>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:0.5rem;">
-        <button class="btn-action-small" onclick="closeLinkModal()">Hủy</button>
-        <button class="btn-action-small primary" onclick="confirmAttachLink()" style="background:var(--primary); color:#fff;">
-          ✓ Đính Kèm Link Này
-        </button>
-      </div>
-    </div>
   </div>
 
 

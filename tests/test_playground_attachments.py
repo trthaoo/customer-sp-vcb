@@ -113,8 +113,8 @@ def test_playground_page_has_local_device_upload_controls(tmp_path, monkeypatch)
     client = get_test_client(tmp_path, monkeypatch)
     resp = client.get("/playground")
     assert resp.status_code == 200
-    assert "Tải Ảnh Từ Máy" in resp.text
-    assert "Tải Video Từ Máy" in resp.text
-    assert "modal-attach-media" in resp.text
     assert 'id="chat-upload-img"' in resp.text
     assert 'id="chat-upload-vid"' in resp.text
+    assert "quick-prompts-row" not in resp.text
+    assert "modal-attach-media" not in resp.text
+    assert "modal-attach-link" not in resp.text

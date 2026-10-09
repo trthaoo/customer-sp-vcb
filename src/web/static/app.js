@@ -229,6 +229,9 @@ function refreshCurrentTab() {
     fetchHandoverQueue();
   } else if (currentTab === 'sessions') {
     loadChatSessions();
+    if (activeModalSessionId) {
+      viewSessionDetails(activeModalSessionId, true);
+    }
   }
 }
 
@@ -337,7 +340,7 @@ function renderSessionsList(sessions) {
 
 let activeModalSessionId = null;
 
-async function viewSessionDetails(sessionId) {
+async function viewSessionDetails(sessionId, silent = false) {
   activeModalSessionId = sessionId;
   const modal = document.getElementById('session-transcript-modal');
   const titleEl = document.getElementById('modal-session-title');
@@ -348,8 +351,10 @@ async function viewSessionDetails(sessionId) {
   if (!modal) return;
   modal.style.display = 'flex';
   titleEl.textContent = `Session: ${sessionId}`;
-  subEl.textContent = 'Đang tải toàn bộ hội thoại...';
-  bodyEl.innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">Đang tải...</div>';
+  if (!silent) {
+    subEl.textContent = 'Đang tải toàn bộ hội thoại...';
+    bodyEl.innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">Đang tải...</div>';
+  }
 
   try {
     const res = await fetch(`/api/chat-sessions/${sessionId}`);
@@ -471,13 +476,14 @@ function setupLiveStream() {
       refreshCurrentTab();
     };
     source.onerror = function() {
-      source.close();
-      // Fallback to polling every 5 seconds
-      setInterval(refreshCurrentTab, 5000);
+      // Reconnection handled automatically by browser EventSource
     };
-  } else {
-    setInterval(refreshCurrentTab, 5000);
   }
+
+  // Active polling sync every 3 seconds to guarantee real-time updates
+  setInterval(() => {
+    refreshCurrentTab();
+  }, 3000);
 }
 
 // Initial load
