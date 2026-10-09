@@ -108,3 +108,13 @@ def test_chat_with_image_only_no_text(tmp_path, monkeypatch):
     assert chat_resp.status_code == 200
     chat_data = chat_resp.json()
     assert chat_data["attachment_type"] == "image"
+
+def test_playground_page_has_local_device_upload_controls(tmp_path, monkeypatch):
+    client = get_test_client(tmp_path, monkeypatch)
+    resp = client.get("/playground")
+    assert resp.status_code == 200
+    assert "Tải Ảnh Từ Máy" in resp.text
+    assert "Tải Video Từ Máy" in resp.text
+    assert "modal-attach-media" in resp.text
+    assert 'id="chat-upload-img"' in resp.text
+    assert 'id="chat-upload-vid"' in resp.text
