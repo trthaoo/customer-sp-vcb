@@ -7,9 +7,47 @@ from src.web.app import app
 from src.config import BASE_DIR
 from src.storage.chat_backup import get_chat_logs_dir, save_chat_backup_to_disk, get_chat_backup_stats
 
-client = TestClient(app)
+from src.storage.database import EventStore
+from src.storage.test_cases import TestCaseManager
+from src.knowledge.loader import KnowledgeBase
+from src.adapters.model import ModelAdapter
+from src.pipeline.orchestrator import PipelineOrchestrator
+import src.pipeline.orchestrator as orch_module
+from src.config import KNOWLEDGE_DIR
 
-def test_chat_turn_creates_disk_backup_files():
+@pytest.fixture
+def client(tmp_path, monkeypatch):
+    test_db = tmp_path / "test_events.db"
+    store = EventStore(str(test_db))
+    monkeypatch.setattr("src.web.app.get_event_store", lambda: store)
+    monkeypatch.setattr("src.pipeline.orchestrator.get_event_store", lambda: store)
+
+    kb = KnowledgeBase(KNOWLEDGE_DIR)
+    monkeypatch.setattr("src.web.app.get_knowledge_base", lambda: kb)
+    monkeypatch.setattr("src.pipeline.orchestrator.get_knowledge_base", lambda: kb)
+
+    test_orchestrator = PipelineOrchestrator(kb=kb, store=store)
+    monkeypatch.setattr(orch_module, "_orchestrator", test_orchestrator)
+    monkeypatch.setattr("src.web.app.get_orchestrator", lambda: test_orchestrator)
+    monkeypatch.setattr("src.pipeline.orchestrator.get_orchestrator", lambda: test_orchestrator)
+
+    mock_adapter = ModelAdapter(api_key="", base_url="", model_name="gemini-1.5-flash")
+    monkeypatch.setattr("src.web.app.get_model_adapter", lambda: mock_adapter)
+    monkeypatch.setattr("src.adapters.model.get_model_adapter", lambda: mock_adapter)
+    monkeypatch.setattr("src.pipeline.composer.get_model_adapter", lambda: mock_adapter)
+
+    test_manager = TestCaseManager(
+        golden_file=tmp_path / "test_golden.json",
+        failed_file=tmp_path / "test_failed.json"
+    )
+    monkeypatch.setattr("src.web.app.get_test_case_manager", lambda: test_manager)
+
+    test_logs_dir = tmp_path / "chat_logs"
+    monkeypatch.setenv("CHAT_LOGS_DIR", str(test_logs_dir))
+
+    return TestClient(app)
+
+def test_chat_turn_creates_disk_backup_files(client):
     session_id = "test_auto_backup_sess_99"
     payload = {
         "session_id": session_id,
@@ -42,7 +80,7 @@ def test_chat_turn_creates_disk_backup_files():
     assert payload["text"] in md_content
 
 
-def test_rating_updates_chat_sessions_and_disk_backup():
+def test_rating_updates_chat_sessions_and_disk_backup(client):
     session_id = "test_rate_sync_sess_88"
     # Create turn first
     client.post("/api/playground/chat", json={
@@ -100,7 +138,7 @@ def test_rating_updates_chat_sessions_and_disk_backup():
     assert "warranty.md" in b_md
 
 
-def test_toggle_case_status_updates_session_and_backup():
+def test_toggle_case_status_updates_session_and_backup(client):
     session_id = "test_toggle_sess_77"
     client.post("/api/playground/chat", json={
         "session_id": session_id,
@@ -146,7 +184,17 @@ def test_toggle_case_status_updates_session_and_backup():
     assert "🟢 ĐÃ FIX" in b_md
 
 
-def test_chat_backup_download_and_stats_endpoints():
+def test_chat_backup_download_and_stats_endpoints(client):
+    sess_id = "test_dl_sess_66"
+    client.post("/api/playground/chat", json={
+        "session_id": sess_id,
+        "channel": "meta",
+        "platform": "ig",
+        "surface": "dm",
+        "text": "Hello stats test",
+        "history": []
+    })
+
     stats_res = client.get("/api/chat-backups/stats")
     assert stats_res.status_code == 200
     stats = stats_res.json()
@@ -155,7 +203,6 @@ def test_chat_backup_download_and_stats_endpoints():
     assert stats["session_count"] >= 1
 
     # Test downloading JSON backup
-    sess_id = "test_auto_backup_sess_99"
     dl_json = client.get(f"/api/chat-backups/{sess_id}?format=json")
     assert dl_json.status_code == 200
     assert "application/json" in dl_json.headers["content-type"]
@@ -166,7 +213,8 @@ def test_chat_backup_download_and_stats_endpoints():
     assert "text/markdown" in dl_md.headers["content-type"]
 
 
-def test_rating_filter_in_list_chat_sessions():
+
+def test_rating_filter_in_list_chat_sessions(client):
     # Filter by rating=pass
     res_pass = client.get("/api/chat-sessions?rating=pass")
     assert res_pass.status_code == 200

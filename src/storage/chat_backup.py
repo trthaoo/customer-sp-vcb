@@ -1,16 +1,25 @@
+import os
 import json
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from src.config import BASE_DIR
 
-CHAT_LOGS_DIR = Path(BASE_DIR) / "data" / "chat_logs"
-STREAM_LOG_FILE = CHAT_LOGS_DIR / "all_chats_stream.jsonl"
+DEFAULT_CHAT_LOGS_DIR = Path(BASE_DIR) / "data" / "chat_logs"
 
 
 def get_chat_logs_dir() -> Path:
-    CHAT_LOGS_DIR.mkdir(parents=True, exist_ok=True)
-    return CHAT_LOGS_DIR
+    custom_dir = os.environ.get("CHAT_LOGS_DIR")
+    if custom_dir:
+        p = Path(custom_dir)
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        p = Path(BASE_DIR) / ".pytest_cache" / "test_chat_logs"
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    DEFAULT_CHAT_LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    return DEFAULT_CHAT_LOGS_DIR
 
 
 def _escape_md(text: str) -> str:
@@ -155,7 +164,8 @@ def save_chat_backup_to_disk(session_data: Dict[str, Any]) -> Dict[str, str]:
             "last_message": session_data.get("last_message"),
             "last_reply": session_data.get("last_reply"),
         }
-        with open(STREAM_LOG_FILE, "a", encoding="utf-8") as f:
+        stream_file = logs_dir / "all_chats_stream.jsonl"
+        with open(stream_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(stream_entry, ensure_ascii=False) + "\n")
     except Exception as e:
         print(f"Warning: Failed to append to chat stream log: {e}")
