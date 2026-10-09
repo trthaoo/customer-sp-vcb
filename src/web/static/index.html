@@ -181,7 +181,10 @@
       </div>
       <div style="padding:0.75rem 1.5rem; border-top:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
         <span id="modal-session-count" style="font-size:0.8rem; color:#94a3b8;"></span>
-        <button onclick="closeSessionModal()" class="filter-btn active">Đóng</button>
+        <div style="display:flex; gap:0.5rem;">
+          <button id="modal-export-csv-btn" onclick="exportCurrentModalSessionCsv()" class="filter-btn" style="background:#d97706; color:#fff;">📥 Export CSV</button>
+          <button onclick="closeSessionModal()" class="filter-btn active">Đóng</button>
+        </div>
       </div>
     </div>
   </div>

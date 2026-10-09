@@ -319,6 +319,9 @@ function renderSessionsList(sessions) {
             <button class="action-btn" onclick="viewSessionDetails('${escapeHtml(s.id)}')" title="Xem toàn bộ transcript phiên chat" style="background:#2563eb; color:#fff;">
               👁 Transcript
             </button>
+            <button class="action-btn" onclick="downloadSessionCsv('${escapeHtml(s.id)}')" title="Tải xuống CSV transcript" style="background:#d97706; color:#fff;">
+              📥 CSV
+            </button>
             <button class="action-btn" onclick="deleteSession('${escapeHtml(s.id)}')" title="Xóa session" style="background:#dc2626; color:#fff;">
               ✕
             </button>
@@ -332,7 +335,10 @@ function renderSessionsList(sessions) {
   container.innerHTML = html;
 }
 
+let activeModalSessionId = null;
+
 async function viewSessionDetails(sessionId) {
+  activeModalSessionId = sessionId;
   const modal = document.getElementById('session-transcript-modal');
   const titleEl = document.getElementById('modal-session-title');
   const subEl = document.getElementById('modal-session-subtitle');
@@ -397,6 +403,53 @@ async function viewSessionDetails(sessionId) {
 function closeSessionModal() {
   const modal = document.getElementById('session-transcript-modal');
   if (modal) modal.style.display = 'none';
+  activeModalSessionId = null;
+}
+
+async function downloadSessionCsv(sessionId) {
+  if (!sessionId) return;
+  try {
+    const res = await fetch(`/api/chat-sessions/${sessionId}`);
+    if (!res.ok) throw new Error('Không tìm thấy session');
+    const data = await res.json();
+    const turns = data.turns || [];
+    if (turns.length === 0) {
+      alert('Session này chưa có turns nào để xuất CSV.');
+      return;
+    }
+
+    let csv = '\uFEFFTurn,Timestamp,KhachHang,BotReply,Intent,SanPham,Rule,Decision\n';
+    turns.forEach((t, i) => {
+      csv += [
+        t.turn_index || (i + 1),
+        `"${(t.timestamp || '').replace(/"/g, '""')}"`,
+        `"${(t.customer_message || t.user_message || '').replace(/"/g, '""')}"`,
+        `"${(t.bot_reply || t.reply || '').replace(/"/g, '""')}"`,
+        `"${(t.intent || '').replace(/"/g, '""')}"`,
+        `"${(t.matched_product || '').replace(/"/g, '""')}"`,
+        `"${(t.matched_rule || '').replace(/"/g, '""')}"`,
+        `"${(t.decision || '').replace(/"/g, '""')}"`
+      ].join(',') + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `session_${sessionId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+  } catch (err) {
+    alert('Lỗi xuất CSV: ' + err.message);
+  }
+}
+
+function exportCurrentModalSessionCsv() {
+  if (activeModalSessionId) {
+    downloadSessionCsv(activeModalSessionId);
+  }
 }
 
 async function deleteSession(sessionId) {
@@ -429,6 +482,12 @@ function setupLiveStream() {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
-  refreshCurrentTab();
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  if (path.includes('/logs') || path.includes('/sessions') || path.includes('/dashboard') || hash === '#sessions' || hash === '#logs') {
+    switchTab('sessions');
+  } else {
+    refreshCurrentTab();
+  }
   setupLiveStream();
 });

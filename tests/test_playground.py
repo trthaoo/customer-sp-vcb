@@ -45,13 +45,25 @@ def client(tmp_path, monkeypatch):
 
     return TestClient(app)
 
-# 1. /playground route renders with optimized US Market layout (badge removed)
+# 1. /playground route renders with clean brand testing interface (model/RAG pills and chat logs isolated)
 def test_playground_page_renders(client):
     response = client.get("/playground")
     assert response.status_code == 200
     assert "PHIÊN TEST, KHÔNG PHẢI SỐ LIVE" not in response.text
     assert "Vien Chi Bao" in response.text
     assert "Pipeline Diagnostics" in response.text
+    # Verify Model & RAG status pills and full logs modal are excluded from brand playground
+    assert 'id="model-pill"' not in response.text
+    assert 'id="rag-pill"' not in response.text
+    assert 'id="playground-logs-modal"' not in response.text
+    assert 'openLogsModal()' not in response.text
+    assert 'Ops Console' not in response.text
+
+def test_internal_logs_dashboard_routes(client):
+    for route in ["/", "/logs", "/dashboard", "/sessions"]:
+        resp = client.get(route)
+        assert resp.status_code == 200
+        assert "Chat Sessions" in resp.text
 
 # 2. source=brand_test never calls Zernio and never leaks into live dashboard or handover
 def test_playground_source_brand_test_isolation(client):

@@ -678,6 +678,9 @@ async def search_rag(body: RagSearchRequest):
     return {"query": body.query, "results": results, "count": len(results)}
 
 @app.get("/")
+@app.get("/dashboard")
+@app.get("/logs")
+@app.get("/sessions")
 async def root():
     index_file = STATIC_DIR / "index.html"
     if index_file.exists():

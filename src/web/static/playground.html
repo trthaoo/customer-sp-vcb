@@ -17,16 +17,8 @@
       </div>
     </div>
 
-    <!-- Header Actions & Model Status -->
+    <!-- Header Actions -->
     <div class="header-actions">
-      <div class="model-status-pill" id="model-pill">
-        <span id="model-dot">●</span>
-        <span id="model-text">Checking Model API...</span>
-      </div>
-      <div class="model-status-pill available" id="rag-pill" onclick="triggerRagReindex()" style="cursor:pointer;" title="Click to view RAG stats or re-index">
-        <span id="rag-dot" style="color:#10b981;">⚡</span>
-        <span id="rag-text">Loading RAG...</span>
-      </div>
       <button class="btn-header btn-rate-pass" id="btn-rate-pass-hdr" onclick="openPassModal()" title="Đánh giá phiên chat này Đạt & Lưu làm Golden Example">
         ✓ Đạt (Lưu Example)
       </button>
@@ -36,18 +28,12 @@
       <button class="btn-header btn-case-hub" id="btn-case-hub" onclick="openCaseHubModal()" title="Xem danh sách Golden Examples và Case Lỗi đã lưu">
         📋 Thư Viện Case <span class="badge-counter" id="cases-count-badge">0</span>
       </button>
-      <button class="btn-header" onclick="openLogsModal()" title="Xem danh sách lịch sử các phiên chat đã lưu">
-        📜 Logs Chat
-      </button>
-      <button class="btn-header btn-gold" id="btn-export-csv" onclick="exportSessionCsv()" title="Tải xuống CSV toàn bộ phiên chat">
+      <button class="btn-header btn-gold" id="btn-export-csv" onclick="exportSessionCsv()" title="Tải xuống CSV toàn bộ phiên chat hiện tại">
         📥 Export CSV
       </button>
       <button class="btn-header" onclick="resetSession()" title="Bắt đầu phiên chat mới">
         🔄 Phiên Mới
       </button>
-      <a href="/" class="btn-header" title="Return to Ops Console">
-        ← Ops Console
-      </a>
     </div>
   </header>
 
@@ -306,89 +292,10 @@
 
     // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
-      loadModelConfig();
-      loadRagStats();
       setupInputHandlers();
       updateCasesBadge();
       updateSessionRatingBar();
     });
-
-    // Model Config Check
-    async function loadModelConfig() {
-      const pill = document.getElementById('model-pill');
-      const dot = document.getElementById('model-dot');
-      const text = document.getElementById('model-text');
-      try {
-        const res = await fetch('/api/playground/config');
-        const data = await res.json();
-        state.modelConfig = data;
-        if (data.is_available) {
-          pill.className = 'model-status-pill available';
-          dot.textContent = '●';
-          text.textContent = `Model: ${data.model_name}`;
-          pill.title = `Model Provider: ${data.provider}`;
-        } else {
-          pill.className = 'model-status-pill unavailable';
-          dot.textContent = '○';
-          text.textContent = 'No Model Key';
-          pill.title = 'MODEL_API_KEY is not configured in .env. The pipeline returns a safe notice without inventing facts.';
-        }
-      } catch (err) {
-        pill.className = 'model-status-pill unavailable';
-        text.textContent = 'Config Error';
-      }
-    }
-
-    // Google AI Studio RAG Stats & Reindex
-    async function loadRagStats() {
-      const pill = document.getElementById('rag-pill');
-      const text = document.getElementById('rag-text');
-      try {
-        const res = await fetch('/api/rag/stats');
-        const data = await res.json();
-        if (data.total_chunks > 0) {
-          pill.className = 'model-status-pill available';
-          text.textContent = `⚡ RAG: ${data.total_chunks} Chunks (Google AI Studio)`;
-          const cat = data.categories || {};
-          pill.title = `Embedded on Google AI Studio (${data.embedding_model}, ${data.dimension} dims)\n` +
-            `• Products / Catalogue: ${cat.catalogue || 0}\n` +
-            `• Policies (Ship/Warranty/Pay): ${cat.policy || 0}\n` +
-            `• Brand & Texting Rules: ${cat.shared || 0}\n` +
-            `• Meta Rules & Edge Cases: ${(cat.meta_rule || 0) + (cat.meta_edge_case || 0)}\n` +
-            `• TikTok Rules & Edge Cases: ${(cat.tiktok_rule || 0) + (cat.tiktok_edge_case || 0)}\n` +
-            `Click to re-index all chunks`;
-        } else {
-          pill.className = 'model-status-pill unavailable';
-          text.textContent = '⚡ RAG: Not Indexed';
-        }
-      } catch (err) {
-        if (pill) pill.className = 'model-status-pill unavailable';
-      }
-    }
-
-    async function triggerRagReindex() {
-      if (!confirm('Re-index toàn bộ tri thức dự án lên server Google AI Studio (gemini-embedding-001)?')) return;
-      const text = document.getElementById('rag-text');
-      if (text) text.textContent = '⏳ Đang embedding lên Google AI Studio...';
-      try {
-        const res = await fetch('/api/rag/reindex', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ force: false })
-        });
-        const data = await res.json();
-        alert(`Đã hoàn tất embedding trên Google AI Studio!\n` +
-          `• Tổng số chunks: ${data.total_chunks}\n` +
-          `• Đã embed mới: ${data.embedded_new}\n` +
-          `• Đã tái sử dụng cache: ${data.reused_cached}\n` +
-          `• Thời gian xử lý: ${data.duration_seconds}s\n` +
-          `• Embedding Model: ${data.embedding_model} (${data.dimension} dims)`);
-        loadRagStats();
-      } catch (err) {
-        alert('Lỗi re-index: ' + err.message);
-        loadRagStats();
-      }
-    }
 
     // Channel Switching
     function setChannel(channel) {
@@ -1008,7 +915,7 @@
       row.innerHTML = `
         <div class="message-sender-meta">Studio Concierge is typing...</div>
         <div class="message-bubble" style="opacity:0.75; font-style:italic;">
-          Querying RAG knowledge & invoking model...
+          Consulting brand knowledge & generating response...
         </div>
       `;
       container.appendChild(row);
@@ -1322,10 +1229,10 @@
           </div>
         </div>
 
-        <!-- Card 7: Files & Chunks RAG -->
+        <!-- Card 7: Verified Knowledge Chunks -->
         <div class="diag-card">
           <div class="diag-card-title">
-            <span>Knowledge Chunks & Files (RAG)</span>
+            <span>Verified Knowledge & Catalog Match</span>
             <span>${chunks.length} chunks</span>
           </div>
           <div style="font-size:0.74rem; color:var(--text-muted); margin-bottom:4px;">
@@ -1334,16 +1241,16 @@
           ${chunksHtml}
         </div>
 
-        <!-- Card 8: Model Call Status -->
+        <!-- Card 8: AI Concierge Engine Status -->
         <div class="diag-card">
           <div class="diag-card-title">
-            <span>LLM Execution Status</span>
-            <span>${turn.model_called ? '🟢 Model Invoked' : '⚪ Model Not Invoked'}</span>
+            <span>AI Concierge Engine Status</span>
+            <span>${turn.model_called ? '🟢 Active' : '⚪ Cached / Static Rules'}</span>
           </div>
           <div class="kv-table">
-            <span class="kv-key">Model Provider:</span><span class="kv-val">${escapeHtml(state.modelConfig?.provider || 'gemini')}</span>
-            <span class="kv-key">Model Name:</span><span class="kv-val">${escapeHtml(turn.model_used || state.modelConfig?.model_name || 'N/A')}</span>
-            <span class="kv-key">Live Send:</span><span class="kv-val">🚫 BLOCKED (Internal playground session - will never post live)</span>
+            <span class="kv-key">Engine:</span><span class="kv-val">Vien Chi Bao AI Concierge</span>
+            <span class="kv-key">Guardrail:</span><span class="kv-val">Strict US Brand Voice & Policy Compliance</span>
+            <span class="kv-key">Live Send:</span><span class="kv-val">🚫 BLOCKED (Testing Sandbox - No live messages posted)</span>
           </div>
         </div>
       `;
@@ -2077,102 +1984,7 @@
     }
 
     /* ==========================================================================
-       Session Logs Modal Logic
-       ========================================================================== */
-    async function openLogsModal() {
-      const modal = document.getElementById('playground-logs-modal');
-      const listEl = document.getElementById('pg-logs-list');
-      if (!modal) return;
-      modal.style.display = 'flex';
-      listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:2rem;">⏳ Đang tải danh sách session...</div>';
 
-      try {
-        const res = await fetch('/api/chat-sessions?limit=50');
-        const data = await res.json();
-        const sessions = data.sessions || [];
-
-        if (sessions.length === 0) {
-          listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:2rem;">Chưa có session chat nào được lưu trong database. Hãy nhắn tin để tạo phiên chat!</div>';
-          return;
-        }
-
-        let html = '';
-        sessions.forEach(s => {
-          const isCurrent = s.id === state.sessionId;
-          const updated = s.updated_at ? new Date(s.updated_at).toLocaleString() : '';
-          html += `
-            <div style="background:#1e293b; border:1px solid ${isCurrent ? '#38bdf8' : '#334155'}; border-radius:8px; padding:0.9rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
-              <div style="flex:1; min-width:0;">
-                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-                  <strong style="color:${isCurrent ? '#38bdf8' : '#f8fafc'}; font-size:0.9rem;">${escapeHtml(s.id)}</strong>
-                  ${isCurrent ? '<span style="background:#0284c7; color:#fff; font-size:0.65rem; padding:0.1rem 0.4rem; border-radius:4px; font-weight:700;">Đang chat</span>' : ''}
-                  <span style="font-size:0.75rem; color:#94a3b8;">${escapeHtml(s.channel.toUpperCase())} · ${escapeHtml(s.platform.toUpperCase())}</span>
-                  <span style="background:#334155; color:#e2e8f0; font-size:0.7rem; padding:0.1rem 0.4rem; border-radius:10px; font-weight:700;">${s.turn_count || 1} turns</span>
-                </div>
-                <div style="font-size:0.8rem; color:#cbd5e1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                  Khách: <em>"${escapeHtml(s.last_message || '')}"</em>
-                </div>
-                <div style="font-size:0.75rem; color:#facc15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:0.2rem;">
-                  Bot: "${escapeHtml(s.last_reply || '')}"
-                </div>
-                <div style="font-size:0.7rem; color:#64748b; margin-top:0.2rem;">${updated}</div>
-              </div>
-              <button onclick="downloadSessionCsvDirect('${escapeHtml(s.id)}')" class="btn-action-small" style="background:#d97706; color:#fff; font-size:0.75rem; padding:0.35rem 0.7rem; white-space:nowrap; border:none; cursor:pointer;">
-                📥 CSV
-              </button>
-            </div>
-          `;
-        });
-        listEl.innerHTML = html;
-      } catch (err) {
-        listEl.innerHTML = `<div style="color:#ef4444; padding:1.5rem; text-align:center;">Lỗi: ${escapeHtml(err.message)}</div>`;
-      }
-    }
-
-    function closeLogsModal() {
-      const modal = document.getElementById('playground-logs-modal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    async function downloadSessionCsvDirect(sessionId) {
-      try {
-        const res = await fetch(`/api/chat-sessions/${sessionId}`);
-        if (!res.ok) throw new Error('Không tìm thấy session');
-        const data = await res.json();
-        const turns = data.turns || [];
-        if (turns.length === 0) {
-          showToast('Session này chưa có turns', 'warning');
-          return;
-        }
-
-        let csv = '\uFEFFTurn,Timestamp,KhachHang,BotReply,Intent,SanPham,Rule,Decision\n';
-        turns.forEach((t, i) => {
-          csv += [
-            t.turn_index || (i + 1),
-            `"${(t.timestamp || '').replace(/"/g, '""')}"`,
-            `"${(t.customer_message || t.user_message || '').replace(/"/g, '""')}"`,
-            `"${(t.bot_reply || t.reply || '').replace(/"/g, '""')}"`,
-            `"${(t.intent || '').replace(/"/g, '""')}"`,
-            `"${(t.matched_product || '').replace(/"/g, '""')}"`,
-            `"${(t.matched_rule || '').replace(/"/g, '""')}"`,
-            `"${(t.decision || '').replace(/"/g, '""')}"`
-          ].join(',') + '\n';
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `session_${sessionId}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        a.remove();
-        showToast('Đã tải CSV session thành công', 'success');
-      } catch (err) {
-        showToast('Lỗi export CSV: ' + err.message, 'error');
-      }
-    }
 
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -2542,24 +2354,7 @@
       </div>
     </div>
   </div>
-  <!-- Modal Xem Danh Sách Session Logs Trong Playground -->
-  <div id="playground-logs-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
-    <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; width:100%; max-width:850px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.6);">
-      <div style="padding:1rem 1.5rem; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <h3 style="margin:0; font-size:1.15rem; color:#f8fafc;">📜 Lịch Sử Chat Sessions &amp; Logs</h3>
-          <span style="font-size:0.75rem; color:#94a3b8;">Dữ liệu lưu trữ bền vững (Hỗ trợ Cloud PostgreSQL &amp; SQLite)</span>
-        </div>
-        <button onclick="closeLogsModal()" style="background:transparent; border:none; color:#94a3b8; font-size:1.4rem; cursor:pointer;">✕</button>
-      </div>
-      <div id="pg-logs-list" style="padding:1.25rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.75rem;">
-        <div style="text-align:center; color:#94a3b8; padding:2rem;">Đang tải danh sách session...</div>
-      </div>
-      <div style="padding:0.75rem 1.5rem; border-top:1px solid #334155; display:flex; justify-content:flex-end;">
-        <button onclick="closeLogsModal()" class="btn-action-small" style="background:#334155; color:#fff;">Đóng</button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
