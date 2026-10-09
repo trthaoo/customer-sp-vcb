@@ -43,6 +43,11 @@ STATIC_DIR.mkdir(parents=True, exist_ok=True)
 _AUTH_PASS = os.getenv("BASIC_AUTH_PASS", "")
 _AUTH_HEADER = "Basic " + base64.b64encode(f"{os.getenv('BASIC_AUTH_USER', '')}:{_AUTH_PASS}".encode()).decode()
 _PUBLIC_PATHS = {"/api/health", "/webhooks/zernio", "/api/posthog/config"}
+# The ops console and session logs need the separate admin login when ADMIN_PASS is set.
+# The admin login also works on every tester page.
+_ADMIN_PASS = os.getenv("ADMIN_PASS", "")
+_ADMIN_HEADER = "Basic " + base64.b64encode(f"{os.getenv('ADMIN_USER', '')}:{_ADMIN_PASS}".encode()).decode()
+_ADMIN_PREFIXES = ("/ops", "/console", "/api/metrics", "/api/handover", "/api/events", "/api/chat-sessions", "/api/chat-backups")
 
 def _inject_posthog_runtime(html_content: str) -> str:
     """Inject runtime PostHog configuration script tag into HTML head."""
@@ -59,9 +64,12 @@ def _inject_posthog_runtime(html_content: str) -> str:
 
 @app.middleware("http")
 async def basic_auth(request: Request, call_next):
-    if _AUTH_PASS and request.url.path not in _PUBLIC_PATHS:
+    path = request.url.path
+    if _AUTH_PASS and path not in _PUBLIC_PATHS:
         given = request.headers.get("authorization", "").encode()
-        if not secrets.compare_digest(given, _AUTH_HEADER.encode()):
+        is_admin = bool(_ADMIN_PASS) and secrets.compare_digest(given, _ADMIN_HEADER.encode())
+        admin_only = bool(_ADMIN_PASS) and path.startswith(_ADMIN_PREFIXES)
+        if not is_admin and (admin_only or not secrets.compare_digest(given, _AUTH_HEADER.encode())):
             return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="vcb"'})
     return await call_next(request)
 

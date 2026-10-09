@@ -117,3 +117,6 @@ Toàn bộ `data/` (chat sessions trong `events.db`, golden examples, failed cas
 
 ### RAG
 Embedding chạy bằng model local `paraphrase-multilingual-mpnet-base-v2`, qua service `embbridge` trên VPS (`127.0.0.1:8789`). Không cần API key. Khi file trong `knowledge/` thay đổi, lần chat đầu tiên sau deploy sẽ embed lại các đoạn vừa sửa.
+
+### Xem log session
+Trang `https://62-106-66-4.sslip.io/ops` hiển thị chat sessions, transcript, handover và metrics. Trang này dùng tài khoản admin riêng (`ADMIN_USER` / `ADMIN_PASS` trong `/etc/vcb.env` trên VPS). Tài khoản `tester` không mở được trang này, cũng không gọi được các API log. Tài khoản admin thì vẫn vào được `/playground`.
