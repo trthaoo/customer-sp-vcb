@@ -38,7 +38,8 @@ class Handler(BaseHTTPRequestHandler):
             texts = [req["input"]] if isinstance(req["input"], str) else list(req["input"])
         except (ValueError, KeyError, TypeError):
             return self._send(400, {"error": "expected JSON with 'input'"})
-        vectors = model.embed(texts)
+        # Small internal batches keep ONNX peak memory low on a shared VPS.
+        vectors = model.embed(texts, batch_size=4)
         data = [{"object": "embedding", "index": i, "embedding": v.tolist()} for i, v in enumerate(vectors)]
         self._send(200, {"object": "list", "model": MODEL, "data": data})
 
