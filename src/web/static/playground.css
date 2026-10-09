@@ -1400,3 +1400,308 @@ header.playground-header {
   from { transform: translateX(30px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
+
+/* ==========================================================================
+   Chat Multimodal Attachments (Images, Videos, Links, Drag & Drop)
+   ========================================================================== */
+
+/* Quick prompts media pills */
+.prompt-pill.pill-media {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  font-weight: 600;
+}
+.prompt-pill.pill-media:hover {
+  background: #e2e8f0;
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Attachment Buttons beside Chat Textarea */
+.chat-attach-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f1f5f9;
+  padding: 0.25rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  height: 44px;
+}
+
+.btn-chat-attach {
+  background: transparent;
+  border: none;
+  font-size: 1.15rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-chat-attach:hover {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.btn-chat-attach:active {
+  transform: scale(0.95);
+}
+
+/* Attachment Preview Bar above Textarea */
+.chat-attachment-bar {
+  background: #ffffff;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  animation: slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.attachment-preview-content {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.attachment-preview-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f1f5f9;
+  border: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.attachment-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.attachment-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.attachment-type-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.attachment-type-badge.image {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.attachment-type-badge.video {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.attachment-type-badge.link {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.attachment-status-text {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.attachment-name-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-clear-attachment {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-clear-attachment:hover {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+/* Drag and drop active on chat input area */
+.chat-input-area.drag-active {
+  background: #eff6ff !important;
+  border: 2px dashed #3b82f6 !important;
+  border-radius: 12px;
+}
+
+/* Customer message attachment bubbles */
+.customer-attachment-card {
+  margin-bottom: 0.4rem;
+  max-width: 300px;
+  animation: fadeIn 0.2s ease;
+}
+
+.customer-attachment-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.customer-attachment-preview-img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.customer-attachment-preview-img:hover {
+  transform: scale(1.02);
+}
+
+.customer-attachment-video {
+  width: 100%;
+  max-height: 240px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: #000000;
+  display: block;
+}
+
+.customer-link-box {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.customer-link-box:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.customer-link-icon {
+  font-size: 1.25rem;
+}
+
+.customer-link-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.customer-link-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-link-url {
+  font-size: 0.7rem;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: underline;
+}
+
+/* Sample link items inside modal */
+.sample-link-item {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sample-link-item:hover {
+  background: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+
+.sample-link-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.sample-link-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.sample-link-info strong {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-main);
+}
+
+.sample-link-info small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -137,22 +137,73 @@
       </div>
 
       <!-- Chat Input Area -->
-      <div class="chat-input-area">
-        <!-- Quick Product Questions (US Market English) -->
+      <div class="chat-input-area" id="chat-input-area">
+        <!-- Quick Product Questions & Multimodal Test Presets -->
         <div class="quick-prompts-row">
           <button class="prompt-pill" onclick="sendQuickPrompt('How much is the Four-Leaf Clover Spinning Ring?')">💍 Clover Ring Price</button>
           <button class="prompt-pill" onclick="sendQuickPrompt('What material is the lotus petal pendant made of?')">🌿 Lotus Pendant Craft</button>
           <button class="prompt-pill" onclick="sendQuickPrompt('Do you have size 8 for the spinning meditation ring?')">📏 US Ring Sizing</button>
           <button class="prompt-pill" onclick="sendQuickPrompt('How long does shipping take to California and what are the fees?')">🚚 US Shipping &amp; Delivery</button>
-          <button class="prompt-pill" onclick="sendQuickPrompt('How much is the gold rutilated quartz ring?')">⚠️ Test Missing Price</button>
+          <button class="prompt-pill pill-media" onclick="quickAttachProductImage('N0006-07-S-WH', 'Four-Leaf Clover Spinning Ring')" title="Đính kèm ảnh nhẫn cỏ 4 lá và test hỏi giá">
+            🖼️ Test Gửi Ảnh Nhẫn
+          </button>
+          <button class="prompt-pill pill-media" onclick="quickAttachProductImage('D0001-00-S-BL', 'Lotus Pendant')" title="Đính kèm ảnh mặt dây chuyền sen">
+            🖼️ Test Gửi Ảnh Mặt Sen
+          </button>
+          <button class="prompt-pill pill-media" onclick="quickAttachProductLink('https://vienchibao.com/products/spinning-ring', 'Four-Leaf Clover Spinning Ring')" title="Gửi link sản phẩm nhẫn cỏ 4 lá">
+            🔗 Test Gửi Link Nhẫn
+          </button>
+          <button class="prompt-pill pill-media" onclick="quickAttachProductLink('https://vienchibao.com/policies/warranty', 'US Warranty Policy')" title="Gửi link chính sách bảo hành">
+            🔗 Test Link Bảo Hành
+          </button>
+          <button class="prompt-pill pill-media" onclick="triggerChatUpload('video')" title="Gửi video clip test quay nhẫn / trang sức">
+            🎥 Test Gửi Video
+          </button>
         </div>
 
+        <!-- Attachment Preview Bar (Above Input Box) -->
+        <div id="chat-attachment-bar" class="chat-attachment-bar" style="display:none;">
+          <div class="attachment-preview-content">
+            <div id="attachment-preview-thumb" class="attachment-preview-thumb"></div>
+            <div class="attachment-meta">
+              <div class="attachment-badge-row">
+                <span id="attachment-type-badge" class="attachment-type-badge image">🖼️ Image</span>
+                <span id="attachment-status-text" class="attachment-status-text">Ready to send</span>
+              </div>
+              <div id="attachment-name-text" class="attachment-name-text">filename.jpg</div>
+            </div>
+          </div>
+          <button type="button" class="btn-clear-attachment" onclick="clearChatAttachment()" title="Bỏ đính kèm">
+            ✕ Bỏ đính kèm
+          </button>
+        </div>
+
+        <!-- Input Box Row -->
         <div class="input-box-row">
+          <!-- Attachment Buttons -->
+          <div class="chat-attach-btn-group" title="Đính kèm file hoặc link vào tin nhắn">
+            <button type="button" class="btn-chat-attach" id="btn-attach-image" onclick="triggerChatUpload('image')" title="Gửi ảnh (JPG, PNG, WebP) hoặc dán Ctrl+V">
+              🖼️
+            </button>
+            <button type="button" class="btn-chat-attach" id="btn-attach-video" onclick="triggerChatUpload('video')" title="Gửi video clip (MP4, WebM, MOV)">
+              🎥
+            </button>
+            <button type="button" class="btn-chat-attach" id="btn-attach-link" onclick="openLinkModal()" title="Gửi link sản phẩm / website / MXH">
+              🔗
+            </button>
+            <input 
+              type="file" 
+              id="chat-upload-input" 
+              style="display:none;" 
+              onchange="handleChatFileUpload(event)">
+          </div>
+
           <textarea 
             id="chat-input" 
             class="chat-textarea" 
             rows="1" 
-            placeholder="Chat as a US customer... (Press Enter to send, Shift+Enter for new line)"></textarea>
+            placeholder="Chat as customer... (Hỗ trợ text, link 🔗, gửi ảnh 🖼️, video 🎥 hoặc dán Ctrl+V)"></textarea>
+          
           <button class="btn-send" id="btn-send-message" onclick="handleSendClick()">
             <span>Send</span> ➤
           </button>
@@ -190,7 +241,8 @@
       selectedTurnIndex: null,
       modelConfig: null,
       mediaCacheId: null,
-      attachedFrames: []
+      attachedFrames: [],
+      chatAttachment: null
     };
 
     async function handleMediaUpload(event) {
@@ -373,18 +425,245 @@
       document.getElementById('btn-surf-dm').classList.toggle('active', surface === 'dm');
     }
 
+    // ==========================================================================
+    // Multimodal Chat Attachments (Images, Videos, Links, Paste, Drag & Drop)
+    // ==========================================================================
+    function triggerChatUpload(type) {
+      const fileInput = document.getElementById('chat-upload-input');
+      if (!fileInput) return;
+      if (type === 'video') {
+        fileInput.accept = 'video/mp4,video/quicktime,video/webm';
+      } else {
+        fileInput.accept = 'image/jpeg,image/png,image/webp,image/gif';
+      }
+      fileInput.setAttribute('data-target-type', type);
+      fileInput.click();
+    }
+
+    function handleChatFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const targetType = event.target.getAttribute('data-target-type') || (file.type.includes('video') ? 'video' : 'image');
+      uploadChatMediaFile(file, targetType);
+      event.target.value = '';
+    }
+
+    async function uploadChatMediaFile(file, type) {
+      const previewBar = document.getElementById('chat-attachment-bar');
+      const typeBadge = document.getElementById('attachment-type-badge');
+      const statusText = document.getElementById('attachment-status-text');
+      const nameText = document.getElementById('attachment-name-text');
+      const thumbEl = document.getElementById('attachment-preview-thumb');
+
+      previewBar.style.display = 'flex';
+      typeBadge.textContent = type === 'video' ? '🎥 Video' : '🖼️ Image';
+      typeBadge.className = `attachment-type-badge ${type}`;
+      statusText.textContent = '⏳ Đang upload & xử lý frames...';
+      nameText.textContent = file.name;
+      nameText.title = file.name;
+
+      // Local preview URL
+      const localUrl = URL.createObjectURL(file);
+      if (type === 'video') {
+        thumbEl.innerHTML = `<video src="${localUrl}" style="width:100%; height:100%; object-fit:cover;" muted></video>`;
+      } else {
+        thumbEl.innerHTML = `<img src="${localUrl}" style="width:100%; height:100%; object-fit:cover;" />`;
+      }
+
+      const formData = new FormData();
+      formData.append('files', file);
+
+      try {
+        const res = await fetch('/api/playground/upload_media', {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        const data = await res.json();
+        state.chatAttachment = {
+          type: data.media_type || type,
+          url: data.preview_url || localUrl,
+          name: file.name,
+          mediaCacheId: data.media_cache_id,
+          frameCount: data.frame_count || 0
+        };
+        statusText.textContent = `✓ Sẵn sàng (${data.frame_count} frames trích xuất)`;
+        showToast(`Đã đính kèm ${type === 'video' ? 'video' : 'ảnh'}: ${file.name}`, 'success');
+      } catch (err) {
+        statusText.textContent = `❌ Lỗi: ${err.message}`;
+        state.chatAttachment = {
+          type: type,
+          url: localUrl,
+          name: file.name,
+          mediaCacheId: null
+        };
+        showToast('Không thể upload lên server, dùng preview cục bộ: ' + err.message, 'info');
+      }
+    }
+
+    function clearChatAttachment() {
+      state.chatAttachment = null;
+      const previewBar = document.getElementById('chat-attachment-bar');
+      if (previewBar) previewBar.style.display = 'none';
+      const fileInput = document.getElementById('chat-upload-input');
+      if (fileInput) fileInput.value = '';
+    }
+
+    function quickAttachProductImage(productId, productName) {
+      const imgUrl = `/static/products/${productId}.jpg`;
+      const previewBar = document.getElementById('chat-attachment-bar');
+      const typeBadge = document.getElementById('attachment-type-badge');
+      const statusText = document.getElementById('attachment-status-text');
+      const nameText = document.getElementById('attachment-name-text');
+      const thumbEl = document.getElementById('attachment-preview-thumb');
+
+      previewBar.style.display = 'flex';
+      typeBadge.textContent = '🖼️ Ảnh Sản Phẩm';
+      typeBadge.className = 'attachment-type-badge image';
+      statusText.textContent = '✓ Ảnh Catalogue VCB';
+      nameText.textContent = `${productName} (${productId})`;
+      nameText.title = `${productName} (${productId})`;
+      thumbEl.innerHTML = `<img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='/static/products/${productId}.png'" />`;
+
+      state.chatAttachment = {
+        type: 'image',
+        url: imgUrl,
+        name: `${productName} (${productId})`,
+        mediaCacheId: null
+      };
+
+      const input = document.getElementById('chat-input');
+      if (!input.value.trim()) {
+        input.value = `Shop ơi mẫu này còn size không, giá bao nhiêu ạ?`;
+      }
+      input.focus();
+      showToast(`Đã đính kèm ảnh: ${productName}`, 'success');
+    }
+
+    function quickAttachProductLink(url, title) {
+      attachLinkToChat(url, title);
+      const input = document.getElementById('chat-input');
+      if (!input.value.trim()) {
+        input.value = `Shop ơi mình muốn hỏi về sản phẩm trong link này`;
+      }
+      input.focus();
+      showToast(`Đã đính kèm link: ${title || url}`, 'success');
+    }
+
+    function attachLinkToChat(url, title) {
+      const previewBar = document.getElementById('chat-attachment-bar');
+      const typeBadge = document.getElementById('attachment-type-badge');
+      const statusText = document.getElementById('attachment-status-text');
+      const nameText = document.getElementById('attachment-name-text');
+      const thumbEl = document.getElementById('attachment-preview-thumb');
+
+      previewBar.style.display = 'flex';
+      typeBadge.textContent = '🔗 Link';
+      typeBadge.className = 'attachment-type-badge link';
+      statusText.textContent = '✓ Sẵn sàng gửi';
+      nameText.textContent = title ? `${title} (${url})` : url;
+      nameText.title = url;
+      thumbEl.innerHTML = `<span style="font-size:1.3rem;">🔗</span>`;
+
+      state.chatAttachment = {
+        type: 'link',
+        url: url,
+        name: title || url
+      };
+    }
+
+    function openLinkModal() {
+      const modal = document.getElementById('modal-attach-link');
+      if (modal) modal.style.display = 'flex';
+      const urlInput = document.getElementById('input-custom-link-url');
+      if (urlInput) {
+        urlInput.value = '';
+        setTimeout(() => urlInput.focus(), 80);
+      }
+    }
+
+    function closeLinkModal() {
+      const modal = document.getElementById('modal-attach-link');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function selectSampleLink(url, title) {
+      document.getElementById('input-custom-link-url').value = url;
+      document.getElementById('input-custom-link-title').value = title;
+    }
+
+    function confirmAttachLink() {
+      const url = document.getElementById('input-custom-link-url').value.trim();
+      const title = document.getElementById('input-custom-link-title').value.trim();
+      if (!url) {
+        alert('Vui lòng nhập đường dẫn liên kết (URL)!');
+        return;
+      }
+      attachLinkToChat(url, title);
+      closeLinkModal();
+      const input = document.getElementById('chat-input');
+      input.focus();
+      showToast('Đã đính kèm liên kết vào tin nhắn!', 'success');
+    }
+
     function setupInputHandlers() {
       const input = document.getElementById('chat-input');
+      const dropArea = document.getElementById('chat-input-area');
+
+      // Keydown send / newline
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           handleSendClick();
         }
       });
+
+      // Auto-resize
       input.addEventListener('input', () => {
         input.style.height = 'auto';
         input.style.height = Math.min(input.scrollHeight, 120) + 'px';
       });
+
+      // Paste screenshot or image from clipboard (Ctrl+V)
+      input.addEventListener('paste', (e) => {
+        const items = (e.clipboardData || window.clipboardData)?.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
+            if (blob) {
+              e.preventDefault();
+              uploadChatMediaFile(blob, 'image');
+              return;
+            }
+          }
+        }
+      });
+
+      // Drag & drop support
+      if (dropArea) {
+        ['dragenter', 'dragover'].forEach(name => {
+          dropArea.addEventListener(name, (e) => {
+            e.preventDefault();
+            dropArea.classList.add('drag-active');
+          });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+          dropArea.addEventListener(name, (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('drag-active');
+          });
+        });
+        dropArea.addEventListener('drop', (e) => {
+          const dt = e.dataTransfer;
+          if (dt && dt.files && dt.files.length > 0) {
+            const file = dt.files[0];
+            const isVid = file.type.includes('video') || file.name.match(/\.(mp4|mov|webm)$/i);
+            uploadChatMediaFile(file, isVid ? 'video' : 'image');
+          }
+        });
+      }
     }
 
     function sendQuickPrompt(text) {
@@ -395,22 +674,34 @@
     async function handleSendClick() {
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
-      if (!text) return;
+      const currentAttach = state.chatAttachment ? { ...state.chatAttachment } : null;
+
+      if (!text && !currentAttach) return;
+
+      const effectiveText = text || (
+        currentAttach.type === 'image' 
+          ? '[Khách gửi 1 hình ảnh sản phẩm]' 
+          : currentAttach.type === 'video' 
+            ? '[Khách gửi 1 video clip]' 
+            : `[Khách gửi liên kết: ${currentAttach.name || currentAttach.url}]`
+      );
 
       const captionInput = document.getElementById('post-caption-input');
       const postContext = captionInput.value.trim() || null;
 
       input.value = '';
       input.style.height = '44px';
+      clearChatAttachment();
 
       const sendBtn = document.getElementById('btn-send-message');
       sendBtn.disabled = true;
 
-      // Render customer message
+      // Render customer message with attachment
       appendMessageToThread({
         role: 'user',
-        text: text,
-        sender: 'Customer (You)'
+        text: effectiveText,
+        sender: 'Customer (You)',
+        attachment: currentAttach
       });
 
       // Show typing indicator
@@ -422,10 +713,14 @@
           channel: state.channel,
           platform: state.platform,
           surface: state.surface,
-          text: text,
+          text: effectiveText,
           post_context: postContext,
           media_cache_id: state.mediaCacheId,
-          history: state.history
+          history: state.history,
+          attachment_url: currentAttach ? currentAttach.url : null,
+          attachment_type: currentAttach ? currentAttach.type : null,
+          attachment_name: currentAttach ? currentAttach.name : null,
+          chat_media_cache_id: currentAttach ? currentAttach.mediaCacheId : null
         };
 
         const res = await fetch('/api/playground/chat', {
@@ -445,7 +740,8 @@
         const turnData = {
           turnIndex: turnIndex,
           timestamp: new Date().toLocaleTimeString('en-US'),
-          customerMessage: text,
+          customerMessage: effectiveText,
+          attachment: currentAttach,
           botReply: data.reply,
           channel: state.channel,
           platform: state.platform,
@@ -457,7 +753,7 @@
         state.turns.push(turnData);
 
         // Update multi-turn history
-        state.history.push({ role: 'user', content: text });
+        state.history.push({ role: 'user', content: effectiveText });
         state.history.push({ role: 'assistant', content: data.reply });
 
         // Render Bot Reply with human sequential texting rhythm
@@ -610,7 +906,7 @@
       return row;
     }
 
-    function appendMessageToThread({ role, text, sender, turnIndex, statusBadge, isError, attachedImageUrl }) {
+    function appendMessageToThread({ role, text, sender, turnIndex, statusBadge, isError, attachedImageUrl, attachment }) {
       const container = document.getElementById('chat-messages');
       const row = document.createElement('div');
       row.className = `message-row ${role}`;
@@ -623,9 +919,42 @@
       meta.textContent = sender;
       row.appendChild(meta);
 
+      // Render customer attachment if present
+      if (role === 'user' && attachment && (attachment.url || attachment.mediaCacheId)) {
+        const attachCard = document.createElement('div');
+        attachCard.className = `customer-attachment-card ${attachment.type}-card`;
+
+        if (attachment.type === 'image') {
+          attachCard.innerHTML = `
+            <div class="customer-attachment-badge">🖼️ Ảnh: ${escapeHtml(attachment.name || 'Ảnh đính kèm')}</div>
+            <img src="${attachment.url}" alt="Customer Photo" class="customer-attachment-preview-img" onclick="window.open('${attachment.url}', '_blank')" />
+          `;
+        } else if (attachment.type === 'video') {
+          attachCard.innerHTML = `
+            <div class="customer-attachment-badge">🎥 Video: ${escapeHtml(attachment.name || 'Video đính kèm')}</div>
+            <video src="${attachment.url}" controls playsinline class="customer-attachment-video"></video>
+          `;
+        } else if (attachment.type === 'link') {
+          attachCard.innerHTML = `
+            <div class="customer-link-box" onclick="window.open('${attachment.url}', '_blank')">
+              <div class="customer-link-icon">🔗</div>
+              <div class="customer-link-content">
+                <div class="customer-link-title">${escapeHtml(attachment.name || 'Liên kết')}</div>
+                <div class="customer-link-url">${escapeHtml(attachment.url)} ↗</div>
+              </div>
+            </div>
+          `;
+        }
+        row.appendChild(attachCard);
+      }
+
       const bubbles = parseBubbles(text);
 
       bubbles.forEach(bubbleText => {
+        // If message is just placeholder for attachment and we already rendered the card, avoid duplicate text bubble
+        if (attachment && (bubbleText === '[Khách gửi 1 hình ảnh sản phẩm]' || bubbleText === '[Khách gửi 1 video clip]' || bubbleText.startsWith('[Khách gửi liên kết:'))) {
+          return;
+        }
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         bubble.textContent = bubbleText;
@@ -805,6 +1134,63 @@
         `;
       }
 
+      let attachmentCardHtml = '';
+      const att = turn.attachment || (turn.attachment_url ? {
+        type: turn.attachment_type,
+        url: turn.attachment_url,
+        name: turn.attachment_name
+      } : null);
+
+      if (att) {
+        const typeLabels = {
+          image: '🖼️ Ảnh Sản Phẩm (Customer Photo)',
+          video: '🎥 Video Clip (Customer Video)',
+          link: '🔗 Đường Dẫn Liên Kết (Link URL)'
+        };
+        let previewHtml = '';
+        if (att.type === 'image' && att.url) {
+          previewHtml = `
+            <div style="margin-top:8px;">
+              <img src="${att.url}" alt="Attachment preview" style="max-height:140px; max-width:100%; border-radius:8px; border:1px solid var(--panel-border); cursor:pointer;" onclick="window.open('${att.url}', '_blank')" />
+            </div>
+          `;
+        } else if (att.type === 'video' && att.url) {
+          previewHtml = `
+            <div style="margin-top:8px;">
+              <video src="${att.url}" controls style="max-height:160px; max-width:100%; border-radius:8px; border:1px solid var(--panel-border); background:#000;"></video>
+            </div>
+          `;
+        } else if (att.type === 'link' && att.url) {
+          previewHtml = `
+            <div style="margin-top:8px; padding:8px 10px; background:#f8fafc; border:1px solid var(--panel-border); border-radius:8px;">
+              <a href="${att.url}" target="_blank" style="color:var(--primary); font-size:0.78rem; word-break:break-all; font-weight:600;">${att.url} ↗</a>
+            </div>
+          `;
+        }
+
+        attachmentCardHtml = `
+          <div class="diag-card">
+            <div class="diag-card-title">
+              <span>📎 Customer Chat Attachment</span>
+              <span class="attachment-type-badge ${att.type || 'link'}">${(att.type || 'link').toUpperCase()}</span>
+            </div>
+            <div class="kv-table">
+              <span class="kv-key">Attachment Type:</span>
+              <span class="kv-val">${typeLabels[att.type] || att.type}</span>
+
+              <span class="kv-key">Name / URL:</span>
+              <span class="kv-val" style="word-break:break-all;">${escapeHtml(att.name || att.url)}</span>
+
+              ${turn.attached_frames_count ? `
+                <span class="kv-key">Extracted Frames:</span>
+                <span class="kv-val highlight">🎬 ${turn.attached_frames_count} frames analyzed by AI Vision</span>
+              ` : ''}
+            </div>
+            ${previewHtml}
+          </div>
+        `;
+      }
+
       container.innerHTML = `
         <!-- Card 1: Status Badge -->
         <div class="diag-card">
@@ -820,6 +1206,8 @@
             </div>
           </div>
         </div>
+
+        ${attachmentCardHtml}
 
         <!-- Card: Post & Visual Context -->
         <div class="diag-card">
@@ -1785,6 +2173,20 @@
         showToast('Lỗi export CSV: ' + err.message, 'error');
       }
     }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        setTimeout(() => toast.remove(), 250);
+      }, 3000);
+    }
   </script>
 
 
@@ -2058,6 +2460,88 @@
         <button class="btn-action-small" onclick="closeCaseHubModal()">Đóng</button>
       </div>
     </div>
+  </div>
+
+  <!-- Modal Gửi Link Khách Hàng (Multimodal Link Input) -->
+  <div id="modal-attach-link" class="modal-backdrop" style="display:none;">
+    <div class="modal-dialog" style="max-width:560px;">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3><span>🔗</span> Gửi Link Khách Hàng (Sản Phẩm / MXH / Web)</h3>
+          <div class="modal-subtitle">Đính kèm URL sản phẩm, post Instagram/TikTok hoặc link website để AI phân tích</div>
+        </div>
+        <button class="modal-close-btn" onclick="closeLinkModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label" for="input-custom-link-url">
+            <span>Đường dẫn liên kết (URL) <span class="req">*</span></span>
+          </label>
+          <input 
+            type="url" 
+            id="input-custom-link-url" 
+            class="form-input" 
+            placeholder="https://vienchibao.com/products/spinning-ring hoặc link bài viết..." 
+            style="width:100%;" />
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label" for="input-custom-link-title">
+            <span>Tiêu đề / Tên mô tả link (tùy chọn)</span>
+          </label>
+          <input 
+            type="text" 
+            id="input-custom-link-title" 
+            class="form-input" 
+            placeholder="Ví dụ: Nhẫn cỏ 4 lá xoay S925, Post Reel Instagram..." 
+            style="width:100%;" />
+        </div>
+
+        <!-- Gợi ý link mẫu catalogue để test nhanh -->
+        <div style="margin-top:1rem; border-top:1px solid var(--panel-border); padding-top:0.85rem;">
+          <div style="font-size:0.75rem; font-weight:700; color:var(--text-dim); margin-bottom:0.6rem;">
+            ⚡ Chọn nhanh link mẫu trong catalogue:
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/products/spinning-ring', 'Nhẫn Bạc Cỏ 4 Lá Xoay Trầm Hương')">
+              <span class="sample-link-icon">💍</span>
+              <div class="sample-link-info">
+                <strong>Nhẫn Cỏ 4 Lá Xoay Trầm Hương</strong>
+                <small>https://vienchibao.com/products/spinning-ring</small>
+              </div>
+            </button>
+            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/products/lotus-pendant', 'Mặt Dây Chuyền Bạc Hoa Sen Khắc Chú')">
+              <span class="sample-link-icon">🌿</span>
+              <div class="sample-link-info">
+                <strong>Mặt Dây Chuyền Bạc Hoa Sen</strong>
+                <small>https://vienchibao.com/products/lotus-pendant</small>
+              </div>
+            </button>
+            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/products/N0006-07-S-WH', 'Sản phẩm SKU: N0006-07-S-WH')">
+              <span class="sample-link-icon">🏷️</span>
+              <div class="sample-link-info">
+                <strong>Link theo Product ID (N0006-07-S-WH)</strong>
+                <small>https://vienchibao.com/products/N0006-07-S-WH</small>
+              </div>
+            </button>
+            <button type="button" class="sample-link-item" onclick="selectSampleLink('https://vienchibao.com/policies/warranty', 'Chính Sách Bảo Hành & Đổi Trả US')">
+              <span class="sample-link-icon">📜</span>
+              <div class="sample-link-info">
+                <strong>Chính Sách Bảo Hành &amp; Đổi Trả</strong>
+                <small>https://vienchibao.com/policies/warranty</small>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:0.5rem;">
+        <button class="btn-action-small" onclick="closeLinkModal()">Hủy</button>
+        <button class="btn-action-small primary" onclick="confirmAttachLink()" style="background:var(--primary); color:#fff;">
+          ✓ Đính Kèm Link Này
+        </button>
+      </div>
+    </div>
+  </div>
   <!-- Modal Xem Danh Sách Session Logs Trong Playground -->
   <div id="playground-logs-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
     <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; width:100%; max-width:850px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.6);">

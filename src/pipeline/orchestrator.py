@@ -32,7 +32,7 @@ class PipelineOrchestrator:
 
     def process(self, inbound: InboundMessage) -> PipelineResult:
         # Step 1: Media processing if not already extracted
-        if not inbound.frames and (inbound.media_url or inbound.carousel_urls):
+        if not inbound.frames and (inbound.media_url or inbound.carousel_urls) and inbound.media_type != "link":
             extracted_frames, missing = self.media_processor.process_media(
                 post_id=inbound.post_id,
                 media_url=inbound.media_url,
@@ -40,7 +40,7 @@ class PipelineOrchestrator:
                 media_type=inbound.media_type
             )
             inbound.frames = extracted_frames
-            if missing:
+            if missing and inbound.surface == "comment":
                 inbound.context_missing = True
 
         comment_needs_media = (inbound.surface == "comment" and comment_depends_on_media(inbound.text))

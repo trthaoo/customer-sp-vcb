@@ -165,16 +165,24 @@ class ProductMatcher:
         if not search_text:
             return []
         matches: List[Product] = []
+        # Pre-clean search text variants (including unhyphenated URL slugs)
+        search_variants = [
+            search_text,
+            re.sub(r'[-_/]', ' ', search_text)
+        ]
         for p in self.products:
-            names_to_check = [p.name] + (p.aliases or [])
+            names_to_check = [p.name, p.id] + (p.aliases or [])
             is_matched = False
             for alias in names_to_check:
                 alias_norm = normalize_text(alias)
-                if not alias_norm:
+                if not alias_norm or len(alias_norm) < 2:
                     continue
                 pattern = r'(?:\b|\W|^)' + re.escape(alias_norm) + r'(?:\b|\W|$)'
-                if re.search(pattern, search_text, re.IGNORECASE):
-                    is_matched = True
+                for text_var in search_variants:
+                    if re.search(pattern, text_var, re.IGNORECASE):
+                        is_matched = True
+                        break
+                if is_matched:
                     break
             if is_matched:
                 matches.append(p)

@@ -7,11 +7,12 @@ import json
 import uuid
 import shutil
 import asyncio
+import re
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List, Literal
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException, Header, Query, UploadFile, File
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -59,6 +60,10 @@ class PlaygroundChatRequest(BaseModel):
     session_id: Optional[str] = None
     user_name: Optional[str] = "Khách Hàng (Brand Test)"
     history: List[Dict[str, str]] = Field(default_factory=list)
+    attachment_url: Optional[str] = None
+    attachment_type: Optional[str] = None  # 'image', 'video', 'link'
+    attachment_name: Optional[str] = None
+    chat_media_cache_id: Optional[str] = None
 
 class ExportTurnItem(BaseModel):
     turn_index: int
@@ -281,6 +286,27 @@ async def playground_page():
             return HTMLResponse(content=f.read())
     return HTMLResponse("<h3>Playground UI not installed yet.</h3>")
 
+@app.get("/api/playground/media/{session_id}/{filename}")
+async def get_playground_media(session_id: str, filename: str):
+    processor = get_media_processor()
+    safe_session = re.sub(r'[^a-zA-Z0-9_\-]', '_', session_id)
+    safe_file = Path(filename).name
+    file_path = processor.cache_dir / safe_session / safe_file
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Media file not found")
+    ext = file_path.suffix.lower()
+    media_types = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".gif": "image/gif",
+        ".mp4": "video/mp4",
+        ".webm": "video/webm",
+        ".mov": "video/quicktime",
+    }
+    return FileResponse(file_path, media_type=media_types.get(ext, "application/octet-stream"))
+
 @app.post("/api/playground/upload_media")
 async def playground_upload_media(
     files: List[UploadFile] = File(...)
@@ -303,8 +329,17 @@ async def playground_upload_media(
         local_files=saved_paths
     )
 
+    primary_file = saved_paths[0] if saved_paths else None
+    ext = primary_file.suffix.lower() if primary_file else ""
+    is_video = ext in (".mp4", ".mov", ".avi", ".mkv", ".webm")
+    media_type = "video" if is_video else "image"
+    preview_url = f"/api/playground/media/{session_id}/{primary_file.name}" if primary_file else None
+
     return {
         "media_cache_id": session_id,
+        "media_type": media_type,
+        "filename": primary_file.name if primary_file else "upload",
+        "preview_url": preview_url,
         "frame_count": len(frames),
         "timestamps": [f.label for f in frames],
         "context_missing": context_missing,
@@ -322,23 +357,51 @@ async def playground_upload_media(
 @app.post("/api/playground/chat")
 async def playground_chat(body: PlaygroundChatRequest):
     orchestrator = get_orchestrator()
+    processor = get_media_processor()
     msg_id = f"brand_test_{int(datetime.now(timezone.utc).timestamp()*1000)}"
 
     frames = []
     context_missing = False
+
+    # 1. Post media context (if provided in top config bar)
     if body.media_cache_id:
-        processor = get_media_processor()
-        frames, context_missing = processor.process_media(post_id=body.media_cache_id)
+        post_frames, c_missing = processor.process_media(post_id=body.media_cache_id)
+        frames.extend(post_frames)
+        if c_missing:
+            context_missing = True
     elif body.surface == "comment":
         context_missing = True
+
+    # 2. Chat message media attachment (customer sends photo/video/link in chat turn)
+    if body.chat_media_cache_id:
+        chat_frames, _ = processor.process_media(post_id=body.chat_media_cache_id)
+        if chat_frames:
+            frames.extend(chat_frames)
+            context_missing = False
+    elif body.attachment_url and body.attachment_type in ("image", "video"):
+        chat_frames, _ = processor.process_media(
+            media_url=body.attachment_url,
+            media_type=body.attachment_type
+        )
+        if chat_frames:
+            frames.extend(chat_frames)
+            context_missing = False
+
+    # 3. Handle link in text: if user provided link attachment, ensure text references it
+    effective_text = body.text
+    if body.attachment_url and body.attachment_type == "link":
+        if body.attachment_url not in effective_text:
+            effective_text = f"{effective_text} {body.attachment_url}".strip()
 
     inbound = InboundMessage(
         id=msg_id,
         platform=body.platform,
         channel=body.channel,
         surface=body.surface,
-        text=body.text,
+        text=effective_text,
         post_context=body.post_context,
+        media_url=body.attachment_url,
+        media_type=body.attachment_type,
         frames=frames,
         context_missing=context_missing,
         thread_id=body.thread_id or f"th_{int(datetime.now(timezone.utc).timestamp())}",
@@ -359,6 +422,10 @@ async def playground_chat(body: PlaygroundChatRequest):
             "turn_index": turn_idx,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "customer_message": body.text,
+            "attachment_url": body.attachment_url,
+            "attachment_type": body.attachment_type,
+            "attachment_name": body.attachment_name,
+            "chat_media_cache_id": body.chat_media_cache_id,
             "bot_reply": result.draft_reply,
             "decision": result.decision,
             "flag": result.flag,
@@ -369,7 +436,8 @@ async def playground_chat(body: PlaygroundChatRequest):
             "knowledge_files": result.knowledge_files,
             "missing_fields": result.missing_fields,
             "attached_image_url": result.attached_image_url,
-            "model_used": result.model_used
+            "model_used": result.model_used,
+            "attached_frames_count": len(frames)
         }
         store.save_session_turn(
             session_id=sess_id,
@@ -409,6 +477,11 @@ async def playground_chat(body: PlaygroundChatRequest):
         "model_used": result.model_used,
         "reply_sent": result.reply_sent,
         "attached_image_url": result.attached_image_url,
+        # Chat turn attachment info
+        "attachment_url": body.attachment_url,
+        "attachment_type": body.attachment_type,
+        "attachment_name": body.attachment_name,
+        "attached_frames_count": len(frames),
         # Panel & Visual Diagnostics
         "caption": result.caption,
         "frame_count": result.frame_count,
