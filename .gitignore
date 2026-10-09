@@ -13,13 +13,9 @@ __pycache__/
 .vscode/
 .idea/
 
-# Local data, sqlite databases, caches & large media
-data/*
-!data/golden_examples.json
-!data/failed_cases.json
-!data/chat_logs/
-data/chat_logs/*
-!data/chat_logs/.gitkeep
+# Runtime data: chat sessions, ratings (golden/failed cases), chat log backups
+# and the RAG vector store. Lives only on the host so deploys never overwrite it.
+data/
 *.db
 *.sqlite
 *.sqlite3

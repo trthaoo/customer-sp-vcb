@@ -21,7 +21,9 @@ MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "")
 MODEL_API_KEY = os.getenv("MODEL_API_KEY", "")
 MODEL_BASE_URL = os.getenv("MODEL_BASE_URL", "")
 MODEL_NAME = os.getenv("MODEL_NAME", "gemini-3.1-flash-lite")
-EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "gemini-embedding-001")
+# OpenAI-compatible embeddings endpoint used by RAG (see scripts/embedding_bridge.py).
+EMBEDDING_BASE_URL = os.getenv("EMBEDDING_BASE_URL", "")
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "sentence-transformers/paraphrase-multilingual-mpnet-base-v2")
 
 # Auto send and handover hold
 AUTO_SEND = os.getenv("AUTO_SEND", "false").lower() in ("true", "1", "yes")
@@ -45,8 +47,8 @@ DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "data" / "events.db"))
 
 # Knowledge directories
 KNOWLEDGE_DIR = BASE_DIR / "knowledge"
-EMBEDDINGS_DIR = KNOWLEDGE_DIR / "embeddings"
-VECTOR_STORE_PATH = EMBEDDINGS_DIR / "vector_store.json"
+# Built at runtime from knowledge/ and kept out of git, so each host indexes with its own embedding model.
+VECTOR_STORE_PATH = Path(os.getenv("VECTOR_STORE_PATH", str(BASE_DIR / "data" / "vector_store.json")))
 
 # Platform character & length limits (Configurable per platform, not hardcoded in prompts)
 PLATFORM_LIMITS: Dict[str, Dict[str, Any]] = {

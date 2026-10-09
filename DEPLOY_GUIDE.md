@@ -111,3 +111,9 @@ Quy trình khi sửa rule hoặc code:
 Không cần secret nào trên GitHub: VPS tự kéo code từ repo public. Nếu chuyển repo sang private, cần thêm deploy key (read-only) cho VPS.
 
 Xem log deploy trên VPS: `journalctl -u vcb-deploy -n 50`.
+
+### Dữ liệu chỉ nằm trên VPS
+Toàn bộ `data/` (chat sessions trong `events.db`, golden examples, failed cases, backup chat log, vector store của RAG) không còn nằm trong git. Deploy không ghi đè lên dữ liệu này. Đừng commit file nào trong `data/`.
+
+### RAG
+Embedding chạy bằng model local `paraphrase-multilingual-mpnet-base-v2`, qua service `embbridge` trên VPS (`127.0.0.1:8789`). Không cần API key. Khi file trong `knowledge/` thay đổi, lần chat đầu tiên sau deploy sẽ embed lại các đoạn vừa sửa.

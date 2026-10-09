@@ -3,19 +3,19 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from src.knowledge.rag_store import VectorStore, KnowledgeChunk
 from src.knowledge.chunker import KnowledgeChunker
-from src.adapters.embedding import get_embedding_adapter, GoogleAIStudioEmbedding
-from src.config import VECTOR_STORE_PATH, KNOWLEDGE_DIR, EMBEDDINGS_DIR
+from src.adapters.embedding import get_embedding_adapter, EmbeddingClient
+from src.config import VECTOR_STORE_PATH
 
 class KnowledgeRAG:
     """
     Unified RAG Engine for Vien Chi Bao Customer Concierge.
-    Embeds all project knowledge onto Google AI Studio server and performs
-    high-speed semantic retrieval.
+    Embeds all project knowledge through the configured embeddings endpoint
+    and performs high-speed semantic retrieval.
     """
     def __init__(
         self,
         vector_store_path: Optional[Path] = None,
-        embedding_adapter: Optional[GoogleAIStudioEmbedding] = None
+        embedding_adapter: Optional[EmbeddingClient] = None
     ):
         self.vector_store_path = vector_store_path or VECTOR_STORE_PATH
         self.embedding_adapter = embedding_adapter or get_embedding_adapter()
@@ -27,17 +27,21 @@ class KnowledgeRAG:
         if self._is_initialized:
             return
 
-        # Attempt to load existing vector store
         loaded = self.vector_store.load_from_file(self.vector_store_path)
-        if not loaded and auto_index:
-            print("[RAG] Vector store not found on disk. Indexing all knowledge with Google AI Studio...")
-            self.index_all(force=False)
+        if auto_index:
+            # Incremental: only chunks whose knowledge text changed are re-embedded.
+            # A store built with another embedding model is rebuilt from scratch.
+            model_changed = loaded and self.vector_store.embedding_model != self.embedding_adapter.model_name
+            try:
+                self.index_all(force=model_changed)
+            except Exception as e:
+                print(f"[RAG] Indexing failed: {e}")
         self._is_initialized = True
 
     def index_all(self, force: bool = False) -> Dict[str, Any]:
         """
         Extracts chunks from all project knowledge files, checks for changes,
-        and embeds missing/updated chunks via Google AI Studio API.
+        and embeds missing/updated chunks through the embeddings endpoint.
         """
         start_time = time.time()
         
@@ -57,9 +61,9 @@ class KnowledgeRAG:
         reused_count = len(all_chunks) - embedded_count
 
         if chunks_to_embed:
-            print(f"[RAG] Embedding {embedded_count} chunks using Google AI Studio ({self.embedding_adapter.model_name})...")
+            print(f"[RAG] Embedding {embedded_count} chunks with {self.embedding_adapter.model_name}...")
             texts = [c.content for c in chunks_to_embed]
-            vectors = self.embedding_adapter.embed_batch(texts, batch_size=15)
+            vectors = self.embedding_adapter.embed_batch(texts)
 
             for ch, vec in zip(chunks_to_embed, vectors):
                 self.vector_store.add_chunk(ch, vec)
@@ -72,6 +76,7 @@ class KnowledgeRAG:
                 self.vector_store.vectors.pop(sid, None)
 
             # Save updated vectors to disk
+            self.vector_store.embedding_model = self.embedding_adapter.model_name
             self.vector_store.save_to_file(self.vector_store_path)
             print(f"[RAG] Successfully saved vector store to {self.vector_store_path}")
 
@@ -98,7 +103,7 @@ class KnowledgeRAG:
         min_score: float = 0.35
     ) -> List[Dict[str, Any]]:
         """
-        Embeds customer query on Google AI Studio and performs cosine similarity search.
+        Embeds the customer query and performs cosine similarity search.
         """
         if not self._is_initialized:
             self.initialize(auto_index=True)
@@ -106,11 +111,11 @@ class KnowledgeRAG:
         if not query or not query.strip():
             return []
 
-        # Embed query using Google AI Studio
+        # Embed the query
         try:
             q_vec = self.embedding_adapter.embed_query(query.strip())
         except Exception as e:
-            print(f"Warning: Failed to embed query with Google AI Studio: {e}")
+            print(f"Warning: Failed to embed RAG query: {e}")
             return []
 
         results = self.vector_store.search(
