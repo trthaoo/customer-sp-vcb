@@ -1,0 +1,201 @@
+[
+  {
+    "id": "fail_20261009_061756_fe3871",
+    "session_id": "test_toggle_sess_77",
+    "created_at": "2026-10-09T06:17:56.810664+00:00",
+    "rating": "fail",
+    "channel": "tiktok",
+    "platform": "tiktok",
+    "surface": "dm",
+    "error_category": "sai_san_pham",
+    "error_category_label": "Sai sản phẩm / Sai giá USD / Sai chất liệu",
+    "failed_turn_index": null,
+    "root_cause": "Nhầm size",
+    "suggested_fix": "Fix catalogue",
+    "target_file_to_fix": "knowledge/catalogue/products.json",
+    "status": "fixed",
+    "fixed_at": "2026-10-09T06:17:56.826665+00:00",
+    "fixed_notes": "Đã sửa file products.json chuẩn size US",
+    "notes": "",
+    "turn_count": 1,
+    "turns": [
+      {
+        "customer_message": "Size 6 US",
+        "bot_reply": "Reply"
+      }
+    ]
+  },
+  {
+    "id": "fail_20261009_061755_f2d276",
+    "session_id": "test_rate_sync_sess_88",
+    "created_at": "2026-10-09T06:17:55.459688+00:00",
+    "rating": "fail",
+    "channel": "meta",
+    "platform": "ig",
+    "surface": "comment",
+    "error_category": "sai_chinh_sach",
+    "error_category_label": "Sai chính sách (Returns / Shipping / Warranty / Payment)",
+    "failed_turn_index": 1,
+    "root_cause": "Bot trả lời bảo hành trọn đời thay vì bảo hành miễn phí xi mạ trong 6 tháng",
+    "suggested_fix": "Cập nhật rule trong warranty.md nêu rõ chính sách 6 tháng",
+    "target_file_to_fix": "knowledge/policies/warranty.md",
+    "status": "open",
+    "fixed_at": null,
+    "fixed_notes": "",
+    "notes": "",
+    "turn_count": 1,
+    "turns": [
+      {
+        "customer_message": "Shop ơi có bảo hành không?",
+        "bot_reply": "Bảo hành trọn đời ạ."
+      }
+    ]
+  },
+  {
+    "id": "fail_20261009_061632_70bee4",
+    "session_id": "test_live_verify_001",
+    "created_at": "2026-10-09T06:16:32.495496+00:00",
+    "rating": "fail",
+    "channel": "meta",
+    "platform": "ig",
+    "surface": "dm",
+    "error_category": "sai_chinh_sach",
+    "error_category_label": "Sai chính sách (Returns / Shipping / Warranty / Payment)",
+    "failed_turn_index": 1,
+    "root_cause": "Test root cause: can sua returns.md",
+    "suggested_fix": "Test suggested fix: them rule ve Texas ship",
+    "target_file_to_fix": "knowledge/policies/shipping.md",
+    "status": "fixed",
+    "fixed_at": "2026-10-09T06:16:32.523784+00:00",
+    "fixed_notes": "Da sua shipping.md",
+    "notes": "",
+    "turn_count": 1,
+    "turns": [
+      {
+        "customer_message": "Shop có ship sang Texas không?",
+        "bot_reply": "[Lỗi kết nối Model API]"
+      }
+    ]
+  },
+  {
+    "id": "fail_20261008_094640_5f4137",
+    "session_id": "session_clhq0it",
+    "created_at": "2026-10-08T09:46:40.647529+00:00",
+    "rating": "fail",
+    "channel": "tiktok",
+    "platform": "tiktok",
+    "surface": "dm",
+    "error_category": "khac",
+    "error_category_label": "Lỗi khác",
+    "failed_turn_index": 1,
+    "root_cause": "Bot trả lời quá dài, nên tách ra 2-3 buble cho giống hành động của con người",
+    "suggested_fix": "Tách ra 2-3 đoạn tin nhắn nếu là tin nhắn dài để cho giống hành vi của con người",
+    "target_file_to_fix": "knowledge/policies/returns.md",
+    "status": "open",
+    "fixed_at": null,
+    "fixed_notes": "",
+    "notes": "",
+    "turn_count": 1,
+    "turns": [
+      {
+        "turnIndex": 1,
+        "timestamp": "4:44:37 PM",
+        "customerMessage": "Hi I want to buy invisible ring, how much is it?",
+        "botReply": "Hello! It’s lovely to hear from you. You’re looking at our S925 Sterling Silver Invisible Setting Moissanite Eternity Ring, which is one of my personal favorites here in the studio. It’s priced at $356.00.\n\nBecause this piece features a seamless, continuous design, getting the perfect fit is quite important. Do you happen to know your current US ring size, or would you like a few tips on how to measure your finger to ensure it’s just right?",
+        "channel": "tiktok",
+        "platform": "tiktok",
+        "surface": "dm",
+        "postContext": null,
+        "id": "brand_test_1791452674857",
+        "reply": "Hello! It’s lovely to hear from you. You’re looking at our S925 Sterling Silver Invisible Setting Moissanite Eternity Ring, which is one of my personal favorites here in the studio. It’s priced at $356.00.\n\nBecause this piece features a seamless, continuous design, getting the perfect fit is quite important. Do you happen to know your current US ring size, or would you like a few tips on how to measure your finger to ensure it’s just right?",
+        "decision": "auto_reply",
+        "flag": "auto_reply",
+        "status_badge": "handled",
+        "needs_human": false,
+        "escalate_reason": null,
+        "matched_product": {
+          "id": "N0006-07-S-WH",
+          "name": "S925 Sterling Silver Invisible Setting Moissanite Eternity Ring",
+          "aliases": [
+            "invisible setting moissanite ring",
+            "moissanite eternity ring",
+            "s925 moissanite ring",
+            "invisible ring",
+            "nhẫn tàng hình",
+            "nhẫn tàng hình moissanite",
+            "nhẫn tàng hình s925",
+            "nhẫn đính moissanite",
+            "N0006-07-S-WH"
+          ],
+          "price": 356,
+          "currency": "USD",
+          "material": "Platinum-plated S925 sterling silver, hypoallergenic and anti-tarnish, set with premium Moissanite",
+          "description": "Crafted from premium S925 sterling silver and finished with a durable platinum plating that resists oxidation, ensures skin safety, and provides long-lasting brilliance. The ring features an exquisite invisible setting with continuous Moissanite stones seamlessly aligned without visible prongs. Band weight is approximately 2-3g. Symbolically, the seamless circular design with neither beginning nor end embodies eternal love, lifelong devotion, and uninterrupted harmony. Moissanite radiates diamond-like fire, signifying self-confidence, good fortune, and vibrant positive energy that elevates the wearer's poise and refined taste. Designed for women, it is ideal for daily wear, office elegance, casual outings, or celebratory occasions like romantic dinners, anniversaries, and birthdays. It also serves as a deeply meaningful gift for wives, partners, or cherished loved ones.",
+          "variants": [
+            "US Size 4",
+            "US Size 5",
+            "US Size 6",
+            "US Size 7",
+            "US Size 8",
+            "US Size 9",
+            "US Size 10",
+            "US Size 11",
+            "US Size 12"
+          ],
+          "in_stock": true,
+          "ship_note": "Standard US delivery in 3-5 business days. Packaged in an artisan presentation gift box.",
+          "size_guide": "Standard US sizes 4 through 12. Measure inner finger circumference in mm to match US size.",
+          "url": null,
+          "image_url": "/static/products/N0006-07-S-WH.jpg",
+          "image_path": "knowledge/catalogue/images/N0006-07-S-WH.jpg",
+          "notes": "Seamless invisible stone setting without beginning or end, symbolizing eternal love and lifelong devotion. Weight: ~2-3g. Ideal for daily wear, anniversaries, or meaningful gifting."
+        },
+        "ambiguous_products": [],
+        "matched_rule": "tiktok_ask_price_dm",
+        "matched_edge_case": null,
+        "intent": "ask_price",
+        "knowledge_files": [
+          "shared/brand_voice.md",
+          "tiktok/rules.md",
+          "catalogue/products.json"
+        ],
+        "knowledge_facts": {
+          "catalogue.price": 356,
+          "catalogue.currency": "USD"
+        },
+        "retrieved_chunks": [
+          {
+            "file": "shared/brand_voice.md",
+            "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
+            "content": "Brand: Vien Chi Bao Fine Jewelry & Artistry (United States Market Concierge).\nPersona: The Mindful Studio Host, speaking with warmth and quiet pride from Master Jeweler Huy K's atelier.\nTarget Market: United States (US). All customer interactions MUST be in 100% natural, warm, human American English.\nPricing & Sizing: Always quote prices in USD ($) and refer to standard US ring sizes (sizes 5-11).\nStrict Non-Negotiable Rules:\n1. NEVER admit or disclose being an AI, bot, language model, or virtual assistant.\n2. NEVER invent prices, materials, discounts, stock, or shipping policies not present in confirmed knowledge.\n3. Do not use canned scripts. Vary phrasing naturally with at most ONE polite clarifying question.\n4. For follow-up questions in the same conversation, continue the thread naturally without repeating the initial greeting or answer."
+          },
+          {
+            "file": "catalogue/products.json",
+            "title": "Catalogue: S925 Sterling Silver Invisible Setting Moissanite Eternity Ring (Chỉ sử dụng dữ liệu này)",
+            "content": "Sản phẩm: S925 Sterling Silver Invisible Setting Moissanite Eternity Ring (ID: N0006-07-S-WH)\nGiá niêm yết: $356.00\nChất liệu: Platinum-plated S925 sterling silver, hypoallergenic and anti-tarnish, set with premium Moissanite\nTình trạng tồn kho: Còn hàng\nBiến thể / Size: ['US Size 4', 'US Size 5', 'US Size 6', 'US Size 7', 'US Size 8', 'US Size 9', 'US Size 10', 'US Size 11', 'US Size 12']\nHướng dẫn size: Standard US sizes 4 through 12. Measure inner finger circumference in mm to match US size.\nVận chuyển / Đóng gói: Standard US delivery in 3-5 business days. Packaged in an artisan presentation gift box.\nMô tả chi tiết / Description: Crafted from premium S925 sterling silver and finished with a durable platinum plating that resists oxidation, ensures skin safety, and provides long-lasting brilliance. The ring features an exquisite invisible setting with continuous Moissanite stones seamlessly aligned without visible prongs. Band weight is approximately 2-3g. Symbolically, the seamless circular design with neither beginning nor end embodies eternal love, lifelong devotion, and uninterrupted harmony. Moissanite radiates diamond-like fire, signifying self-confidence, good fortune, and vibrant positive energy that elevates the wearer's poise and refined taste. Designed for women, it is ideal for daily wear, office elegance, casual outings, or celebratory occasions like romantic dinners, anniversaries, and birthdays. It also serves as a deeply meaningful gift for wives, partners, or cherished loved ones.\nÝ nghĩa & Ghi chú / Notes: Seamless invisible stone setting without beginning or end, symbolizing eternal love and lifelong devotion. Weight: ~2-3g. Ideal for daily wear, anniversaries, or meaningful gifting."
+          },
+          {
+            "file": "tiktok/rules.md",
+            "title": "Quy tắc phản hồi: tiktok_ask_price_dm",
+            "content": "Kênh: tiktok | Bề mặt: dm\nHướng dẫn trả lời: Quote the verified USD price from the catalogue and offer personalized sizing assistance for their preferred fit."
+          }
+        ],
+        "missing_fields": [],
+        "example_good_reply": null,
+        "model_called": true,
+        "model_used": "gemini-3.1-flash-lite",
+        "reply_sent": false,
+        "caption": null,
+        "frame_count": 0,
+        "frame_timestamps": [],
+        "visual_product_guess": "S925 Sterling Silver Invisible Setting Moissanite Eternity Ring",
+        "catalogue_id_matched": "N0006-07-S-WH",
+        "frame_used": null,
+        "context_missing": false,
+        "vision_unsupported": false,
+        "short_reason": "product=N0006-07-S-WH, frame=N/A, chunks=catalogue/tiktok_ask_price_dm",
+        "frames": []
+      }
+    ]
+  }
+]

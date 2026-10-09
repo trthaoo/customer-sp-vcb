@@ -232,13 +232,14 @@ async def get_events(
 async def list_chat_sessions(
     channel: Optional[str] = Query(None),
     platform: Optional[str] = Query(None),
+    rating: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0)
 ):
     store = get_event_store()
     sessions = store.get_chat_sessions(
-        channel=channel, platform=platform, search=search, limit=limit, offset=offset
+        channel=channel, platform=platform, rating=rating, search=search, limit=limit, offset=offset
     )
     return {"sessions": sessions, "count": len(sessions)}
 
@@ -254,7 +255,38 @@ async def get_chat_session_detail(session_id: str):
 async def delete_chat_session(session_id: str):
     store = get_event_store()
     success = store.delete_chat_session(session_id)
+    broadcast_sse({
+        "type": "chat_session_deleted",
+        "session_id": session_id,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
     return {"success": success}
+
+@app.get("/api/chat-backups/stats")
+async def get_chat_backup_statistics():
+    """Returns disk backup statistics from data/chat_logs/."""
+    from src.storage.chat_backup import get_chat_backup_stats
+    return get_chat_backup_stats()
+
+@app.get("/api/chat-backups/{session_id}")
+async def download_chat_backup(session_id: str, format: Literal["json", "md"] = "json"):
+    """Downloads disk backup of session in JSON or Markdown format."""
+    from src.storage.chat_backup import get_chat_logs_dir, save_chat_backup_to_disk
+    safe_name = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in session_id)
+    target_file = get_chat_logs_dir() / f"{safe_name}.{format}"
+    if not target_file.exists():
+        store = get_event_store()
+        sess = store.get_chat_session(session_id)
+        if not sess:
+            raise HTTPException(status_code=404, detail="Không tìm thấy phiên chat này")
+        save_chat_backup_to_disk(sess)
+    
+    media_type = "application/json" if format == "json" else "text/markdown; charset=utf-8"
+    return FileResponse(
+        target_file,
+        media_type=media_type,
+        filename=f"chat_backup_{safe_name}.{format}"
+    )
 
 _sse_subscribers: List[asyncio.Queue] = []
 
@@ -275,6 +307,9 @@ async def stream_events(request: Request):
         store = get_event_store()
         last_id = ""
         try:
+            # Yield initial connection confirmation
+            init_msg = json.dumps({"type": "connected", "timestamp": datetime.now(timezone.utc).isoformat()})
+            yield f"data: {init_msg}\n\n"
             while True:
                 if await request.is_disconnected():
                     break
@@ -282,6 +317,8 @@ async def stream_events(request: Request):
                     msg = await asyncio.wait_for(q.get(), timeout=2.0)
                     yield f"data: {json.dumps(msg)}\n\n"
                 except asyncio.TimeoutError:
+                    # Keep-alive heartbeat comment
+                    yield ": ping\n\n"
                     recent = store.get_recent_events(limit=1)
                     if recent:
                         latest = recent[0]
@@ -292,7 +329,15 @@ async def stream_events(request: Request):
             if q in _sse_subscribers:
                 _sse_subscribers.remove(q)
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -604,6 +649,7 @@ async def export_playground_csv(body: PlaygroundExportRequest):
 @app.post("/api/playground/session/rate")
 async def rate_playground_session(body: SessionRatingRequest):
     manager = get_test_case_manager()
+    store = get_event_store()
     if body.rating == "pass":
         record = manager.save_golden_example(
             session_id=body.session_id,
@@ -615,6 +661,24 @@ async def rate_playground_session(body: SessionRatingRequest):
             notes=body.notes or "",
             tags=body.tags
         )
+        rating_data = {
+            "case_id": record.get("id"),
+            "rating": "pass",
+            "title": record.get("title"),
+            "notes": record.get("notes"),
+            "tags": record.get("tags") or [],
+            "rated_at": record.get("created_at"),
+            "turn_count": len(body.turns)
+        }
+        store.update_session_rating(body.session_id, "pass", rating_data)
+        broadcast_sse({
+            "type": "case_rated",
+            "session_id": body.session_id,
+            "rating": "pass",
+            "case": record,
+            "rating_data": rating_data,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
         return {
             "success": True,
             "rating": "pass",
@@ -640,6 +704,31 @@ async def rate_playground_session(body: SessionRatingRequest):
             failed_turn_index=body.failed_turn_index,
             notes=body.notes or ""
         )
+        rating_data = {
+            "case_id": record.get("id"),
+            "rating": "fail",
+            "error_category": record.get("error_category"),
+            "error_category_label": record.get("error_category_label"),
+            "failed_turn_index": record.get("failed_turn_index"),
+            "root_cause": record.get("root_cause"),
+            "suggested_fix": record.get("suggested_fix"),
+            "target_file_to_fix": record.get("target_file_to_fix"),
+            "status": record.get("status", "open"),
+            "fixed_at": record.get("fixed_at"),
+            "fixed_notes": record.get("fixed_notes"),
+            "notes": record.get("notes"),
+            "rated_at": record.get("created_at"),
+            "turn_count": len(body.turns)
+        }
+        store.update_session_rating(body.session_id, "fail", rating_data)
+        broadcast_sse({
+            "type": "case_rated",
+            "session_id": body.session_id,
+            "rating": "fail",
+            "case": record,
+            "rating_data": rating_data,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
         return {
             "success": True,
             "rating": "fail",
@@ -658,14 +747,51 @@ async def update_failed_case_status(case_id: str, body: CaseStatusUpdateRequest)
     updated = manager.update_failed_case_status(case_id, body.status, body.fixed_notes)
     if not updated:
         raise HTTPException(status_code=404, detail="Không tìm thấy case lỗi với ID này")
+
+    sess_id = updated.get("session_id")
+    if sess_id:
+        store = get_event_store()
+        sess = store.get_chat_session(sess_id)
+        if sess:
+            rdata = sess.get("rating_data") or {}
+            rdata["status"] = body.status
+            rdata["fixed_at"] = updated.get("fixed_at")
+            rdata["fixed_notes"] = body.fixed_notes or ""
+            store.update_session_rating(sess_id, "fail", rdata)
+
+    broadcast_sse({
+        "type": "case_updated",
+        "case_id": case_id,
+        "session_id": sess_id,
+        "status": body.status,
+        "case": updated,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
     return {"success": True, "case": updated}
 
 @app.delete("/api/playground/session/cases/{case_type}/{case_id}")
 async def delete_playground_case(case_type: Literal["golden", "failed"], case_id: str):
     manager = get_test_case_manager()
+    cases = manager.get_all_cases()
+    target_list = cases["golden_examples"] if case_type == "golden" else cases["failed_cases"]
+    matching = next((c for c in target_list if c.get("id") == case_id), None)
+    sess_id = matching.get("session_id") if matching else None
+
     deleted = manager.delete_case(case_type, case_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Không tìm thấy case cần xóa")
+
+    if sess_id:
+        store = get_event_store()
+        store.update_session_rating(sess_id, None, {})
+
+    broadcast_sse({
+        "type": "case_deleted",
+        "case_type": case_type,
+        "case_id": case_id,
+        "session_id": sess_id,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
     return {"success": True, "case_id": case_id}
 
 class RagSearchRequest(BaseModel):

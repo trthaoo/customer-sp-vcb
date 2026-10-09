@@ -92,11 +92,24 @@ class EventStore:
                     last_message TEXT,
                     last_reply TEXT,
                     status TEXT NOT NULL DEFAULT 'active',
-                    turns_data TEXT NOT NULL DEFAULT '[]'
+                    turns_data TEXT NOT NULL DEFAULT '[]',
+                    rating TEXT,
+                    rating_data TEXT NOT NULL DEFAULT '{}'
                 );
             """)
+            # Migration check for existing SQLite tables
+            try:
+                cursor.execute("ALTER TABLE chat_sessions ADD COLUMN rating TEXT;")
+            except Exception:
+                pass
+            try:
+                cursor.execute("ALTER TABLE chat_sessions ADD COLUMN rating_data TEXT NOT NULL DEFAULT '{}';")
+            except Exception:
+                pass
+
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_chat_sessions_updated ON chat_sessions (updated_at);")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_chat_sessions_chan ON chat_sessions (channel, platform);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_chat_sessions_rating ON chat_sessions (rating);")
             conn.commit()
 
     def insert_event(self, event: EventRecord):
@@ -174,8 +187,11 @@ class EventStore:
         """
         Saves or appends a turn to a chat session log.
         Creates the session if it doesn't exist, or appends the turn and updates counters.
+        Automatically pushes real-time backup files into data/chat_logs/ (.json and .md).
         """
         now = datetime.now(timezone.utc).isoformat()
+        session_snapshot: Optional[Dict[str, Any]] = None
+
         with self._get_connection() as conn:
             if self.is_postgres:
                 cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -183,7 +199,7 @@ class EventStore:
                 cursor = conn.cursor()
 
             # Check if session exists
-            select_sql = self._format_sql("SELECT id, turns_data, turn_count, created_at FROM chat_sessions WHERE id = ?")
+            select_sql = self._format_sql("SELECT id, turns_data, turn_count, created_at, rating, rating_data FROM chat_sessions WHERE id = ?")
             cursor.execute(select_sql, (session_id,))
             row = cursor.fetchone()
 
@@ -196,6 +212,8 @@ class EventStore:
                 turns.append(turn_data)
                 turns_json = json.dumps(turns, ensure_ascii=False)
                 new_count = len(turns)
+                rating = row_dict.get("rating")
+                rating_data_str = row_dict.get("rating_data") or "{}"
 
                 update_sql = self._format_sql("""
                     UPDATE chat_sessions
@@ -208,26 +226,116 @@ class EventStore:
                     WHERE id = ?
                 """)
                 cursor.execute(update_sql, (new_count, now, user_message, reply, status, turns_json, session_id))
+
+                try:
+                    r_data = json.loads(rating_data_str)
+                except Exception:
+                    r_data = {}
+
+                session_snapshot = {
+                    "id": session_id,
+                    "session_id": session_id,
+                    "channel": channel,
+                    "platform": platform,
+                    "surface": surface,
+                    "thread_id": thread_id or session_id,
+                    "user_id": user_id or "user",
+                    "user_name": user_name or "Khách Hàng",
+                    "turn_count": new_count,
+                    "created_at": row_dict.get("created_at") or now,
+                    "updated_at": now,
+                    "last_message": user_message,
+                    "last_reply": reply,
+                    "status": status,
+                    "rating": rating,
+                    "rating_data": r_data,
+                    "feedback": r_data,
+                    "turns": turns
+                }
             else:
                 turns = [turn_data]
                 turns_json = json.dumps(turns, ensure_ascii=False)
                 insert_sql = self._format_sql("""
                     INSERT INTO chat_sessions (
                         id, channel, platform, surface, thread_id, user_id, user_name,
-                        turn_count, created_at, updated_at, last_message, last_reply, status, turns_data
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        turn_count, created_at, updated_at, last_message, last_reply, status, turns_data, rating, rating_data
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """)
                 cursor.execute(insert_sql, (
                     session_id, channel, platform, surface, thread_id or session_id,
                     user_id or "user", user_name or "Khách Hàng", 1, now, now,
-                    user_message, reply, status, turns_json
+                    user_message, reply, status, turns_json, None, "{}"
                 ))
+                session_snapshot = {
+                    "id": session_id,
+                    "session_id": session_id,
+                    "channel": channel,
+                    "platform": platform,
+                    "surface": surface,
+                    "thread_id": thread_id or session_id,
+                    "user_id": user_id or "user",
+                    "user_name": user_name or "Khách Hàng",
+                    "turn_count": 1,
+                    "created_at": now,
+                    "updated_at": now,
+                    "last_message": user_message,
+                    "last_reply": reply,
+                    "status": status,
+                    "rating": None,
+                    "rating_data": {},
+                    "feedback": {},
+                    "turns": turns
+                }
             conn.commit()
+
+        # Direct disk backup to data/chat_logs/
+        if session_snapshot:
+            try:
+                from src.storage.chat_backup import save_chat_backup_to_disk
+                save_chat_backup_to_disk(session_snapshot)
+            except Exception as e:
+                print(f"Warning: Failed to back up chat session to disk: {e}")
+
+    def update_session_rating(
+        self,
+        session_id: str,
+        rating: str,
+        rating_data: Dict[str, Any]
+    ) -> bool:
+        """
+        Updates rating and feedback for a chat session.
+        Live-updates into SQLite AND re-synchronizes disk backup files in data/chat_logs/.
+        """
+        now = datetime.now(timezone.utc).isoformat()
+        rdata_json = json.dumps(rating_data, ensure_ascii=False)
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            update_sql = self._format_sql("""
+                UPDATE chat_sessions
+                SET rating = ?,
+                    rating_data = ?,
+                    updated_at = ?
+                WHERE id = ?
+            """)
+            cursor.execute(update_sql, (rating, rdata_json, now, session_id))
+            conn.commit()
+            updated = cursor.rowcount > 0
+
+        if updated:
+            full_sess = self.get_chat_session(session_id)
+            if full_sess:
+                try:
+                    from src.storage.chat_backup import save_chat_backup_to_disk
+                    save_chat_backup_to_disk(full_sess)
+                except Exception as e:
+                    print(f"Warning: Failed to sync disk backup after rating update: {e}")
+        return updated
 
     def get_chat_sessions(
         self,
         channel: Optional[str] = None,
         platform: Optional[str] = None,
+        rating: Optional[str] = None,
         search: Optional[str] = None,
         limit: int = 50,
         offset: int = 0
@@ -247,15 +355,28 @@ class EventStore:
             if platform and platform != "all":
                 conditions.append("platform = ?")
                 params.append(platform)
+            if rating and rating != "all":
+                if rating == "unrated":
+                    conditions.append("(rating IS NULL OR rating = '')")
+                elif rating == "pass":
+                    conditions.append("rating = 'pass'")
+                elif rating == "fail":
+                    conditions.append("rating = 'fail'")
+                elif rating == "open_fail":
+                    conditions.append("(rating = 'fail' AND rating_data LIKE '%\"status\": \"open\"%')")
+                elif rating == "fixed_fail":
+                    conditions.append("(rating = 'fail' AND rating_data LIKE '%\"status\": \"fixed\"%')")
+
             if search:
-                conditions.append("(id LIKE ? OR last_message LIKE ? OR user_name LIKE ?)")
+                conditions.append("(id LIKE ? OR last_message LIKE ? OR user_name LIKE ? OR rating_data LIKE ?)")
                 search_param = f"%{search}%"
-                params.extend([search_param, search_param, search_param])
+                params.extend([search_param, search_param, search_param, search_param])
 
             where_clause = " AND ".join(conditions)
             sql = f"""
                 SELECT id, channel, platform, surface, thread_id, user_id, user_name,
-                       turn_count, created_at, updated_at, last_message, last_reply, status
+                       turn_count, created_at, updated_at, last_message, last_reply, status,
+                       rating, rating_data
                 FROM chat_sessions
                 WHERE {where_clause}
                 ORDER BY updated_at DESC
@@ -264,7 +385,16 @@ class EventStore:
             params.extend([limit, offset])
             cursor.execute(self._format_sql(sql), params)
             rows = cursor.fetchall()
-            return [dict(r) for r in rows]
+            results = []
+            for r in rows:
+                item = dict(r)
+                try:
+                    item["rating_data"] = json.loads(item["rating_data"]) if item.get("rating_data") else {}
+                except Exception:
+                    item["rating_data"] = {}
+                item["feedback"] = item["rating_data"]
+                results.append(item)
+            return results
 
     def get_chat_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         with self._get_connection() as conn:
@@ -283,6 +413,11 @@ class EventStore:
                 res["turns"] = json.loads(res["turns_data"]) if res.get("turns_data") else []
             except Exception:
                 res["turns"] = []
+            try:
+                res["rating_data"] = json.loads(res["rating_data"]) if res.get("rating_data") else {}
+            except Exception:
+                res["rating_data"] = {}
+            res["feedback"] = res["rating_data"]
             return res
 
     def delete_chat_session(self, session_id: str) -> bool:

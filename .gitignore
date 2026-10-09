@@ -14,7 +14,12 @@ __pycache__/
 .idea/
 
 # Local data, sqlite databases, caches & large media
-data/
+data/*
+!data/golden_examples.json
+!data/failed_cases.json
+!data/chat_logs/
+data/chat_logs/*
+!data/chat_logs/.gitkeep
 *.db
 *.sqlite
 *.sqlite3
