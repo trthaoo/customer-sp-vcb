@@ -31,7 +31,7 @@ HOLD_ON_HANDOVER = os.getenv("HOLD_ON_HANDOVER", "true").lower() in ("true", "1"
 APP_ENV = os.getenv("APP_ENV", "prod")
 
 # PostHog Analytics & Session Recording Configuration
-POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "").strip()
+POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "phc_Ab8smdwdH5D7Ymwg6VivfPT5FaC2ThyewEaa6fNXPHWZ").strip()
 POSTHOG_HOST = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com").strip().rstrip("/")
 POSTHOG_ENABLE_RECORDING = os.getenv("POSTHOG_ENABLE_RECORDING", "true").lower() in ("true", "1", "yes")
 POSTHOG_PROJECT_ID = os.getenv("POSTHOG_PROJECT_ID", "654868").strip()

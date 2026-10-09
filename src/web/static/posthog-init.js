@@ -48,14 +48,18 @@
     },
 
     getReplayUrl: function () {
+      const projId = (window.__POSTHOG_CONFIG__ && window.__POSTHOG_CONFIG__.projectId) || "654868";
+      const apiKey = (window.__POSTHOG_CONFIG__ && window.__POSTHOG_CONFIG__.apiKey);
+
       if (window.posthog && typeof window.posthog.get_session_replay_url === "function") {
         try {
           const direct = window.posthog.get_session_replay_url();
-          if (direct) return direct;
+          if (direct) {
+            return (apiKey && projId) ? direct.replace(apiKey, projId) : direct;
+          }
         } catch (e) {}
       }
       const sessId = window.PostHogHelper.getSessionId();
-      const projId = (window.__POSTHOG_CONFIG__ && window.__POSTHOG_CONFIG__.projectId) || "654868";
       if (sessId) {
         return "https://us.posthog.com/project/" + projId + "/replay/" + sessId;
       }
@@ -142,6 +146,7 @@
           if (shouldRecord) {
             try {
               ph.startSessionRecording();
+              ph.capture("$pageview");
               const replayUrl = window.PostHogHelper.getReplayUrl();
               console.log(
                 "%c[PostHog]%c Session Recording is ACTIVE ⏺ | Distinct ID: %c" + ph.get_distinct_id() + (replayUrl ? " | Replay: " + replayUrl : ""),
