@@ -124,6 +124,25 @@
 
       <!-- Chat Input Area -->
       <div class="chat-input-area" id="chat-input-area">
+        <!-- Attachment Preview Bar (Above Input Box) -->
+        <div id="chat-attachment-bar" class="chat-attachment-bar" style="display:none;">
+          <div class="attachment-preview-content">
+            <div id="attachment-preview-thumb" class="attachment-preview-thumb"></div>
+            <div class="attachment-meta">
+              <div class="attachment-badge-row">
+                <span id="attachment-type-badge" class="attachment-type-badge image">🖼️ Image</span>
+                <span id="attachment-status-text" class="attachment-status-text">Ready to send</span>
+              </div>
+              <div id="attachment-name-text" class="attachment-name-text">filename.jpg</div>
+            </div>
+          </div>
+          <button type="button" class="btn-clear-attachment" onclick="clearChatAttachment()" title="Bỏ đính kèm">
+            ✕ Bỏ đính kèm
+          </button>
+        </div>
+
+        <!-- Input Box Row -->
+        <div class="input-box-row">
           <!-- Attachment Buttons -->
           <div class="chat-attach-btn-group" title="Tải ảnh hoặc video từ máy tính">
             <label class="btn-chat-attach" id="btn-attach-image" title="Mở thư viện trên máy tính để tải ảnh">
@@ -2203,6 +2222,7 @@
       <div class="modal-footer">
         <button class="btn-action-small" onclick="closeCaseHubModal()">Đóng</button>
       </div>
+    </div>
   </div>
 
 
