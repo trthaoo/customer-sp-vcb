@@ -154,17 +154,59 @@ class IntentClassifier:
         if cache_key in self._cache:
             return self._cache[cache_key]
 
-        # 1. AI-Driven Semantic Reasoning via Model Adapter
+        # 1. Ultra-fast Semantic Heuristic check (< 0.1ms)
+        fast_intent = self._classify_semantic_fallback(text)
+        if fast_intent != "other" and fast_intent in self.allowed_intents:
+            self._cache[cache_key] = fast_intent
+            return fast_intent
+
+        # 2. Fast System One Decision via Jev (~50-80ms) if available
+        try:
+            from src.adapters.jev import get_jev_adapter
+            jev = get_jev_adapter()
+            if jev.is_available():
+                jev_intent = self._classify_with_jev(text, context, jev)
+                if jev_intent and jev_intent in self.allowed_intents:
+                    self._cache[cache_key] = jev_intent
+                    return jev_intent
+        except Exception:
+            pass
+
+        # 3. AI-Driven Semantic Reasoning via Model Adapter (only if fast path & Jev inconclusive)
         if self.model_adapter and self.model_adapter.is_available():
             inferred_intent = self._classify_with_llm(text, context)
             if inferred_intent and inferred_intent in self.allowed_intents:
                 self._cache[cache_key] = inferred_intent
                 return inferred_intent
 
-        # 2. Semantic Heuristic Fallback (e.g. for offline testing or API downtime)
-        fallback_intent = self._classify_semantic_fallback(text)
-        self._cache[cache_key] = fallback_intent
-        return fallback_intent
+        self._cache[cache_key] = "other"
+        return "other"
+
+    def _classify_with_jev(self, text: str, context: Optional[str], jev: Any) -> Optional[str]:
+        client = jev._get_client()
+        if not client:
+            return None
+        from typesafe_sdk import Choice
+        criteria = {
+            intent: INTENT_TAXONOMY.get(intent, {}).get("description", intent)[:90]
+            for intent in self.allowed_intents
+        }
+        criteria["other"] = "General greeting, banter, or unlisted query"
+        questions = {
+            "intent": Choice(
+                instructions="Classify the customer inquiry into the most suitable category",
+                criteria=criteria
+            )
+        }
+        resp = client.system_one(
+            state={"customer_message": text, "context": context or ""},
+            questions=questions,
+            model=jev.model_name
+        )
+        choice_ans = resp.answers.get("intent")
+        if choice_ans and hasattr(choice_ans, "choice"):
+            return choice_ans.choice
+        return None
 
     def _classify_with_llm(self, text: str, context: Optional[str] = None) -> Optional[str]:
         """

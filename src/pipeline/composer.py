@@ -148,10 +148,13 @@ class ReplyComposer:
                     src_file = r.get("source_file", "")
                     if src_file:
                         files_used.append(src_file)
+                    jev_suffix = f" [Jev Reranked {int(r['jev_score']*100)}%]" if r.get("jev_evaluated") else ""
                     retrieved_chunks.append({
                         "file": src_file or "knowledge/rag",
-                        "title": f"Google AI Studio RAG [{int(r['score']*100)}% Match]: {r['title']}",
-                        "content": r["content"]
+                        "title": f"Google AI Studio RAG [{int(r['score']*100)}% Match]{jev_suffix}: {r['title']}",
+                        "content": r["content"],
+                        "jev_score": r.get("jev_score"),
+                        "jev_evaluated": r.get("jev_evaluated", False)
                     })
             except Exception as e:
                 print(f"Warning: RAG retrieval error in edge case: {e}")
@@ -325,10 +328,13 @@ class ReplyComposer:
                 src_file = r.get("source_file", "")
                 if src_file:
                     files_used.append(src_file)
+                jev_suffix = f" [Jev Reranked {int(r['jev_score']*100)}%]" if r.get("jev_evaluated") else ""
                 retrieved_chunks.append({
                     "file": src_file or "knowledge/rag",
-                    "title": f"Google AI Studio RAG [{int(r['score']*100)}% Match]: {r['title']}",
-                    "content": r["content"]
+                    "title": f"Google AI Studio RAG [{int(r['score']*100)}% Match]{jev_suffix}: {r['title']}",
+                    "content": r["content"],
+                    "jev_score": r.get("jev_score"),
+                    "jev_evaluated": r.get("jev_evaluated", False)
                 })
         except Exception as e:
             print(f"Warning: RAG retrieval error: {e}")

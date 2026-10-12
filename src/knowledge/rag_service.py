@@ -4,21 +4,25 @@ from typing import List, Dict, Any, Optional
 from src.knowledge.rag_store import VectorStore, KnowledgeChunk
 from src.knowledge.chunker import KnowledgeChunker
 from src.adapters.embedding import get_embedding_adapter, EmbeddingClient
+from src.adapters.jev import get_jev_adapter, JevAdapter
 from src.config import VECTOR_STORE_PATH
 
 class KnowledgeRAG:
     """
     Unified RAG Engine for Vien Chi Bao Customer Concierge.
-    Embeds all project knowledge through the configured embeddings endpoint
-    and performs high-speed semantic retrieval.
+    Embeds all project knowledge through the configured embeddings endpoint,
+    performs high-speed semantic retrieval, and reranks candidate chunks
+    using TypeSafe AI's Jev System One model.
     """
     def __init__(
         self,
         vector_store_path: Optional[Path] = None,
-        embedding_adapter: Optional[EmbeddingClient] = None
+        embedding_adapter: Optional[EmbeddingClient] = None,
+        jev_adapter: Optional[JevAdapter] = None
     ):
         self.vector_store_path = vector_store_path or VECTOR_STORE_PATH
         self.embedding_adapter = embedding_adapter or get_embedding_adapter()
+        self.jev_adapter = jev_adapter or get_jev_adapter()
         self.chunker = KnowledgeChunker()
         self.vector_store = VectorStore(storage_path=self.vector_store_path)
         self._is_initialized = False
@@ -100,10 +104,13 @@ class KnowledgeRAG:
         top_k: int = 5,
         category: Optional[str] = None,
         channel: Optional[str] = None,
-        min_score: float = 0.35
+        min_score: float = 0.35,
+        use_jev: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Embeds the customer query and performs cosine similarity search.
+        When Jev is available and use_jev is True, candidate chunks are evaluated
+        and reranked using TypeSafe AI's Jev System One model.
         """
         if not self._is_initialized:
             self.initialize(auto_index=True)
@@ -118,13 +125,27 @@ class KnowledgeRAG:
             print(f"Warning: Failed to embed RAG query: {e}")
             return []
 
+        should_rerank_jev = bool(use_jev and self.jev_adapter.is_available())
+        candidate_k = max(top_k * 2, 6) if should_rerank_jev else top_k
+
         results = self.vector_store.search(
             query_vector=q_vec,
-            top_k=top_k,
+            top_k=candidate_k,
             category=category,
             channel=channel,
             min_score=min_score
         )
+
+        if should_rerank_jev and results:
+            results = self.jev_adapter.rerank(
+                query=query.strip(),
+                chunks=results,
+                top_k=top_k,
+                min_score=min_score
+            )
+        else:
+            results = results[:top_k]
+
         return results
 
     def get_stats(self) -> Dict[str, Any]:
@@ -133,6 +154,9 @@ class KnowledgeRAG:
         stats = self.vector_store.get_stats()
         stats["is_initialized"] = self._is_initialized
         stats["api_available"] = self.embedding_adapter.is_available()
+        stats["jev_available"] = self.jev_adapter.is_available()
+        stats["jev_model"] = self.jev_adapter.model_name
+        stats["jev_enabled"] = self.jev_adapter.enabled
         return stats
 
 _rag_instance: Optional[KnowledgeRAG] = None

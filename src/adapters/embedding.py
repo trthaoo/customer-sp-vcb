@@ -18,6 +18,15 @@ class EmbeddingClient:
         self._base_url = base_url
         self._api_key = api_key
         self._model_name = model_name
+        self._http_client: Optional[httpx.Client] = None
+
+    def _get_client(self) -> httpx.Client:
+        if self._http_client is None or self._http_client.is_closed:
+            self._http_client = httpx.Client(
+                timeout=httpx.Timeout(45.0, connect=5.0),
+                limits=httpx.Limits(max_keepalive_connections=10, max_connections=20, keepalive_expiry=60.0)
+            )
+        return self._http_client
 
     @property
     def base_url(self) -> str:
@@ -49,12 +58,12 @@ class EmbeddingClient:
         headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
         url = f"{self.base_url.rstrip('/')}/embeddings"
         vectors: List[List[float]] = []
-        with httpx.Client(timeout=60.0) as client:
-            for i in range(0, len(texts), batch_size):
-                resp = client.post(url, headers=headers, json={"model": self.model_name, "input": texts[i:i + batch_size]})
-                resp.raise_for_status()
-                data = sorted(resp.json()["data"], key=lambda d: d["index"])
-                vectors.extend(d["embedding"] for d in data)
+        client = self._get_client()
+        for i in range(0, len(texts), batch_size):
+            resp = client.post(url, headers=headers, json={"model": self.model_name, "input": texts[i:i + batch_size]})
+            resp.raise_for_status()
+            data = sorted(resp.json()["data"], key=lambda d: d["index"])
+            vectors.extend(d["embedding"] for d in data)
         return vectors
 
 

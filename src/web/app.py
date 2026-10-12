@@ -842,6 +842,7 @@ class RagSearchRequest(BaseModel):
     category: Optional[str] = None
     channel: Optional[str] = None
     min_score: Optional[float] = 0.3
+    use_jev: Optional[bool] = True
 
 class RagReindexRequest(BaseModel):
     force: Optional[bool] = False
@@ -864,14 +865,22 @@ async def reindex_rag(body: Optional[RagReindexRequest] = None):
 async def search_rag(body: RagSearchRequest):
     from src.knowledge.rag_service import get_rag_service
     rag = get_rag_service()
+    use_jev = body.use_jev if body.use_jev is not None else True
     results = rag.search(
         query=body.query,
         top_k=body.top_k or 5,
         category=body.category,
         channel=body.channel,
-        min_score=body.min_score or 0.3
+        min_score=body.min_score or 0.3,
+        use_jev=use_jev
     )
-    return {"query": body.query, "results": results, "count": len(results)}
+    return {
+        "query": body.query,
+        "results": results,
+        "count": len(results),
+        "use_jev": use_jev,
+        "jev_available": rag.jev_adapter.is_available()
+    }
 
 @app.get("/")
 @app.get("/dashboard")

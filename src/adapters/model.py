@@ -16,6 +16,16 @@ class ModelAdapter:
         self._api_key = api_key
         self._base_url = base_url
         self._model_name = model_name
+        self._http_client: Optional[httpx.Client] = None
+
+    def _get_client(self) -> httpx.Client:
+        """Returns reusable httpx.Client with persistent connection pooling and keep-alive."""
+        if self._http_client is None or self._http_client.is_closed:
+            self._http_client = httpx.Client(
+                timeout=httpx.Timeout(30.0, connect=5.0),
+                limits=httpx.Limits(max_keepalive_connections=20, max_connections=50, keepalive_expiry=120.0)
+            )
+        return self._http_client
 
     @property
     def provider(self) -> str:
@@ -146,27 +156,27 @@ class ModelAdapter:
             "contents": contents,
             "generationConfig": {
                 "temperature": 0.3,
-                "maxOutputTokens": 400
+                "maxOutputTokens": 350
             }
         }
+        client = self._get_client()
         for attempt in range(3):
             try:
-                with httpx.Client(timeout=30.0) as client:
-                    resp = client.post(url, json=body)
-                    if resp.status_code == 429 and attempt < 2:
-                        time.sleep(2.0 * (attempt + 1))
-                        continue
-                    resp.raise_for_status()
-                    data = resp.json()
-                    candidates = data.get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        if parts:
-                            return parts[0].get("text", "").strip()
-                    return ""
+                resp = client.post(url, json=body)
+                if resp.status_code == 429 and attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                candidates = data.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        return parts[0].get("text", "").strip()
+                return ""
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429 and attempt < 2:
-                    time.sleep(2.0 * (attempt + 1))
+                    time.sleep(1.5 * (attempt + 1))
                     continue
                 raise
         return ""
@@ -211,21 +221,21 @@ class ModelAdapter:
         body = {
             "model": self.model_name or "gpt-4o-mini",
             "messages": payload_messages,
-            "temperature": 0.3,
-            "max_tokens": 2048
+            "temperature": 0.25,
+            "max_tokens": 512
         }
-        with httpx.Client(timeout=45.0) as client:
-            resp = client.post(url, json=body, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
-            choices = data.get("choices", [])
-            if choices:
-                msg = choices[0].get("message", {})
-                content = (msg.get("content") or "").strip()
-                if not content and msg.get("reasoning_content"):
-                    # Fallback if model exhausted tokens inside thinking
-                    content = msg.get("reasoning_content", "").strip()
-                return content
+        client = self._get_client()
+        resp = client.post(url, json=body, headers=headers)
+        resp.raise_for_status()
+        data = resp.json()
+        choices = data.get("choices", [])
+        if choices:
+            msg = choices[0].get("message", {})
+            content = (msg.get("content") or "").strip()
+            if not content and msg.get("reasoning_content"):
+                # Fallback if model exhausted tokens inside thinking
+                content = msg.get("reasoning_content", "").strip()
+            return content
         return ""
 
 _model_adapter_instance: Optional[ModelAdapter] = None

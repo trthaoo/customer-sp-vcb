@@ -25,6 +25,14 @@ MODEL_NAME = os.getenv("MODEL_NAME", "gemini-3.1-flash-lite")
 EMBEDDING_BASE_URL = os.getenv("EMBEDDING_BASE_URL", "")
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "sentence-transformers/paraphrase-multilingual-mpnet-base-v2")
 
+# Jev / TypeSafe AI Decision & Reranking Configuration for RAG
+JEV_API_KEY = os.getenv("JEV_API_KEY", os.getenv("TYPESAFE_API_KEY", "")).strip()
+JEV_BASE_URL = os.getenv("JEV_BASE_URL", os.getenv("TYPESAFE_BASE_URL", "")).strip()
+JEV_MODEL = os.getenv("JEV_MODEL", os.getenv("TYPESAFE_DEFAULT_MODEL", "jev-latest")).strip()
+JEV_ENABLED = os.getenv("JEV_ENABLED", "true").lower() in ("true", "1", "yes")
+JEV_RERANK_THRESHOLD = float(os.getenv("JEV_RERANK_THRESHOLD", "0.35"))
+JEV_TIMEOUT = float(os.getenv("JEV_TIMEOUT", "8.0"))
+
 # Auto send and handover hold
 AUTO_SEND = os.getenv("AUTO_SEND", "false").lower() in ("true", "1", "yes")
 HOLD_ON_HANDOVER = os.getenv("HOLD_ON_HANDOVER", "true").lower() in ("true", "1", "yes")
