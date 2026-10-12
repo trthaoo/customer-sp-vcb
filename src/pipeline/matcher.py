@@ -101,17 +101,8 @@ class ProductMatcher:
                 self._cache[cache_key] = res
                 return res
 
-        # Step 4: AI Semantic Product Grounding via Model Reasoning (only if query implies a product)
-        JEWELRY_INDICATORS = [
-            'nhẫn', 'vòng', 'bạc', 'dây', 'mặt', 'lắc', 'bông', 'khuyên', 'mẫu', 'chiếc', 'cái',
-            'ring', 'bracelet', 'pendant', 'necklace', 'earring', 'jewelry', 'piece', 'item',
-            'this', 'it', 'one', 'màu', 'size', 'bộ', 'đá', 'gem', 'stone', 'chuỗi', 'sp'
-        ]
-        has_indicator = any(w in text_norm for w in JEWELRY_INDICATORS) or (
-            bool(context and any(w in normalize_text(context) for w in JEWELRY_INDICATORS))
-        )
-
-        if has_indicator and self.model_adapter and self.model_adapter.is_available() and self.products and text_norm:
+        # Step 4: AI Semantic Product Grounding via Model Reasoning
+        if self.model_adapter and self.model_adapter.is_available() and self.products and text_norm:
             semantic_res = self._match_semantic_ai(text, context)
             if semantic_res[0] is not None or len(semantic_res[1]) > 0:
                 self._cache[cache_key] = semantic_res

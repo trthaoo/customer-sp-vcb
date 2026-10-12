@@ -154,13 +154,7 @@ class IntentClassifier:
         if cache_key in self._cache:
             return self._cache[cache_key]
 
-        # 1. Ultra-fast Semantic Heuristic check (< 0.1ms)
-        fast_intent = self._classify_semantic_fallback(text)
-        if fast_intent != "other" and fast_intent in self.allowed_intents:
-            self._cache[cache_key] = fast_intent
-            return fast_intent
-
-        # 2. Fast System One Decision via Jev (~50-80ms) if available
+        # 1. AI-Driven Semantic Reasoning via Jev System One (if configured)
         try:
             from src.adapters.jev import get_jev_adapter
             jev = get_jev_adapter()
@@ -172,15 +166,17 @@ class IntentClassifier:
         except Exception:
             pass
 
-        # 3. AI-Driven Semantic Reasoning via Model Adapter (only if fast path & Jev inconclusive)
+        # 2. AI-Driven Semantic Reasoning via Model Adapter LLM
         if self.model_adapter and self.model_adapter.is_available():
             inferred_intent = self._classify_with_llm(text, context)
             if inferred_intent and inferred_intent in self.allowed_intents:
                 self._cache[cache_key] = inferred_intent
                 return inferred_intent
 
-        self._cache[cache_key] = "other"
-        return "other"
+        # 3. Semantic Heuristic Fallback (strictly for offline environments or API downtime)
+        fallback_intent = self._classify_semantic_fallback(text)
+        self._cache[cache_key] = fallback_intent
+        return fallback_intent
 
     def _classify_with_jev(self, text: str, context: Optional[str], jev: Any) -> Optional[str]:
         client = jev._get_client()

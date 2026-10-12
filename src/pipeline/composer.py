@@ -42,7 +42,8 @@ class ReplyComposer:
         product_visible_not_in_catalogue: bool = False,
         visual_product_guess: Optional[str] = None,
         frame_used: Optional[str] = None,
-        attached_image_url: Optional[str] = None
+        attached_image_url: Optional[str] = None,
+        rag_results: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
         """
         RAG + Visual context every turn:
@@ -141,10 +142,13 @@ class ReplyComposer:
 
             # Semantic Knowledge Chunks from Google AI Studio Embeddings
             try:
-                from src.knowledge.rag_service import get_rag_service
-                rag = get_rag_service()
-                rag_results = rag.search(query=inbound.text, top_k=2, channel=inbound.channel, min_score=0.45)
-                for r in rag_results:
+                if rag_results is not None:
+                    active_rag_results = rag_results[:2]
+                else:
+                    from src.knowledge.rag_service import get_rag_service
+                    rag = get_rag_service()
+                    active_rag_results = rag.search(query=inbound.text, top_k=2, channel=inbound.channel, min_score=0.45)
+                for r in active_rag_results:
                     src_file = r.get("source_file", "")
                     if src_file:
                         files_used.append(src_file)
@@ -321,10 +325,13 @@ class ReplyComposer:
 
         # Chunk 5: Dynamic Semantic Knowledge from Google AI Studio Embeddings
         try:
-            from src.knowledge.rag_service import get_rag_service
-            rag = get_rag_service()
-            rag_results = rag.search(query=inbound.text, top_k=3, channel=inbound.channel, min_score=0.45)
-            for r in rag_results:
+            if rag_results is not None:
+                active_rag_results = rag_results[:3]
+            else:
+                from src.knowledge.rag_service import get_rag_service
+                rag = get_rag_service()
+                active_rag_results = rag.search(query=inbound.text, top_k=3, channel=inbound.channel, min_score=0.45)
+            for r in active_rag_results:
                 src_file = r.get("source_file", "")
                 if src_file:
                     files_used.append(src_file)
