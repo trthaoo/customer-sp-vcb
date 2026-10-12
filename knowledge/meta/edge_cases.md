@@ -9,7 +9,7 @@ Defines high-priority edge case scenarios for the Meta funnel (Instagram and Fac
 - id: meta_edge_scam_legitimacy_inquiry
   channel: meta
   trigger: "Customer expresses scam suspicion, asks if the business is legit, or asks about buyer protection and atelier location"
-  contains_any: ["is this legit", "are you a scam", "is it a scam", "scam website", "where are you located", "real store", "fake website", "uy tín không", "có lừa đảo không", "shop ở đâu"]
+  contains_any: ["is this legit", "are you a scam", "is it a scam", "scam website", "where are you located", "real store", "fake website", "uy tín không", "có lừa đảo không", "shop ở đâu", "legit", "is it fake", "fake silver"]
   do: "Reassure with warm poise: highlight over 10 years of artisan silver craft, official S925 hallmarks, our 10x authenticity refund guarantee, 30-day return policy, and secure checkout with PayPal Buyer Protection"
   do_not: "Never get defensive, never trade accusations, and never post defensive walls of text"
   escalate: false
@@ -19,7 +19,7 @@ Defines high-priority edge case scenarios for the Meta funnel (Instagram and Fac
 - id: meta_edge_angry_complaint
   channel: meta
   trigger: "Customer expresses anger, reports damaged/flawed jewelry, demands an urgent refund, or alleges scam"
-  contains_any: ["broken", "refund", "terrible", "damaged", "poor quality", "lừa đảo", "hỏng", "rởm", "tẩy chay", "hoàn tiền", "trả hàng gấp", "chất lượng kém", "tệ hại", "scam!"]
+  contains_any: ["broken", "refund", "terrible", "damaged", "poor quality", "lừa đảo", "hỏng", "rởm", "tẩy chay", "hoàn tiền", "trả hàng gấp", "chất lượng kém", "tệ hại", "scam!", "fake", "fake!", "product is fake", "hàng giả"]
   do: "Acknowledge the customer's frustration with heartfelt empathy and state that you are escalating directly to the studio manager / quản lý for immediate resolution"
   do_not: "Never argue, never blame the customer or shipping carrier, and do not make unauthorized compensation commitments"
   escalate: true

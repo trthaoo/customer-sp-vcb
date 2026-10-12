@@ -3,7 +3,7 @@ from typing import Optional, Dict, Any, List, Tuple
 from src.models import InboundMessage, Product, Rule, EdgeCase, MediaFrame
 from src.knowledge.loader import KnowledgeBase
 from src.config import PLATFORM_LIMITS
-from src.adapters.model import get_model_adapter
+from src.adapters.model import get_model_adapter, sanitize_model_output
 
 def format_currency(price: Optional[float], currency: Optional[str] = "VND") -> str:
     if price is None:
@@ -484,12 +484,22 @@ class ReplyComposer:
         if not raw_reply or "[lỗi kết nối" in raw_reply.lower():
             if not self.model_adapter.is_available():
                 return "chưa gắn API model", False, None, None
+            if inbound.surface == "comment":
+                return "We apologize! Escalating directly to our studio manager to resolve this right away 🤍", False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (comment fallback)"
             if edge_case.example_good_reply:
                 return edge_case.example_good_reply, False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (fallback example)"
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
             return fallback_text, False, self.model_adapter.model_name, f"Model {self.model_adapter.model_name} response empty -> Fallback"
 
         reply, reason = self._extract_diagnostic_reason(raw_reply)
+        reply = sanitize_model_output(reply)
+        if not reply or len(reply.strip()) < 3:
+            if inbound.surface == "comment":
+                return "We apologize! Escalating directly to our studio manager to resolve this right away 🤍", False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (comment fallback)"
+            if edge_case.example_good_reply:
+                return edge_case.example_good_reply, False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (fallback example)"
+            fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
+            return fallback_text, False, self.model_adapter.model_name, f"Model response empty -> Fallback"
         return reply, True, self.model_adapter.model_name, reason
 
     def _call_model_for_rule(
@@ -592,6 +602,17 @@ class ReplyComposer:
             return fallback_text, False, self.model_adapter.model_name, f"Model {self.model_adapter.model_name} response empty -> Fallback"
 
         reply, reason = self._extract_diagnostic_reason(raw_reply)
+        reply = sanitize_model_output(reply)
+        if not reply or len(reply.strip()) < 3:
+            if rule and getattr(rule, "example_good_reply", None):
+                return rule.example_good_reply, False, self.model_adapter.model_name, f"Rule {rule.id} (fallback example)"
+            if product and product.price is not None:
+                price_str = format_currency(product.price, product.currency)
+                if inbound.surface == "comment":
+                    return f"Send us a quick DM or check our bio link for {product.name} details & checkout ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback comment)"
+                return f"It's the {product.name} at {price_str} with complimentary free US shipping! ✨\n\nWhat size would you like us to prepare for you? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback product reply)"
+            fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
+            return fallback_text, False, self.model_adapter.model_name, f"Model response empty -> Fallback"
         return reply, True, self.model_adapter.model_name, reason
 
     def _extract_diagnostic_reason(self, raw_reply: str) -> Tuple[str, Optional[str]]:
@@ -619,10 +640,13 @@ class ReplyComposer:
                 text = " ".join(words[:max_words])
             if len(text) > max_chars:
                 text = text[:max_chars].rsplit(" ", 1)[0]
-            return text.strip()
+            # Strip dangling punctuation and trailing connectors
+            text = re.sub(r'[\s/,\-–—;:]+$', '', text).strip()
+            return text
         else:
             max_chars = limits.get("dm_max_chars", 600)
             if len(text) > max_chars:
                 text = text[:max_chars].rsplit(" ", 1)[0]
-            return text.strip()
+            text = re.sub(r'[\s/,\-–—;:]+$', '', text).strip()
+            return text
 

@@ -245,5 +245,62 @@ def test_official_warranty_exchange_policy(orchestrator):
     assert "order@huykjeweler.com" in warranty_fact
     assert "Free 1-to-1 Replacement" in warranty_fact or "replacement" in warranty_fact.lower()
 
+# 14. Fake product allegation on public comment -> Handover & Under 15 words clean reply
+def test_fake_product_allegation_comment(orchestrator):
+    inbound = InboundMessage(
+        id="case_loi_14",
+        platform="ig",
+        channel="meta",
+        surface="comment",
+        text="Hey, your product is fake!",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_edge_case == "meta_edge_angry_complaint"
+    assert result.flag == "handover"
+    assert result.decision == "escalate"
+    assert result.needs_human is True
+    # Ensure no internal reasoning leaked
+    assert "we need answer" not in result.draft_reply.lower()
+    assert "need parse" not in result.draft_reply.lower()
+    assert "<think>" not in result.draft_reply
+    # Ensure under 15 words limit for public comment
+    words = result.draft_reply.split()
+    assert len(words) <= 15
+    assert not result.draft_reply.endswith("/")
+
+# 15. Refund & fake allegation on DM -> Handover & Complete studio escalation response
+def test_fake_product_refund_dm(orchestrator):
+    inbound = InboundMessage(
+        id="case_loi_15",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="hey i want to be refunded, your product is fake?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_edge_case == "meta_edge_angry_complaint"
+    assert result.flag == "handover"
+    assert result.decision == "escalate"
+    assert result.needs_human is True
+    assert "we need answer" not in result.draft_reply.lower()
+    assert not result.draft_reply.endswith("and I’m")
+    assert not result.draft_reply.endswith("and I'm")
+    assert len(result.draft_reply) > 20
+
+# 16. Unit test for sanitize_model_output logic
+def test_sanitize_scratchpad_and_cutoffs():
+    from src.adapters.model import sanitize_model_output
+    # Deliberation scratchpad
+    leak = 'We need answer. Need parse. Customer says "Hey, your product is fake!" Public comment. Need reply one single line under'
+    assert sanitize_model_output(leak) == ""
+    # Incomplete sentence cut-off
+    cutoff = 'I hear you, and I’m'
+    assert sanitize_model_output(cutoff) == ""
+    # Think tag block
+    cot = '<think>Deliberating answer...</think>We hear you and apologize!'
+    assert sanitize_model_output(cot) == "We hear you and apologize!"
+
 
 

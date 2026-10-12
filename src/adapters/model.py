@@ -1,8 +1,56 @@
 from typing import List, Dict, Any, Optional
 import os
+import re
 import time
 import httpx
 from src import config
+
+def sanitize_model_output(text: str) -> str:
+    """
+    Strips internal model thinking scratchpads, <think> tags, and deliberation artifacts.
+    Guarantees no raw reasoning or thought process leaks into customer replies.
+    """
+    if not text:
+        return ""
+    # Strip <think>...</think> blocks
+    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
+    # Strip unclosed <think>... (if thinking was cut off)
+    text = re.sub(r'<think>.*', '', text, flags=re.DOTALL)
+    # Strip explicit reasoning headers
+    text = re.sub(r'^(?:thinking process|thought|internal reasoning|deliberation):\s*.*?\n\n', '', text, flags=re.DOTALL | re.IGNORECASE)
+    cleaned = text.strip()
+
+    # Reject scratchpad leak sentences if the model output is literally raw deliberation
+    lower = cleaned.lower()
+    suspicious_patterns = [
+        "we need answer",
+        "need parse",
+        "need reply",
+        "customer says",
+        "the customer says",
+        "internal reasoning",
+        "thinking process",
+        "scratchpad",
+        "public comment. need",
+        "deliberation",
+        "reasoning:",
+        "thought:"
+    ]
+    if any(p in lower for p in suspicious_patterns if p in lower[:120] or lower.startswith(p)):
+        return ""
+
+    # Check for obvious truncated cut-off sentence fragments (e.g. "I hear you, and I’m")
+    words = cleaned.split()
+    if len(words) < 8 and len(words) > 0:
+        dangling_endings = ["i'm", "i’m", "i am", "and", "or", "to", "with", "that", "we're", "we’re"]
+        last_word = words[-1].lower().rstrip(",;:-/—")
+        if last_word in dangling_endings:
+            return ""
+
+    # Clean any trailing dangling punctuation
+    cleaned = re.sub(r'[\s/,\-–—;:]+$', '', cleaned).strip()
+
+    return cleaned
 
 class ModelAdapter:
     def __init__(
@@ -107,9 +155,10 @@ class ModelAdapter:
         try:
             prov = self.provider
             if prov == "gemini" or (not prov and ("gemini" in self.model_name.lower() or self.api_key.startswith("AIza") or self.api_key.startswith("AQ.")) and not self.base_url):
-                return self._generate_gemini(system_prompt, messages, frames)
+                res = self._generate_gemini(system_prompt, messages, frames)
             else:
-                return self._generate_openai(system_prompt, messages, frames)
+                res = self._generate_openai(system_prompt, messages, frames)
+            return sanitize_model_output(res)
         except Exception as e:
             err_str = str(e).lower()
             if "vision" in err_str or "image" in err_str or "unsupported" in err_str or "modal" in err_str:
@@ -156,7 +205,7 @@ class ModelAdapter:
             "contents": contents,
             "generationConfig": {
                 "temperature": 0.3,
-                "maxOutputTokens": 350
+                "maxOutputTokens": 2048
             }
         }
         client = self._get_client()
@@ -172,7 +221,8 @@ class ModelAdapter:
                 if candidates:
                     parts = candidates[0].get("content", {}).get("parts", [])
                     if parts:
-                        return parts[0].get("text", "").strip()
+                        text = parts[0].get("text", "").strip()
+                        return sanitize_model_output(text)
                 return ""
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429 and attempt < 2:
@@ -222,7 +272,7 @@ class ModelAdapter:
             "model": self.model_name or "gpt-4o-mini",
             "messages": payload_messages,
             "temperature": 0.25,
-            "max_tokens": 512
+            "max_tokens": 2048
         }
         client = self._get_client()
         resp = client.post(url, json=body, headers=headers)
@@ -232,10 +282,8 @@ class ModelAdapter:
         if choices:
             msg = choices[0].get("message", {})
             content = (msg.get("content") or "").strip()
-            if not content and msg.get("reasoning_content"):
-                # Fallback if model exhausted tokens inside thinking
-                content = msg.get("reasoning_content", "").strip()
-            return content
+            # NEVER use reasoning_content as user reply - internal reasoning must never leak to customers
+            return sanitize_model_output(content)
         return ""
 
 _model_adapter_instance: Optional[ModelAdapter] = None
