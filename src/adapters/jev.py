@@ -51,9 +51,17 @@ class JevAdapter:
     @property
     def base_url(self) -> Optional[str]:
         if self._base_url is not None:
-            return self._base_url
-        url = os.getenv("JEV_BASE_URL", os.getenv("TYPESAFE_BASE_URL", getattr(config, "JEV_BASE_URL", ""))).strip()
-        return url if url else None
+            raw = self._base_url
+        else:
+            raw = os.getenv("JEV_BASE_URL", os.getenv("TYPESAFE_BASE_URL", getattr(config, "JEV_BASE_URL", ""))).strip()
+        if not raw:
+            return None
+        url = raw.rstrip("/")
+        if url.endswith("/v1/systemone"):
+            url = url[:-len("/v1/systemone")]
+        elif url.endswith("/v1"):
+            url = url[:-len("/v1")]
+        return url.rstrip("/")
 
     @property
     def model_name(self) -> str:
@@ -203,11 +211,14 @@ class JevAdapter:
         query: str,
         chunks: List[Dict[str, Any]],
         top_k: int = 5,
-        min_score: Optional[float] = None
+        min_score: Optional[float] = None,
+        abstain_on_irrelevant: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Reranks candidate knowledge chunks using Jev System One model.
         Runs evaluations concurrently to minimize RAG latency.
+        Implements Gating: abstains (returns empty list) if all candidate passages
+        are judged irrelevant / not in documentation.
         """
         if not chunks:
             return []
@@ -265,9 +276,11 @@ class JevAdapter:
             if c.get("jev_choice") != "irrelevant" and c.get("score", 0.0) >= threshold
         ]
 
-        # Fallback: if all chunks filtered out, preserve top candidate
-        final_results = filtered if filtered else scored_chunks
-        return final_results[:top_k]
+        # Jev Gating: If all candidate chunks are irrelevant or below threshold,
+        # abstain from feeding ungrounded documents into LLM ("Abstain: Not in Docs").
+        if abstain_on_irrelevant:
+            return filtered[:top_k]
+        return (filtered if filtered else scored_chunks)[:top_k]
 
     def needs_knowledge(self, query: str) -> Dict[str, Any]:
         """

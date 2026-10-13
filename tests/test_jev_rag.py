@@ -125,6 +125,35 @@ def test_jev_adapter_rerank_with_mock_client():
     assert "c3" not in ids
 
 
+def test_jev_adapter_gating_abstain_not_in_docs():
+    """Verifies Jev + RAG Gating architecture: when all candidates are irrelevant, Jev abstains."""
+    mock_client = MagicMock()
+    mock_client.system_one.return_value = SystemOneResponse(
+        model="jev-latest",
+        usage=Usage(input_tokens=40, output_tokens=2),
+        answers={
+            "is_relevant": NoulAnswer(type="noul", noul=0.08),
+            "relevance_level": ChoiceAnswer(
+                type="choice",
+                choice="irrelevant",
+                confidence=0.99,
+                probabilities={"direct": 0.0, "related": 0.01, "irrelevant": 0.99}
+            )
+        }
+    )
+
+    adapter = JevAdapter(enabled=True, client=mock_client)
+    candidate_chunks = [
+        {"id": "c1", "title": "Chính sách đổi trả", "content": "Đổi trả trong 7 ngày", "score": 0.40},
+        {"id": "c2", "title": "Bảo hành bạc", "content": "Bảo hành làm sáng trọn đời", "score": 0.38}
+    ]
+
+    # Query is completely out of domain / not in docs
+    reranked = adapter.rerank(query="shop có bán điện thoại iPhone không", chunks=candidate_chunks, top_k=2)
+    # Jev Gating must abstain (return empty list) rather than injecting irrelevant documents into LLM
+    assert reranked == []
+
+
 def test_jev_adapter_graceful_error_fallback():
     mock_client = MagicMock()
     mock_client.system_one.side_effect = RuntimeError("TypeSafe API connection timeout")

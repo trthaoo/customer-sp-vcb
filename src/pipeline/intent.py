@@ -157,26 +157,14 @@ class IntentClassifier:
         if cache_key in self._cache:
             return self._cache[cache_key]
 
-        # 1. AI-Driven Semantic Reasoning via Jev System One (if configured)
-        try:
-            from src.adapters.jev import get_jev_adapter
-            jev = get_jev_adapter()
-            if jev.is_available():
-                jev_intent = self._classify_with_jev(text, context, jev)
-                if jev_intent and jev_intent in self.allowed_intents:
-                    self._cache[cache_key] = jev_intent
-                    return jev_intent
-        except Exception:
-            pass
-
-        # 2. AI-Driven Semantic Reasoning via Model Adapter LLM
+        # 1. AI-Driven Semantic Reasoning via Model Adapter LLM
         if self.model_adapter and self.model_adapter.is_available():
             inferred_intent = self._classify_with_llm(text, context)
             if inferred_intent and inferred_intent in self.allowed_intents:
                 self._cache[cache_key] = inferred_intent
                 return inferred_intent
 
-        # 3. Semantic Heuristic Fallback (strictly for offline environments or API downtime)
+        # 2. Semantic Heuristic Fallback (strictly for offline environments or API downtime)
         fallback_intent = self._classify_semantic_fallback(text)
         self._cache[cache_key] = fallback_intent
         return fallback_intent
