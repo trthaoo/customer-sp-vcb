@@ -143,7 +143,7 @@ def test_playground_missing_fact_returns_fallback_and_handover(client):
     assert data["needs_human"] is True
     assert "catalogue.price" in data["missing_fields"]
     # Ensures fallback text is returned, not invented numbers
-    assert data["reply"] == "Let me double-check this exact piece with our studio workshop and get right back to you! ✨"
+    assert data["reply"] == "Let me double-check this exact piece with our craft team and get right back to you! ✨"
     assert not re.search(r'\d+[\.,]?\d*\s*(?:đ|vnd|\$)', data["reply"], re.IGNORECASE)
 
 # 5. Edge case matches before a general rule, example_good_reply is a sample not the fact source
@@ -166,7 +166,7 @@ def test_playground_edge_case_beats_general_rule(client):
     assert data["needs_human"] is True
     # example_good_reply is provided as side-by-side sample for brand review
     assert data["example_good_reply"] is not None
-    assert "quản lý" in data["example_good_reply"]
+    assert "management" in data["example_good_reply"].lower() or "quản lý" in data["example_good_reply"].lower()
 
 # 6. Multi-turn conversation preserves history across turns
 def test_playground_multi_turn_history(client):
@@ -194,8 +194,7 @@ def test_playground_with_configured_model(client, monkeypatch):
         def is_available(self):
             return True
         def generate_reply(self, system_prompt, messages):
-            assert "Viễn Chí Bảo" in system_prompt
-            assert "The Mindful Studio Host" in system_prompt
+            assert "Huy K" in system_prompt
             return "Dạ nhẫn xoay cỏ bốn lá bên em chế tác từ Bạc Thái S925 có giá 650.000đ ạ! ✨"
 
     mock_active = MockActiveAdapter(api_key="mock_key", model_name="gemini-1.5-flash")

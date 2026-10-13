@@ -40,7 +40,7 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
   surface: any
   when:
     intent: ask_material
-    contains_any: ["material", "silver", "sterling", "gold", "chất liệu", "bằng gì", "vàng", "bạc", "kim loại"]
+    contains_any: ["material", "silver", "sterling", "chất liệu", "bằng gì", "bạc", "kim loại"]
     product_required: true
   use_knowledge: ["catalogue.material"]
   if_missing: escalate
@@ -66,7 +66,7 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
     product_required: true
   use_knowledge: ["catalogue.in_stock"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) confirm availability directly (yes in stock and ready to ship, or being crafted in current workshop batch); 2) share estimated ready time; 3) want me to save one for your size? ✨"
+  reply_guide: "Send 2–3 short bubbles: 1) confirm availability directly (yes in stock and ready to ship, or currently being hand-finished by our craft team); 2) share estimated ready time; 3) want me to save one for your size? ✨"
 
 - id: meta_ask_shipping_any
   channel: meta
@@ -77,7 +77,7 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
     product_required: false
   use_knowledge: ["policies.shipping"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) domestic US shipping is 100% free (included in price); 2) 2–5 business days for in-stock US warehouse pieces, ~2–3 weeks if traveling from our artisan workshop (1–3 days prep); 3) what city or state are you ordering from? 🤍"
+  reply_guide: "Send 2–3 short bubbles: 1) domestic US shipping is 100% free (included in price); 2) 2–5 business days for in-stock US warehouse pieces, ~2–3 weeks if traveling from our artisan craft studio (1–3 days prep); 3) what city or state are you ordering from? 🤍"
 
 - id: meta_ask_payment_any
   channel: meta
@@ -88,7 +88,7 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
     product_required: false
   use_knowledge: ["policies.payment"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) we currently process checkout securely via PayPal with full PayPal Buyer Protection; 2) no COD for insured US delivery; 3) if you need special payment handling, our concierge team can assist you directly ✨"
+  reply_guide: "Send 2–3 short bubbles: 1) we currently process checkout securely via PayPal with full PayPal Buyer Protection; 2) no COD for insured US delivery; 3) if you need special payment handling, my craft team can assist you directly ✨"
 
 - id: meta_ask_return_warranty_any
   channel: meta
@@ -99,18 +99,95 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
     product_required: false
   use_knowledge: ["policies.returns", "policies.warranty"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) free return/exchange within 8 days of receipt for initial workshop defects; 2) free 1-to-1 replacement for craft flaws and cancellations allowed before shipment; 3) feel free to DM us or reach order@huykjeweler.com anytime 🤍"
+  reply_guide: "Send 2–3 short bubbles: 1) free return/exchange within 8 days of receipt for initial crafting defects; 2) free 1-to-1 replacement for craft flaws and cancellations allowed before shipment; 3) feel free to DM us or reach order@huykjeweler.com anytime 🤍"
 
 - id: meta_ask_silver_quality_any
   channel: meta
   surface: any
   when:
     intent: ask_silver_quality
-    contains_any: ["real silver", "s925", "pure silver", "hallmark", "bạc thật không", "chất lượng bạc", "bạc chuẩn không", "có bị đen không"]
+    contains_any: ["real silver", "s925", "pure silver", "hallmark", "bạc thật không", "chất lượng bạc", "bạc chuẩn không"]
     product_required: false
   use_knowledge: ["policies.warranty"]
   if_missing: escalate
   reply_guide: "Send 2–3 short bubbles: 1) 100% solid S925 sterling silver with protective platinum plating; 2) stamped with official studio hallmark and backed by our 10x authenticity refund guarantee; 3) diamagnetic so it never sticks to a magnet ✨"
+
+- id: meta_ask_tarnish_care_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_material
+    contains_any: ["tarnish", "turn black", "turn green", "đen không", "gỉ không", "bị đen", "có bị đen không"]
+    product_required: false
+  use_knowledge: ["policies.warranty"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) solid S925 sterling silver finished with multi-layer platinum plating to resist tarnishing and stay skin-safe; 2) silver naturally interacts with body chemistry and sulfur (absorbing negative elements), but our platinum finish protects it for long-lasting daily wear; 3) includes lifetime polishing cloth and 1-to-1 replacement warranty! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Solid S925 with platinum plating keeps it radiant! DM for care tips ✨')"
+
+- id: meta_ask_custom_design_any
+  channel: meta
+  surface: any
+  when:
+    intent: request_custom
+    contains_any: ["custom", "custom design", "chế tác", "làm theo mẫu", "đặt làm", "mẫu riêng", "custom jewelry", "make something similar", "theo yêu cầu", "thiết kế riêng"]
+    product_required: false
+  use_knowledge: ["catalogue.material"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) my craft team definitely takes custom orders; 2) we primarily craft in solid S925 silver and also custom-craft in 14K/18K solid yellow or white gold; 3) send over a photo or sketch of your idea and let's bring it to life! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We do custom silver & gold! DM us your design or photo ✨')"
+
+- id: meta_ask_size_general_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_size
+    contains_any: ["size", "sizing", "measurement", "dimensions", "kích thước", "đo size", "vừa không", "chiều dài", "đường kính", "cỡ tay", "size tay"]
+    product_required: false
+  use_knowledge: ["catalogue.size_guide", "catalogue.variants"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) we craft standard US ring sizes from 4 to 12 directly for most pieces; 2) what size are you looking for, or would you like our quick 1-minute finger measurement guide? 3) feel free to share which piece you're eyeing! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We craft standard US sizes 4 to 12! DM us your size ✨')"
+
+- id: meta_ask_shipping_international_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_shipping
+    contains_any: ["china", "international", "ship to", "quốc tế", "nước ngoài", "ở trung quốc", "在中国能买吗", "overseas", "global shipping", "ship abroad"]
+    product_required: false
+  use_knowledge: ["policies.shipping"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) we primarily offer complimentary free shipping across the US; 2) for international destinations (including Asia/China/Europe), my craft team can arrange dedicated insured international courier shipping; 3) DM us your exact delivery address and we will confirm international transit options right away! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We do US & international shipping! DM us your location ✨')"
+
+- id: meta_ask_catalogue_website_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_order
+    contains_any: ["website", "see more designs", "web", "collection", "trang web", "xem thêm"]
+    product_required: false
+  use_knowledge: ["policies.payment", "catalogue.material"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) our full ready-to-wear collection is in our bio link, primarily crafted in solid S925 sterling silver; 2) for custom gold pieces (14K/18K) or bespoke designs, my craft team creates those upon special request; 3) drop us a DM anytime with ideas or pieces you'd like to explore! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Bio link has solid silver; DM us for custom gold & bespoke designs ✨')"
+
+- id: meta_ask_gold_material_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_material
+    contains_any: ["in gold", "have this in gold", "yellow gold", "white gold", "bằng vàng", "có vàng không", "mạ vàng", "làm bằng vàng"]
+    product_required: false
+  use_knowledge: ["catalogue.material"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) our ready-to-wear pieces are solid S925 silver with platinum plating; 2) my craft team also crafts this piece in 14K/18K yellow or white gold upon custom request; 3) would you prefer yellow gold or white gold? ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We craft in solid S925 & custom 14K/18K gold! DM us for details ✨')"
+
+- id: meta_ask_stones_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_material
+    contains_any: ["what kind of stone", "kind of stone", "stones do you use", "diamonds", "diamond or moissanite", "đá gì", "kim cương", "đá moissanite", "loại đá"]
+    product_required: false
+  use_knowledge: ["catalogue.material"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) our ready-to-wear designs feature premium brilliant Moissanite for diamond-rivaling fire and everyday durability; 2) my craft team also crafts custom designs with lab or natural diamonds; 3) which design are you looking to create? 🤍 (Nếu là comment: QUY TẮC 1 < 15 từ: 'Set with brilliant Moissanite, custom diamonds available! DM us to explore ✨')"
 
 - id: meta_ask_bulk_discount_any
   channel: meta
@@ -121,7 +198,7 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
     product_required: false
   use_knowledge: ["policies.promotions"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) love this! choosing 2+ pieces includes free US shipping, individual presentation boxes, and polishing cloths; 2) for 3+ pieces our concierge can set up a special bundle perk; 3) which designs are you looking to pair up? ✨"
+  reply_guide: "Send 2–3 short bubbles: 1) love this! choosing 2+ pieces includes free US shipping, individual presentation boxes, and polishing cloths; 2) for 3+ pieces my craft team can set up a special bundle perk; 3) which designs are you looking to pair up? ✨"
 
 - id: meta_ask_order_dm
   channel: meta
@@ -145,6 +222,17 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
   if_missing: escalate
   reply_guide: "QUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Hướng dẫn khách check DM hoặc bio link để nhận báo giá và hướng dẫn đặt hàng ✨ (Ví dụ: 'check your DM or bio link for direct order details ✨')"
 
+- id: meta_ask_direct_order_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_order
+    contains_any: ["order directly", "order from you", "buy directly", "mua trực tiếp", "đặt trực tiếp"]
+    product_required: false
+  use_knowledge: ["policies.shipping", "policies.payment"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) yes, you can order directly right here with us in DM or via our bio link; 2) includes complimentary free US shipping and secure PayPal checkout; 3) what design can I prepare for you? ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Yes, order directly right here in DM with free US shipping! ✨')"
+
 - id: meta_ask_order_general_dm
   channel: meta
   surface: dm
@@ -155,6 +243,17 @@ Defines automated response rules specifically for the Meta funnel (Instagram and
   use_knowledge: ["policies.shipping", "policies.payment"]
   if_missing: escalate
   reply_guide: "Send 2–3 short bubbles: 1) all pieces include free US shipping and secure checkout via PayPal; 2) handcrafted in solid S925 sterling silver; 3) which design or stone do you have your eye on? ✨"
+
+- id: meta_ask_store_location_any
+  channel: meta
+  surface: any
+  when:
+    intent: ask_location
+    contains_any: ["store address", "where is your store", "where is your jewelry made", "cửa hàng ở đâu", "địa chỉ", "made in", "where is it made"]
+    product_required: false
+  use_knowledge: ["policies.shipping", "policies.payment"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) our jewelry is handcrafted by designer Huy K's craft team; 2) domestic US orders ship directly from our US fulfillment center with insured 2–5 day delivery via USPS/UPS; 3) all online orders are protected by 100% PayPal Buyer Protection ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Handcrafted by Huy K craft team, insured 2-5 day US delivery via bio link ✨')"
 
 - id: meta_ask_photo_dm
   channel: meta

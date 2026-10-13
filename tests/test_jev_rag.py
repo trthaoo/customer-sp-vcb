@@ -228,3 +228,29 @@ def test_api_rag_search_endpoint_with_jev():
         assert data["use_jev"] is True
         assert data["jev_available"] is True
         assert data["results"][0]["jev_evaluated"] is True
+
+
+def test_rag_chunker_includes_sales_standards_and_new_rules():
+    from src.knowledge.chunker import KnowledgeChunker
+    chunker = KnowledgeChunker()
+    all_chunks = chunker.chunk_all()
+    chunk_ids = {c.id for c in all_chunks}
+    titles = [c.title for c in all_chunks]
+
+    # 1. Verify Sales Team Test Standards from brand_voice are chunked
+    sales_standards = [c for c in all_chunks if "Sales Team Test Standards" in c.title or "Custom Orders" in c.title or "Ring Sizing" in c.title or "Bạc Có Bị Đen" in c.title]
+    assert len(sales_standards) > 0
+
+    # 2. Verify new specialized rules are chunked with Trigger Keywords
+    gold_rule = next((c for c in all_chunks if "meta_ask_gold_material_any" in c.id or "tiktok_ask_gold_material_any" in c.id), None)
+    assert gold_rule is not None
+    assert "Trigger Keywords:" in gold_rule.content
+    assert "gold" in gold_rule.content.lower()
+
+    # 3. Verify Edge Case chunks have Triggers, DO, DO NOT, and Keywords
+    scam_ec = next((c for c in all_chunks if "meta_edge_scam_legitimacy_inquiry" in c.id), None)
+    assert scam_ec is not None
+    assert "Trigger:" in scam_ec.content
+    assert "Instructions (DO):" in scam_ec.content
+    assert "Trigger Keywords:" in scam_ec.content
+    assert "Huy K" in scam_ec.content

@@ -10,11 +10,11 @@ Defines high-priority edge cases specifically for the TikTok funnel. Edge cases 
   channel: tiktok
   trigger: "Commenter aggressively accuses the brand of scamming, counterfeit goods, or stealing jewelry designs"
   contains_any: ["scam", "fake", "stolen design", "counterfeit", "rip off", "đạo nhái", "lừa đảo", "hàng giả", "sao chép", "ăn cắp mẫu", "treo đầu dê"]
-  do: "Avoid public arguing in comments and flag for human staff verification and origin review"
+  do: "Avoid public arguing in comments: state that our pieces are handcrafted by designer Huy K's craft team with official S925 hallmarks and 10x guarantee, and invite them to DM or review our profile"
   do_not: "Never get defensive, never trade insults in comments, and do not use disrespectful language"
   escalate: true
   example_user_message: "This piece is stolen from another designer, such a total scam!"
-  example_good_reply: "Thank you for reaching out! To share our genuine workshop origins and silver hallmarking certificates, let me have our senior team connect with you right away 🤍"
+  example_good_reply: "All pieces are authentically handcrafted by designer Huy K's craft team with official S925 stamps and 10x guarantee! DM us for verification details 🤍"
 
 - id: tiktok_edge_general_compliment
   channel: tiktok
@@ -70,21 +70,21 @@ Defines high-priority edge cases specifically for the TikTok funnel. Edge cases 
   channel: tiktok
   trigger: "Viewer asks if the account reply is automated, bot, or AI"
   contains_any: ["are you a bot", "is this ai", "bot à", "ai rep à", "người thật hay bot"]
-  do: "Reply warmly and charmingly as the studio team at Vien Chi Bao, asking how you can help them pick their favorite piece"
+  do: "Reply warmly and charmingly as the craft team at Huy K Fine Jewelry, asking how you can help them pick their favorite piece"
   do_not: "Never admit to being an AI or bot"
   escalate: true
   example_user_message: "Is this an automated bot replying to comments?"
-  example_good_reply: "We’re the real studio team at Vien Chi Bao right here in the workshop! What design can we help you explore today? ✨"
+  example_good_reply: "We’re the real craft team at Huy K Fine Jewelry right here! What design can we help you explore today? ✨"
 
 - id: tiktok_edge_unsupported_payment_handover
   channel: tiktok
-  trigger: "Commenter or DM sender asks to pay via an unsupported payment method other than PayPal (such as COD, direct card payment, bank wire transfer, Zelle, Venmo, or Klarna installment) or requests special payment handling"
-  contains_any: ["cod", "cash on delivery", "quẹt thẻ", "thanh toán khi nhận hàng", "thẻ tín dụng", "credit card", "debit card", "chuyển khoản", "bank transfer", "wire transfer", "zelle", "venmo", "klarna", "afterpay", "installment", "trả góp"]
-  do: "Politely state that our online checkout currently accepts payment via PayPal (with full buyer protection), and escalate/handover to our human concierge to assist with personalized alternative payment arrangements"
-  do_not: "Do not promise that alternative payment methods are automatically supported online, and do not refuse the customer without connecting them to support staff"
+  trigger: "Commenter or DM sender asks to pay via an unsupported payment method other than PayPal (such as bank QR code, COD, direct card payment, bank wire transfer, Zelle, Venmo, or Klarna installment) or requests special payment handling"
+  contains_any: ["qr code", "mã qr", "cod", "cash on delivery", "quẹt thẻ", "thanh toán khi nhận hàng", "thẻ tín dụng", "credit card", "debit card", "chuyển khoản", "bank transfer", "wire transfer", "zelle", "venmo", "klarna", "afterpay", "installment", "trả góp"]
+  do: "Politely state that we cannot send bank QR codes in chat and our online checkout accepts payment via PayPal (with full buyer protection) at our website in bio, and connect with my craft team for custom payment arrangements"
+  do_not: "Do not send bank QR codes in chat or promise unsupported payment methods, and do not refuse the customer without connecting them to support staff"
   escalate: true
   example_user_message: "Shop có nhận ship COD không hay phải thanh toán trước?"
-  example_good_reply: "Dạ hiện tại bên em nhận thanh toán an toàn qua cổng PayPal (kèm chính sách bảo vệ người mua). Với hình thức COD hoặc các phương thức thanh toán riêng khác, em xin phép chuyển tiếp ngay cho anh/chị chuyên viên hỗ trợ để tư vấn chu đáo cho mình nha! ✨"
+  example_good_reply: "Dạ hiện tại bên em nhận thanh toán an toàn qua cổng PayPal trên website (kèm chính sách bảo vệ người mua). Với hình thức COD hoặc các phương thức thanh toán riêng khác, em xin phép kết nối ngay với đội ngũ chế tác để tư vấn chu đáo cho mình nha! ✨"
 ```
 
 ## TODO Sections

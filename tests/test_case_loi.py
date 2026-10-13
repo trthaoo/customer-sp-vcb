@@ -302,5 +302,120 @@ def test_sanitize_scratchpad_and_cutoffs():
     cot = '<think>Deliberating answer...</think>We hear you and apologize!'
     assert sanitize_model_output(cot) == "We hear you and apologize!"
 
+# 17. Sales Test Case: Khách hỏi nhẫn làm bằng vàng -> Khớp meta_ask_gold_material_any, không đẩy sang xưởng
+def test_case_loi_ask_gold_material(orchestrator):
+    inbound = InboundMessage(
+        id="case_gold_1",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="Do you have this ring in gold?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule == "tiktok_ask_gold_material_any"
+    assert "workshop" not in result.draft_reply.lower()
+    assert "Master Jeweler" not in result.draft_reply
+
+# 18. Sales Test Case: Khách hỏi loại đá / có làm bằng kim cương không -> Khớp meta_ask_stones_any
+def test_case_loi_ask_stones_diamond(orchestrator):
+    inbound = InboundMessage(
+        id="case_stones_1",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="What kind of stones do you use? do you made with diamonds?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule == "tiktok_ask_stones_any"
+    assert "specialist" not in result.draft_reply.lower()
+
+# 19. Sales Test Case: Khách hỏi bạc có đen không -> Khớp meta_ask_tarnish_care_any
+def test_case_loi_ask_tarnish_care(orchestrator):
+    inbound = InboundMessage(
+        id="case_tarnish_1",
+        platform="ig",
+        channel="meta",
+        surface="comment",
+        text="Will the ring tarnish or turn black over time?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule == "meta_ask_tarnish_care_any"
+
+# 20. Sales Test Case: Khách hỏi size khi chưa có sản phẩm -> Trả lời size 4-12 trực tiếp, không check xưởng
+def test_case_loi_ask_size_general(orchestrator):
+    inbound = InboundMessage(
+        id="case_size_general_1",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="Can I order this ring in my size?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule == "meta_ask_size_general_any"
+    assert "workshop" not in result.draft_reply.lower()
+
+# 21. Sales Test Case: Khách hỏi nhận chế tác mẫu riêng -> Khớp tiktok_ask_custom_design_any
+def test_case_loi_ask_custom_design(orchestrator):
+    inbound = InboundMessage(
+        id="case_custom_1",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="Do you offer custom ring designs?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule == "tiktok_ask_custom_design_any"
+
+# 22. Sales Test Case: Khách hỏi ship sang Trung Quốc / quốc tế -> Khớp meta_ask_shipping_international_any
+def test_case_loi_ask_china_shipping(orchestrator):
+    inbound = InboundMessage(
+        id="case_shipping_china_1",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="你好，在中国能买吗",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule == "meta_ask_shipping_international_any"
+
+# 23. Sales Test Case: Khách hỏi địa chỉ xưởng / sản xuất ở đâu -> Khớp tiktok_ask_store_location_any
+def test_case_loi_ask_store_location(orchestrator):
+    inbound = InboundMessage(
+        id="case_location_1",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        text="Please give me your store address. Where is your jewelry made?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule == "tiktok_ask_store_location_any"
+
+# 24. Sanitization test: Không lọt token [HANDOVER: missing_info] hoặc dấu ngoặc ]
+def test_sanitize_handover_tokens_and_brackets():
+    from src.adapters.model import sanitize_model_output
+    raw = "That's our eternity band pick! [HANDOVER: missing_info]"
+    cleaned = sanitize_model_output(raw)
+    assert "[HANDOVER" not in cleaned
+    assert "missing_info" not in cleaned
+
+    stray_bracket = "Free US shipping included 🤍\n\n]"
+    cleaned_bracket = sanitize_model_output(stray_bracket)
+    assert "]" not in cleaned_bracket
+
+
 
 

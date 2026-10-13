@@ -86,7 +86,23 @@ class FunnelEngine:
         # ----------------------------------------------------------------------
         # 2. Match rule based on Semantic Intent, Surface & Product Context
         # ----------------------------------------------------------------------
-        # Priority A: Check rules matching intent, surface, and product requirement
+        # Pass 1: Prioritize specialized rules matching both intent AND explicit contains_any keywords
+        for rule in rules:
+            if rule.surface not in (surface, "any"):
+                continue
+
+            if rule.when.product_required and product is None:
+                continue
+
+            if rule.when.intent and rule.when.intent != intent:
+                continue
+
+            if rule.when.contains_any:
+                matched_kw = any(kw.lower() in text_lower for kw in rule.when.contains_any)
+                if matched_kw:
+                    return None, rule
+
+        # Pass 2: General match based on surface, product requirement, and intent
         for rule in rules:
             if rule.surface not in (surface, "any"):
                 continue
@@ -105,7 +121,7 @@ class FunnelEngine:
 
             return None, rule
 
-        # Priority B: Check rules matching intent with surface="any" if surface-specific was not found
+        # Pass 3: Check rules matching intent with surface="any" if surface-specific was not found
         for rule in rules:
             if rule.when.intent and rule.when.intent == intent:
                 if rule.when.product_required and product is None:

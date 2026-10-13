@@ -50,14 +50,16 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
         "description": "Customer asks about the materials, metals, silver purity, stones, tarnish resistance, or whether it causes skin discoloration (turn skin green).",
         "examples": [
             "material", "sterling silver", "s925", "gold", "silver", "what is this made of", "tarnish", "pure silver", "turn skin green",
-            "chất liệu", "bằng gì", "bạc", "vàng", "titan", "thật không", "bạc thật", "bị đen", "gỉ"
+            "stone", "stones", "diamond", "diamonds", "moissanite", "gemstone", "kind of stone",
+            "chất liệu", "bằng gì", "bạc", "vàng", "titan", "thật không", "bạc thật", "bị đen", "gỉ", "đá", "kim cương"
         ]
     },
     "ask_size": {
         "description": "Customer asks about sizes, US ring sizes, dimensions, finger measurements, or how to choose the right fit.",
         "examples": [
+            "in my size", "my size", "ring size", "order in my size", "order my size",
             "size", "sizing", "measurement", "dimensions", "fit", "diameter", "size 7", "size 8", "size 9", "size guide",
-            "kích thước", "đo size", "vừa không", "tay nhỏ", "chiều dài", "đường kính", "bảng size"
+            "kích thước", "đo size", "vừa không", "tay nhỏ", "chiều dài", "đường kính", "bảng size", "cỡ tay", "size tay"
         ]
     },
     "ask_stock": {
@@ -71,7 +73,8 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
         "description": "Customer asks about shipping fees, delivery speed, transit time, shipping to a specific state or address, or carrier.",
         "examples": [
             "shipping", "delivery", "shipping fee", "how long to ship", "ship to", "deliver to", "fast shipping", "freeship",
-            "ship", "vận chuyển", "giao hàng", "mấy ngày nhận", "phí ship", "bao lâu nhận"
+            "international", "china", "overseas", "global shipping", "ship abroad", "中国", "在中国能买吗",
+            "ship", "vận chuyển", "giao hàng", "mấy ngày nhận", "phí ship", "bao lâu nhận", "quốc tế", "nước ngoài"
         ]
     },
     "ask_payment": {
@@ -91,7 +94,7 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
     "ask_bulk_discount": {
         "description": "Customer asks about volume discounts, buying multiple pieces or combo sets.",
         "examples": [
-            "bulk", "buy multiple", "buy 2", "buy 3", "discount", "combo", "wholesale", "offer",
+            "bulk", "buy multiple", "buy 2", "buy 3", "discount", "combo", "wholesale", "special offer", "bundle deal", "bundle offer",
             "mua nhiều", "mua 2", "mua 3", "giảm giá", "bớt không", "ưu đãi", "chiết khấu", "mua sỉ"
         ]
     },
@@ -112,15 +115,15 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
     "ask_store_location": {
         "description": "Customer asks for physical workshop address, showroom, or visiting the atelier in person.",
         "examples": [
-            "address", "store location", "where is the studio", "showroom", "visit in person",
-            "địa chỉ", "cửa hàng ở đâu", "qua xem trực tiếp", "shop ở đâu"
+            "address", "store location", "where is the studio", "showroom", "visit in person", "where is your jewelry made", "store address",
+            "địa chỉ", "cửa hàng ở đâu", "qua xem trực tiếp", "shop ở đâu", "xưởng ở đâu"
         ]
     },
     "request_custom": {
         "description": "Customer asks for bespoke jewelry, custom engraving, personalized sizing, or custom stone setting.",
         "examples": [
-            "custom", "bespoke", "engrave", "engraving", "personalized", "custom size",
-            "đặt làm", "theo yêu cầu", "khắc tên", "thiết kế riêng"
+            "custom", "bespoke", "engrave", "engraving", "personalized", "custom size", "custom design", "custom ring", "custom jewelry", "make something similar",
+            "đặt làm", "theo yêu cầu", "khắc tên", "thiết kế riêng", "chế tác", "làm theo mẫu", "mẫu riêng"
         ]
     },
     "general_compliment": {
@@ -273,16 +276,18 @@ class IntentClassifier:
 
         # Priority 2: Product & service inquiries
         priority_order = [
-            "ask_silver_quality", "ask_bulk_discount", "ask_legitimacy",
-            "ask_order", "ask_payment", "ask_price", "ask_material", "ask_size", "ask_stock", 
+            "ask_silver_quality", "request_custom", "ask_bulk_discount", "ask_legitimacy",
+            "ask_size", "ask_order", "ask_payment", "ask_price", "ask_material", "ask_stock", 
             "ask_shipping", "ask_return_warranty", "ask_store_location", 
-            "request_custom", "general_compliment"
+            "general_compliment"
         ]
 
         for intent in priority_order:
             if intent in self.allowed_intents:
                 examples = INTENT_TAXONOMY.get(intent, {}).get("examples", [])
-                if any(kw in text_lower for kw in examples):
+                # Match longer phrases first
+                sorted_examples = sorted(examples, key=len, reverse=True)
+                if any(kw in text_lower for kw in sorted_examples):
                     return intent
 
         return "other"

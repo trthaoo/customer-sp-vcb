@@ -7,8 +7,9 @@ from src import config
 
 def sanitize_model_output(text: str) -> str:
     """
-    Strips internal model thinking scratchpads, <think> tags, and deliberation artifacts.
-    Guarantees no raw reasoning or thought process leaks into customer replies.
+    Strips internal model thinking scratchpads, <think> tags, deliberation artifacts,
+    and control tokens like [HANDOVER: ...] or [REASON: ...].
+    Guarantees no raw reasoning or internal metadata leaks into customer replies.
     """
     if not text:
         return ""
@@ -18,6 +19,8 @@ def sanitize_model_output(text: str) -> str:
     text = re.sub(r'<think>.*', '', text, flags=re.DOTALL)
     # Strip explicit reasoning headers
     text = re.sub(r'^(?:thinking process|thought|internal reasoning|deliberation):\s*.*?\n\n', '', text, flags=re.DOTALL | re.IGNORECASE)
+    # Strip control tokens like [HANDOVER: missing_info], [REASON: ...], [META: ...]
+    text = re.sub(r'\[(?:HANDOVER|REASON|META|DEBUG)(?::\s*[^\]]*)?\]?', '', text, flags=re.IGNORECASE)
     cleaned = text.strip()
 
     # Reject scratchpad leak sentences if the model output is literally raw deliberation
@@ -47,7 +50,9 @@ def sanitize_model_output(text: str) -> str:
         if last_word in dangling_endings:
             return ""
 
-    # Clean any trailing dangling punctuation
+    # Clean stray brackets and trailing dangling punctuation
+    cleaned = re.sub(r'^[\s\]\[]+', '', cleaned)
+    cleaned = re.sub(r'[\s\]\[]+$', '', cleaned)
     cleaned = re.sub(r'[\s/,\-–—;:]+$', '', cleaned).strip()
 
     return cleaned

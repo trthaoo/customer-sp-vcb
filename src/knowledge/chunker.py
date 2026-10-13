@@ -159,17 +159,17 @@ class KnowledgeChunker:
         if not shared_dir.exists():
             return chunks
 
-        # 1. Brand voice - split by Rules (### Rule ...)
+        # 1. Brand voice - split by major sections (## or ###)
         brand_voice_path = shared_dir / "brand_voice.md"
         if brand_voice_path.exists():
             with open(brand_voice_path, "r", encoding="utf-8", errors="ignore") as f:
                 raw_bv = f.read()
             cleaned_bv = strip_example_blocks(raw_bv)
 
-            rule_sections = re.split(r'\n(?=###\s+Rule\s+)', cleaned_bv)
-            for idx, sec in enumerate(rule_sections):
+            sections = re.split(r'\n(?=#{2,3}\s+)', cleaned_bv)
+            for idx, sec in enumerate(sections):
                 sec_trimmed = sec.strip()
-                if not sec_trimmed:
+                if not sec_trimmed or len(sec_trimmed) < 20:
                     continue
                 first_line = sec_trimmed.splitlines()[0].replace("#", "").strip()
                 chunks.append(KnowledgeChunk(
@@ -178,7 +178,7 @@ class KnowledgeChunker:
                     source_file="shared/brand_voice.md",
                     title=f"Brand Voice: {first_line}",
                     content=sec_trimmed,
-                    metadata={"topic": "brand_voice", "rule": first_line}
+                    metadata={"topic": "brand_voice", "section": first_line}
                 ))
 
         # 2. Other shared files (brand_overview, escalation, fallbacks, intents)
@@ -233,18 +233,23 @@ class KnowledgeChunker:
                             surface = item.get("surface", "any")
                             when = item.get("when", {})
                             intent = when.get("intent", "") if isinstance(when, dict) else ""
+                            contains_any = when.get("contains_any", []) if isinstance(when, dict) else []
                             guide = item.get("reply_guide", "")
                             example = item.get("example_good_reply", "")
 
-                            content = (
-                                f"Channel: {channel.upper()}\n"
-                                f"Rule ID: {rid}\n"
-                                f"Surface: {surface}\n"
-                                f"Intent: {intent}\n"
-                                f"Reply Guidance:\n{guide}\n"
-                            )
+                            content_lines = [
+                                f"Channel: {channel.upper()}",
+                                f"Rule ID: {rid}",
+                                f"Surface: {surface}",
+                                f"Intent: {intent}",
+                            ]
+                            if contains_any:
+                                content_lines.append(f"Trigger Keywords: {', '.join(contains_any)}")
+                            if guide:
+                                content_lines.append(f"Reply Guidance:\n{guide}")
                             if example:
-                                content += f"\nHuman Response Example:\n{example}"
+                                content_lines.append(f"Human Response Example:\n{example}")
+                            content = "\n".join(content_lines)
 
                             chunks.append(KnowledgeChunk(
                                 id=f"{channel}::rule::{rid}",
@@ -256,7 +261,8 @@ class KnowledgeChunker:
                                     "channel": channel,
                                     "surface": surface,
                                     "intent": intent,
-                                    "rule_id": rid
+                                    "rule_id": rid,
+                                    "keywords": contains_any
                                 }
                             ))
                     except Exception as e:
@@ -277,18 +283,35 @@ class KnowledgeChunker:
                             if not isinstance(item, dict) or "id" not in item:
                                 continue
                             ec_id = item["id"]
-                            handover = item.get("handover", False)
+                            trigger = item.get("trigger", "")
+                            contains_any = item.get("contains_any", [])
+                            do_text = item.get("do", "")
+                            do_not = item.get("do_not", "")
+                            handover = bool(item.get("escalate", item.get("handover", False)))
                             guide = item.get("reply_guide", "")
+                            example_user = item.get("example_user_message", "")
                             example = item.get("example_good_reply", "")
 
-                            content = (
-                                f"Channel: {channel.upper()}\n"
-                                f"Edge Case ID: {ec_id}\n"
-                                f"Requires Handover: {handover}\n"
-                                f"Reply Guidance:\n{guide}\n"
-                            )
+                            content_lines = [
+                                f"Channel: {channel.upper()}",
+                                f"Edge Case ID: {ec_id}",
+                                f"Requires Handover / Escalation: {handover}",
+                            ]
+                            if trigger:
+                                content_lines.append(f"Trigger: {trigger}")
+                            if contains_any:
+                                content_lines.append(f"Trigger Keywords: {', '.join(contains_any)}")
+                            if do_text:
+                                content_lines.append(f"Instructions (DO): {do_text}")
+                            if do_not:
+                                content_lines.append(f"Restrictions (DO NOT): {do_not}")
+                            if guide:
+                                content_lines.append(f"Reply Guidance:\n{guide}")
+                            if example_user:
+                                content_lines.append(f"User Query Example: {example_user}")
                             if example:
-                                content += f"\nHuman Response Example:\n{example}"
+                                content_lines.append(f"Human Response Example:\n{example}")
+                            content = "\n".join(content_lines)
 
                             chunks.append(KnowledgeChunk(
                                 id=f"{channel}::edge_case::{ec_id}",
@@ -299,7 +322,8 @@ class KnowledgeChunker:
                                 metadata={
                                     "channel": channel,
                                     "edge_case_id": ec_id,
-                                    "handover": handover
+                                    "handover": handover,
+                                    "keywords": contains_any
                                 }
                             ))
                     except Exception as e:

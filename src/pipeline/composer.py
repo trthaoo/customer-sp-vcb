@@ -69,13 +69,13 @@ class ReplyComposer:
             is_vietnamese = bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', inbound.text.lower()))
             if is_vietnamese:
                 reply_text = (
-                    "Dạ mẫu trang sức trong video này bên em hiện chưa có trong danh mục niêm yết chính thức của xưởng ạ. "
-                    "Em xin phép chuyển thông tin cho bạn chuyên viên kiểm tra kho chế tác và hỗ trợ anh/chị ngay nhé! ✨"
+                    "Dạ mẫu trang sức trong video này bên em hiện chưa có trong danh mục niêm yết sẵn ạ. "
+                    "Anh/chị gửi thêm ảnh chi tiết qua DM để Huy K và craft team tư vấn chế tác riêng cho mình nhé! ✨"
                 )
             else:
                 reply_text = (
-                    "This handcrafted piece in the video is currently not listed in our official studio catalogue. "
-                    "Let me connect you with our studio artisan to check workshop availability for you right away! ✨"
+                    "This handcrafted piece in the video is currently not listed in our standard catalogue. "
+                    "Send us a quick DM with close-up photos so Huy K and our craft team can custom-craft it for you! ✨"
                 )
             return {
                 "reply": reply_text,
@@ -396,8 +396,9 @@ class ReplyComposer:
     def _get_brand_voice_summary(self, surface: str = "dm") -> str:
         if surface == "comment":
             return (
-                "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market Concierge - HuyK Jewelry).\n"
-                "Persona: The Mindful Studio Host, speaking with warmth and quiet pride from Master Jeweler Huy K's workshop.\n"
+                "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market - Huy K Jewelry).\n"
+                "Persona: Huy K & our craft team. Speak with direct warmth and creator pride.\n"
+                "STRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team.\n"
                 "Target Audience: United States shoppers (roughly 18–34).\n"
                 "CRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n"
                 "1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n"
@@ -407,8 +408,9 @@ class ReplyComposer:
                 "5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
             )
         return (
-            "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market Concierge - HuyK Jewelry).\n"
-            "Persona: The Mindful Studio Host, speaking with warmth and quiet pride from Master Jeweler Huy K's workshop.\n"
+            "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market - Huy K Jewelry).\n"
+            "Persona: Huy K & our craft team. Speak with direct creator warmth, craft pride, and personal authority.\n"
+            "STRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team ('I' or 'our craft team').\n"
             "Target Audience: United States shoppers (roughly 18–34). Reply in 100% natural, human American texting style.\n"
             "HUMAN TEXTING CONVERSATIONAL ARCHITECTURE (9 NON-NEGOTIABLE RULES FOR PRIVATE DMS):\n"
             "1. DYNAMIC 1–3 BUBBLES RHYTHM: Send 1 to 3 short bubbles (separated by double newlines '\\n\\n'), NOT a giant block of text and NOT robotic 3 bubbles every single turn.\n"
@@ -453,8 +455,9 @@ class ReplyComposer:
             )
 
         system_prompt = (
-            f"You are customer support staff replying to a customer for Vien Chi Bao jewelry on {inbound.platform} ({inbound.surface}).\n"
-            f"Persona: The Mindful Studio Host, speaking with warmth and respect from Master Jeweler Huy K's workshop.\n"
+            f"You are Huy K / our craft team replying to a customer for Vien Chi Bao Fine Jewelry on {inbound.platform} ({inbound.surface}).\n"
+            f"Persona: Huy K & our craft team. Speak with direct creator warmth, craft pride, and personal authority.\n"
+            f"STRICTLY BANNED: NEVER say 'let me check with Master Jeweler Huy K', NEVER use 'workshop', 'atelier', 'specialist', 'human concierge'. Speak directly as Huy K or our craft team.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
             f"{surface_rules}"
             f"Strict Edge Case instructions:\n"
@@ -462,7 +465,7 @@ class ReplyComposer:
             f"- DO NOT: {edge_case.do_not}\n\n"
             f"CRITICAL 100% KNOWLEDGE GROUNDING & ZERO GUESSING:\n"
             f"- Strictly follow official studio knowledge, specs, and policies. Never invent unconfirmed warranties or discounts.\n"
-            f"- If any critical requested detail is unknown or uncertain, state you are escalating to our studio management/artisan team for immediate help.\n\n"
+            f"- If any critical requested detail is unknown or uncertain, state that our craft team will assist directly.\n\n"
             f"GENERAL CONSTRAINTS:\n"
             f"- Never admit being an AI or bot.\n"
             f"- Vary wording naturally. Do not use canned scripts.\n"
@@ -555,8 +558,9 @@ class ReplyComposer:
             )
 
         system_prompt = (
-            f"You are page staff replying to customers for Vien Chi Bao jewelry on {inbound.platform} ({inbound.surface}).\n"
-            f"Persona: The Mindful Studio Host, speaking warmly from Master Jeweler Huy K's atelier.\n"
+            f"You are Huy K / our craft team replying to customers for Vien Chi Bao Fine Jewelry on {inbound.platform} ({inbound.surface}).\n"
+            f"Persona: Huy K & our craft team. Speak with direct creator warmth, craft pride, and personal authority.\n"
+            f"STRICTLY BANNED: NEVER say 'let me check with Master Jeweler Huy K', NEVER use 'workshop', 'atelier', 'specialist', 'human concierge'. Speak directly as Huy K or our craft team.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
             f"{surface_rules}"
             f"{caption_info}{media_info}{photo_info}\n\n"
@@ -564,10 +568,10 @@ class ReplyComposer:
             f"{chunks_text}\n\n"
             f"CRITICAL 100% KNOWLEDGE GROUNDING & ZERO GUESSING (MANDATORY):\n"
             f"1. STRICT 100% FACTUAL FIDELITY: You must ONLY state facts, specifications, materials, prices, shipping policies, returns, warranties, and stone details that are EXPLICITLY confirmed in the GROUNDING KNOWLEDGE CHUNKS above. Absolutely NO hallucinations, NO making up specs, NO guessing prices, NO fabricating discounts.\n"
-            f"2. MISSING OR UNCERTAIN INFORMATION -> IMMEDIATE HANDOVER:\n"
-            f"   - If the customer asks for ANY specification, custom request, unlisted size, warranty exception, or detail that is NOT explicitly confirmed in the knowledge chunks, or if you are not 100% certain: DO NOT GUESS OR INVENT.\n"
-            f"   - Instead, reply warmly explaining that you will check directly with our studio workshop/artisan and connect them with a specialist right away.\n"
-            f"   - You MUST append '[HANDOVER: missing_info]' inside your closing [REASON] tag.\n\n"
+            f"2. UNCONFIRMED OR CUSTOM REQUESTS:\n"
+            f"   - If the customer asks for a custom specification, unlisted size, or unconfirmed detail: DO NOT GUESS OR INVENT.\n"
+            f"   - Instead, reply warmly explaining that my craft team will check the exact piece for them or custom-craft it to their request.\n"
+            f"   - DO NOT output internal control tokens like '[HANDOVER]' inside the customer message. Put any internal tags inside [REASON: ... HANDOVER: missing_info].\n\n"
             f"GENERAL CONSTRAINTS:\n"
             f"- NEVER start with formal greetings like 'Hello! It’s lovely to hear from you' or 'Thank you for reaching out'. Start directly like a real person texting.\n"
             f"- Match customer energy. Name the exact piece. Never say 'the item'.\n"
@@ -616,10 +620,19 @@ class ReplyComposer:
         return reply, True, self.model_adapter.model_name, reason
 
     def _extract_diagnostic_reason(self, raw_reply: str) -> Tuple[str, Optional[str]]:
-        """Extracts [REASON: ...] tag for playground panel and strips it from customer reply."""
-        match = re.search(r'\[REASON:\s*(.*?)\]', raw_reply, re.DOTALL | re.IGNORECASE)
-        reason = match.group(1).strip() if match else None
-        cleaned_reply = re.sub(r'\[REASON:\s*.*?\]', '', raw_reply, flags=re.DOTALL | re.IGNORECASE).strip()
+        """Extracts [REASON: ...] tag and [HANDOVER: ...] for playground panel and strips them completely from customer reply."""
+        match_reason = re.search(r'\[REASON:\s*(.*?)\]', raw_reply, re.DOTALL | re.IGNORECASE)
+        match_handover = re.search(r'\[HANDOVER(?::\s*([^\]]*))?\]', raw_reply, re.DOTALL | re.IGNORECASE)
+        reason_parts = []
+        if match_reason:
+            reason_parts.append(match_reason.group(1).strip())
+        if match_handover:
+            reason_parts.append(f"HANDOVER: {match_handover.group(1).strip() if match_handover.group(1) else 'missing_info'}")
+        reason = " | ".join(reason_parts) if reason_parts else None
+
+        cleaned_reply = re.sub(r'\[(?:REASON|HANDOVER|META|DEBUG)(?::\s*[^\]]*)?\]?', '', raw_reply, flags=re.DOTALL | re.IGNORECASE).strip()
+        cleaned_reply = re.sub(r'^[\s\]\[]+', '', cleaned_reply)
+        cleaned_reply = re.sub(r'[\s\]\[]+$', '', cleaned_reply).strip()
         return cleaned_reply, reason
 
     def _enforce_limits(self, text: str, platform: str, surface: str) -> str:

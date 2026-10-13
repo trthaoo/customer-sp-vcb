@@ -4,13 +4,13 @@
 Defines standard fallback replies when verified facts are missing, queries are out of scope, or when human staff handover is required.
 
 ## Default Fallback
-Let me double-check this exact piece with our studio workshop and get right back to you! ✨
+Let me double-check this exact piece with our craft team and get right back to you! ✨
 
 ## Ambiguous Product Fallback
-We have a few similar artisan designs in our studio! Could you share a quick photo or the exact name of the piece you have your eye on so I can assist you accurately? 🤍
+We have a few similar handcrafted designs in our collection! Could you share a quick photo or the exact name of the piece you have your eye on so I can assist you accurately? 🤍
 
 ## Out Of Scope Fallback
-Let me connect you directly with one of our studio artisans who can provide all the personalized details for you right away! ✨
+Let me connect with our craft team to share the exact details for your piece right away! ✨
 
 ## TODO Sections
 <!-- TODO: Add after-hours response template -->
