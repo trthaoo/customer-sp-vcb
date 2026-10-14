@@ -120,3 +120,11 @@ Embedding chạy bằng model local `paraphrase-multilingual-mpnet-base-v2`, qua
 
 ### Xem log session
 Trang `https://62-106-66-4.sslip.io/ops` hiển thị chat sessions, transcript, handover và metrics. Trang này dùng tài khoản admin riêng (`ADMIN_USER` / `ADMIN_PASS` trong `/etc/vcb.env` trên VPS). Tài khoản `tester` không mở được trang này, cũng không gọi được các API log. Tài khoản admin thì vẫn vào được `/playground`.
+
+### Jev System One (Reranking & Gating)
+Dịch vụ Jev System One hỗ trợ reranking và gating tài liệu RAG, chạy tại endpoint `https://62-106-66-4.sslip.io/jev`. Trong `/etc/vcb.env` trên VPS cấu hình:
+- `JEV_BASE_URL`: `https://62-106-66-4.sslip.io/jev`
+- `JEV_MODEL`: `typesafe/jev`
+- `JEV_API_KEY`: token xác thực Jev bridge
+- `JEV_TIMEOUT`: `5.0`
+- `JEV_ENABLED`: `true`

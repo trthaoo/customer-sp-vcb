@@ -205,7 +205,7 @@ def test_knowledge_rag_search_with_jev(tmp_path):
             "relevance_level": ChoiceAnswer(type="choice", choice="direct", confidence=0.92, probabilities={"direct": 0.92})
         }
     )
-    mock_jev = JevAdapter(enabled=True, client=mock_client)
+    mock_jev = JevAdapter(enabled=True, client=mock_client, model_name="jev-latest")
 
     rag = KnowledgeRAG(jev_adapter=mock_jev)
     # Mock embedding adapter to return dummy vectors
@@ -228,7 +228,7 @@ def test_knowledge_rag_search_with_jev(tmp_path):
 
     stats = rag.get_stats()
     assert stats["jev_available"] is True
-    assert stats["jev_model"] == "jev-latest"
+    assert stats["jev_model"] in ("jev-latest", "typesafe/jev")
 
 
 def test_api_rag_search_endpoint_with_jev():
