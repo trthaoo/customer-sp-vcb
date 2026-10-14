@@ -596,6 +596,13 @@ async function viewSessionDetails(sessionId, silent = false) {
       const respSec = (t.response_time_sec !== undefined && t.response_time_sec !== null) ? Number(t.response_time_sec) : null;
       const latMs = (t.latency_ms !== undefined && t.latency_ms !== null) ? Number(t.latency_ms) : (respSec !== null ? Math.round(respSec * 1000) : null);
 
+      const ragMs = t.rag_time_ms;
+      const modelMs = t.model_time_ms;
+      const timingDetail = (ragMs !== undefined && modelMs !== undefined && ragMs !== null && modelMs !== null)
+        ? ` (AI: ${(modelMs/1000).toFixed(1)}s | Jev: ${(ragMs/1000).toFixed(1)}s)`
+        : '';
+      const timingTitle = `${respSec !== null ? `Thời gian phản hồi: ${respSec}s (${latMs}ms)` : 'Chưa đo'}${ragMs ? `&#10;- Jev + RAG: ${(ragMs/1000).toFixed(2)}s&#10;- Model LLM: ${(modelMs/1000).toFixed(2)}s` : ''}`;
+
       turnsHtml += `
         <div style="background:${isFailedTurn ? '#2a1720' : '#1e293b'}; border:1px solid ${isFailedTurn ? '#e11d48' : '#334155'}; border-radius:8px; padding:1rem; display:flex; flex-direction:column; gap:0.6rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#94a3b8; flex-wrap:wrap; gap:0.4rem;">
@@ -604,8 +611,8 @@ async function viewSessionDetails(sessionId, silent = false) {
               ${isFailedTurn ? '<span style="background:#e11d48; color:#fff; font-size:0.7rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:3px;">🚨 LƯỢT PHÁT HIỆN LỖI</span>' : ''}
             </div>
             <div style="display:flex; align-items:center; gap:0.6rem;">
-              <span style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4); padding:0.15rem 0.55rem; border-radius:12px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:0.25rem;" title="${respSec !== null ? `Thời gian phản hồi: ${respSec}s (${latMs}ms)` : 'Chưa ghi nhận thời gian phản hồi (phiên cũ)'}">
-                ⚡ ${respSec !== null ? `${respSec}s (${latMs}ms)` : 'Chưa đo'}
+              <span style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4); padding:0.15rem 0.55rem; border-radius:12px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:0.25rem;" title="${timingTitle}">
+                ⚡ ${respSec !== null ? `${respSec}s${timingDetail}` : 'Chưa đo'}
               </span>
               <span>${t.timestamp || ''}</span>
             </div>

@@ -145,12 +145,15 @@ class PipelineOrchestrator:
             return self.classifier.classify(inbound.text)
 
         def _run_rag():
+            t_rag_start = time.perf_counter()
             try:
                 from src.knowledge.rag_service import get_rag_service
-                return get_rag_service().search(query=inbound.text, top_k=3, channel=inbound.channel, min_score=0.45)
+                rag_res = get_rag_service().search(query=inbound.text, top_k=3, channel=inbound.channel, min_score=0.45)
+                dur = int(round((time.perf_counter() - t_rag_start) * 1000))
+                return rag_res, dur
             except Exception as e:
                 print(f"Warning: Concurrent RAG search error: {e}")
-                return []
+                return [], 0
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             fut_match = executor.submit(_run_matcher)
@@ -159,7 +162,7 @@ class PipelineOrchestrator:
 
             matched_product, ambiguous_products = fut_match.result()
             intent = fut_intent.result()
-            prefetched_rag = fut_rag.result()
+            prefetched_rag, rag_time_ms = fut_rag.result()
         
         visual_product_guess: Optional[str] = None
         catalogue_id_matched: Optional[str] = None
@@ -229,6 +232,7 @@ class PipelineOrchestrator:
             facts, files_used, is_missing, missing_fields = self.engine.load_knowledge_facts(matched_rule, matched_product)
 
         # Step 6 & 7: Compose human reply
+        t_comp_start = time.perf_counter()
         composition = self.composer.compose_reply(
             inbound=inbound,
             intent=intent,
@@ -245,6 +249,7 @@ class PipelineOrchestrator:
             attached_image_url=attached_image_url,
             rag_results=prefetched_rag
         )
+        model_time_ms = int(round((time.perf_counter() - t_comp_start) * 1000))
 
         reply = composition["reply"]
         decision = composition["decision"]
@@ -318,6 +323,8 @@ class PipelineOrchestrator:
         elapsed_sec = round(time.perf_counter() - start_time, 3)
         result.response_time_sec = elapsed_sec
         result.latency_ms = int(round(elapsed_sec * 1000))
+        result.rag_time_ms = rag_time_ms
+        result.model_time_ms = model_time_ms
 
         now_ts = datetime.now(timezone.utc).isoformat()
         self._log_event(inbound, result, reply, decision, flag, escalate_reason, now_ts)

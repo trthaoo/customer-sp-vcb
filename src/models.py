@@ -115,6 +115,8 @@ class PipelineResult(BaseModel):
     attached_image_url: Optional[str] = None
     response_time_sec: Optional[float] = None
     latency_ms: Optional[int] = None
+    rag_time_ms: Optional[int] = None
+    model_time_ms: Optional[int] = None
 
 class EventRecord(BaseModel):
     id: str

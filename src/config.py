@@ -26,12 +26,12 @@ EMBEDDING_BASE_URL = os.getenv("EMBEDDING_BASE_URL", "")
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "sentence-transformers/paraphrase-multilingual-mpnet-base-v2")
 
 # Jev / TypeSafe AI Decision & Reranking Configuration for RAG
-JEV_API_KEY = os.getenv("JEV_API_KEY", os.getenv("TYPESAFE_API_KEY", "")).strip()
-JEV_BASE_URL = os.getenv("JEV_BASE_URL", os.getenv("TYPESAFE_BASE_URL", "")).strip()
-JEV_MODEL = os.getenv("JEV_MODEL", os.getenv("TYPESAFE_DEFAULT_MODEL", "jev-latest")).strip()
+JEV_API_KEY = os.getenv("JEV_API_KEY", os.getenv("TYPESAFE_API_KEY", "1c01c20a638060e68d52fc9a40397ac589af2679a52f5ff441c22f9b8deb5b18")).strip()
+JEV_BASE_URL = os.getenv("JEV_BASE_URL", os.getenv("TYPESAFE_BASE_URL", "https://62-106-66-4.sslip.io/jev")).strip()
+JEV_MODEL = os.getenv("JEV_MODEL", os.getenv("TYPESAFE_DEFAULT_MODEL", "typesafe/jev")).strip()
 JEV_ENABLED = os.getenv("JEV_ENABLED", "true").lower() in ("true", "1", "yes")
 JEV_RERANK_THRESHOLD = float(os.getenv("JEV_RERANK_THRESHOLD", "0.35"))
-JEV_TIMEOUT = float(os.getenv("JEV_TIMEOUT", "1.8"))
+JEV_TIMEOUT = float(os.getenv("JEV_TIMEOUT", "3.0"))
 
 # Auto send and handover hold
 AUTO_SEND = os.getenv("AUTO_SEND", "false").lower() in ("true", "1", "yes")

@@ -141,7 +141,24 @@ class PlaygroundExportRequest(BaseModel):
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok", "service": "vcb-concierge", "version": "20261014-latency-v2"}
+    from src.adapters.jev import get_jev_adapter
+    from src.adapters.model import get_model_adapter
+    jev = get_jev_adapter()
+    model = get_model_adapter()
+    return {
+        "status": "ok",
+        "service": "vcb-concierge",
+        "version": "20261014-latency-v3",
+        "jev": {
+            "available": jev.is_available(),
+            "base_url": jev.base_url,
+            "model": jev.model_name
+        },
+        "model": {
+            "provider": model.provider,
+            "model_name": model.model_name
+        }
+    }
 
 @app.post("/webhooks/zernio")
 async def handle_zernio_webhook(
@@ -187,7 +204,9 @@ async def handle_zernio_webhook(
             "knowledge_files": result.knowledge_files,
             "reply_sent": result.reply_sent,
             "response_time_sec": result.response_time_sec,
-            "latency_ms": result.latency_ms
+            "latency_ms": result.latency_ms,
+            "rag_time_ms": result.rag_time_ms,
+            "model_time_ms": result.model_time_ms
         }
         store.save_session_turn(
             session_id=sess_id,
@@ -553,7 +572,9 @@ async def playground_chat(body: PlaygroundChatRequest):
             "model_used": result.model_used,
             "attached_frames_count": len(frames),
             "response_time_sec": result.response_time_sec,
-            "latency_ms": result.latency_ms
+            "latency_ms": result.latency_ms,
+            "rag_time_ms": result.rag_time_ms,
+            "model_time_ms": result.model_time_ms
         }
         store.save_session_turn(
             session_id=sess_id,

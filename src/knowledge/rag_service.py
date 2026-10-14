@@ -126,7 +126,7 @@ class KnowledgeRAG:
             return []
 
         should_rerank_jev = bool(use_jev and self.jev_adapter.is_available())
-        candidate_k = max(top_k * 2, 6) if should_rerank_jev else top_k
+        candidate_k = min(top_k + 1, 4) if should_rerank_jev else top_k
 
         results = self.vector_store.search(
             query_vector=q_vec,
