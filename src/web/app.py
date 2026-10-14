@@ -42,7 +42,7 @@ STATIC_DIR.mkdir(parents=True, exist_ok=True)
 # Zernio webhook (it has its own HMAC check), and public telemetry config. Disabled when BASIC_AUTH_PASS is unset.
 _AUTH_PASS = os.getenv("BASIC_AUTH_PASS", "")
 _AUTH_HEADER = "Basic " + base64.b64encode(f"{os.getenv('BASIC_AUTH_USER', '')}:{_AUTH_PASS}".encode()).decode()
-_PUBLIC_PATHS = {"/api/health", "/webhooks/zernio", "/api/posthog/config"}
+_PUBLIC_PATHS = {"/api/health", "/webhooks/zernio", "/api/posthog/config", "/brand-report"}
 # The ops console and session logs need the separate admin login when ADMIN_PASS is set.
 # The admin login also works on every tester page.
 _ADMIN_PASS = os.getenv("ADMIN_PASS", "")
@@ -141,7 +141,7 @@ class PlaygroundExportRequest(BaseModel):
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok", "service": "vcb-concierge"}
+    return {"status": "ok", "service": "vcb-concierge", "version": "20261014-latency-v2"}
 
 @app.post("/webhooks/zernio")
 async def handle_zernio_webhook(
@@ -391,6 +391,14 @@ async def playground_page():
         with open(playground_file, "r", encoding="utf-8") as f:
             return HTMLResponse(content=_inject_posthog_runtime(f.read()))
     return HTMLResponse("<h3>Playground UI not installed yet.</h3>")
+
+@app.get("/brand-report")
+async def brand_report_page():
+    report_file = STATIC_DIR / "brand_report.html"
+    if report_file.exists():
+        with open(report_file, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse("<h3>Báo cáo chưa được cài đặt.</h3>")
 
 @app.get("/api/playground/media/{session_id}/{filename}")
 async def get_playground_media(session_id: str, filename: str):
