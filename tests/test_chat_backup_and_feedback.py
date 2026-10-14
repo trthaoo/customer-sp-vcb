@@ -226,3 +226,66 @@ def test_rating_filter_in_list_chat_sessions(client):
     assert res_fail.status_code == 200
     for s in res_fail.json()["sessions"]:
         assert s["rating"] == "fail"
+
+
+def test_response_time_logging_and_transcript(client):
+    session_id = "test_perf_latency_sess_101"
+    payload = {
+        "session_id": session_id,
+        "channel": "meta",
+        "platform": "ig",
+        "surface": "dm",
+        "text": "Nhẫn cỏ 4 lá bạc S925 có sẵn size 6 không shop?",
+        "history": []
+    }
+    res = client.post("/api/playground/chat", json=payload)
+    assert res.status_code == 200
+    res_data = res.json()
+
+    # 1. Verify response time is NOT exposed to playground UI
+    assert "response_time_sec" not in res_data
+    assert "latency_ms" not in res_data
+
+    # 2. Verify GET /api/chat-sessions/{session_id} (Dashboard Logs API) has response time per turn and aggregate
+    sess_res = client.get(f"/api/chat-sessions/{session_id}")
+    assert sess_res.status_code == 200
+    sess_data = sess_res.json()
+    assert len(sess_data["turns"]) >= 1
+    turn = sess_data["turns"][0]
+    assert "response_time_sec" in turn
+    assert turn["response_time_sec"] is not None
+    assert "latency_ms" in turn
+    assert turn["latency_ms"] is not None
+    assert sess_data["last_response_time_sec"] is not None
+    assert sess_data["avg_response_time_sec"] is not None
+
+    # 3. Verify JSON backup on disk
+    backup_dir = get_chat_logs_dir()
+    json_backup = backup_dir / f"{session_id}.json"
+    assert json_backup.exists()
+    disk_json = json.loads(json_backup.read_text(encoding="utf-8"))
+    assert disk_json["turns"][0]["response_time_sec"] is not None
+    assert disk_json["turns"][0]["latency_ms"] is not None
+
+    # 4. Verify Markdown backup transcript on disk
+    md_backup = backup_dir / f"{session_id}.md"
+    assert md_backup.exists()
+    md_content = md_backup.read_text(encoding="utf-8")
+    assert "Thời gian phản hồi bot" in md_content
+    assert "Tốc độ phản hồi trung bình" in md_content
+    assert "ms" in md_content
+
+    # 5. Verify all_chats_stream.jsonl
+    stream_file = backup_dir / "all_chats_stream.jsonl"
+    assert stream_file.exists()
+    stream_lines = stream_file.read_text(encoding="utf-8").strip().splitlines()
+    last_stream_entry = json.loads(stream_lines[-1])
+    assert last_stream_entry["session_id"] == session_id
+    assert "response_time_sec" in last_stream_entry
+    assert last_stream_entry["response_time_sec"] is not None
+
+    # 6. Verify /api/chat-backups/stats includes avg_response_time_sec
+    stats_res = client.get("/api/chat-backups/stats")
+    assert stats_res.status_code == 200
+    assert "avg_response_time_sec" in stats_res.json()
+    assert stats_res.json()["avg_response_time_sec"] is not None

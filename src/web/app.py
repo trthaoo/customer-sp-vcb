@@ -185,7 +185,9 @@ async def handle_zernio_webhook(
             "matched_rule": result.matched_rule or result.matched_edge_case,
             "intent": result.intent,
             "knowledge_files": result.knowledge_files,
-            "reply_sent": result.reply_sent
+            "reply_sent": result.reply_sent,
+            "response_time_sec": result.response_time_sec,
+            "latency_ms": result.latency_ms
         }
         store.save_session_turn(
             session_id=sess_id,
@@ -541,7 +543,9 @@ async def playground_chat(body: PlaygroundChatRequest):
             "missing_fields": result.missing_fields,
             "attached_image_url": result.attached_image_url,
             "model_used": result.model_used,
-            "attached_frames_count": len(frames)
+            "attached_frames_count": len(frames),
+            "response_time_sec": result.response_time_sec,
+            "latency_ms": result.latency_ms
         }
         store.save_session_turn(
             session_id=sess_id,
@@ -563,6 +567,8 @@ async def playground_chat(body: PlaygroundChatRequest):
             "platform": body.platform,
             "last_message": body.text,
             "last_reply": result.draft_reply,
+            "response_time_sec": result.response_time_sec,
+            "latency_ms": result.latency_ms,
             "timestamp": datetime.now(timezone.utc).isoformat()
         })
     except Exception as e:

@@ -291,6 +291,26 @@ async function updateSessionsOverviewStats(sessions) {
   if (openFailEl) openFailEl.textContent = openFailCount;
   if (fixedFailEl) fixedFailEl.textContent = fixedFailCount;
 
+  // Calculate and display average bot latency across sessions
+  const avgLatEl = document.getElementById('stat-avg-latency');
+  const latencies = [];
+  sessions.forEach(s => {
+    if (s.last_response_time_sec !== undefined && s.last_response_time_sec !== null) {
+      latencies.push(Number(s.last_response_time_sec));
+    } else if (s.avg_response_time_sec !== undefined && s.avg_response_time_sec !== null) {
+      latencies.push(Number(s.avg_response_time_sec));
+    }
+  });
+  if (avgLatEl) {
+    if (latencies.length > 0) {
+      const avg = (latencies.reduce((a, b) => a + b, 0) / latencies.length).toFixed(2);
+      avgLatEl.textContent = `${avg}s`;
+      avgLatEl.title = `Tốc độ phản hồi trung bình từ ${latencies.length} phiên chat`;
+    } else {
+      avgLatEl.textContent = '--';
+    }
+  }
+
   // Fetch disk backup folder stats
   try {
     const bRes = await fetch('/api/chat-backups/stats');
@@ -321,6 +341,8 @@ function filterSessionsList() {
       (s.user_name && s.user_name.toLowerCase().includes(query)) ||
       (s.platform && s.platform.toLowerCase().includes(query)) ||
       (s.rating && s.rating.toLowerCase().includes(query)) ||
+      (s.last_response_time_sec && String(s.last_response_time_sec).includes(query)) ||
+      (s.avg_response_time_sec && String(s.avg_response_time_sec).includes(query)) ||
       (rd.title && rd.title.toLowerCase().includes(query)) ||
       (rd.notes && rd.notes.toLowerCase().includes(query)) ||
       (rd.error_category && rd.error_category.toLowerCase().includes(query)) ||
@@ -350,6 +372,7 @@ function renderSessionsList(sessions) {
           <th>Funnel / Kênh</th>
           <th>Khách Hàng</th>
           <th>Lượt</th>
+          <th>⚡ Phản Hồi</th>
           <th>Thời Điểm</th>
           <th style="min-width:210px;">Đánh Giá &amp; Feedback</th>
           <th>Tin Nhắn Khách Gần Nhất</th>
@@ -409,6 +432,16 @@ function renderSessionsList(sessions) {
       `;
     }
 
+    const respTime = s.last_response_time_sec !== undefined && s.last_response_time_sec !== null
+      ? s.last_response_time_sec
+      : (s.avg_response_time_sec !== undefined && s.avg_response_time_sec !== null ? s.avg_response_time_sec : null);
+
+    const perfHtml = respTime !== null ? `
+      <span style="display:inline-block; padding:0.18rem 0.5rem; background:#1e3a5f; color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4); border-radius:12px; font-weight:700; font-size:0.75rem;" title="Lượt gần nhất: ${s.last_response_time_sec !== null && s.last_response_time_sec !== undefined ? s.last_response_time_sec + 's' : 'N/A'}&#10;Trung bình: ${s.avg_response_time_sec !== null && s.avg_response_time_sec !== undefined ? s.avg_response_time_sec + 's' : 'N/A'}">
+        ⚡ ${respTime}s
+      </span>
+    ` : `<span style="color:#64748b; font-size:0.75rem;">--</span>`;
+
     html += `
       <tr id="session-row-${escapeHtml(s.id)}">
         <td><code>${escapeHtml(s.id)}</code></td>
@@ -418,6 +451,7 @@ function renderSessionsList(sessions) {
         </td>
         <td><strong>${escapeHtml(s.user_name || 'Khách Hàng')}</strong></td>
         <td><span style="display:inline-block; padding:0.2rem 0.5rem; background:#334155; border-radius:12px; font-weight:700; font-size:0.8rem;">${s.turn_count || 1} turns</span></td>
+        <td>${perfHtml}</td>
         <td style="font-size:0.8rem; color:var(--text-dim);">${updatedTime}</td>
         <td>${ratingHtml}</td>
         <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(s.last_message || '')}">
@@ -478,8 +512,15 @@ async function viewSessionDetails(sessionId, silent = false) {
     if (!res.ok) throw new Error('Không tìm thấy session');
     const data = await res.json();
 
-    subEl.textContent = `${data.channel.toUpperCase()} · ${data.platform.toUpperCase()} (${data.surface}) · Cập nhật: ${new Date(data.updated_at).toLocaleString()}`;
-    countEl.textContent = `Tổng số: ${data.turns ? data.turns.length : 0} lượt trao đổi &bull; Sao lưu tại: data/chat_logs/${sessionId}.json`;
+    const avgLatency = data.avg_response_time_sec !== undefined && data.avg_response_time_sec !== null
+      ? `${data.avg_response_time_sec}s`
+      : (data.turns && data.turns.length ? (() => {
+          const valid = data.turns.filter(t => t.response_time_sec !== undefined && t.response_time_sec !== null);
+          return valid.length ? `${(valid.reduce((a, b) => a + Number(b.response_time_sec), 0) / valid.length).toFixed(2)}s` : 'N/A';
+        })() : 'N/A');
+
+    subEl.textContent = `${data.channel.toUpperCase()} · ${data.platform.toUpperCase()} (${data.surface}) · Cập nhật: ${new Date(data.updated_at).toLocaleString()} · ⚡ Phản hồi TB: ${avgLatency}`;
+    countEl.textContent = `Tổng số: ${data.turns ? data.turns.length : 0} lượt trao đổi &bull; Tốc độ TB: ${avgLatency} &bull; Sao lưu tại: data/chat_logs/${sessionId}.json`;
 
     // Render Rich Feedback Banner
     if (feedbackBannerEl) {
@@ -552,15 +593,24 @@ async function viewSessionDetails(sessionId, silent = false) {
     data.turns.forEach((t, idx) => {
       const turnNo = t.turn_index || (idx + 1);
       const isFailedTurn = rd.failed_turn_index && rd.failed_turn_index === turnNo;
+      const respSec = (t.response_time_sec !== undefined && t.response_time_sec !== null) ? Number(t.response_time_sec) : null;
+      const latMs = (t.latency_ms !== undefined && t.latency_ms !== null) ? Number(t.latency_ms) : (respSec !== null ? Math.round(respSec * 1000) : null);
 
       turnsHtml += `
         <div style="background:${isFailedTurn ? '#2a1720' : '#1e293b'}; border:1px solid ${isFailedTurn ? '#e11d48' : '#334155'}; border-radius:8px; padding:1rem; display:flex; flex-direction:column; gap:0.6rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#94a3b8;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#94a3b8; flex-wrap:wrap; gap:0.4rem;">
             <div style="display:flex; align-items:center; gap:0.5rem;">
               <span style="font-weight:700; color:#38bdf8;">Turn #${turnNo}</span>
               ${isFailedTurn ? '<span style="background:#e11d48; color:#fff; font-size:0.7rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:3px;">🚨 LƯỢT PHÁT HIỆN LỖI</span>' : ''}
             </div>
-            <span>${t.timestamp || ''}</span>
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              ${respSec !== null ? `
+                <span style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4); padding:0.15rem 0.55rem; border-radius:12px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:0.25rem;" title="Thời gian chatbot phản hồi: ${respSec} giây (${latMs} mili-giây)">
+                  ⚡ ${respSec}s (${latMs}ms)
+                </span>
+              ` : ''}
+              <span>${t.timestamp || ''}</span>
+            </div>
           </div>
           <div style="display:flex; gap:0.5rem; align-items:flex-start;">
             <span style="background:#0284c7; color:#fff; font-size:0.7rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:4px;">Khách</span>
@@ -570,12 +620,16 @@ async function viewSessionDetails(sessionId, silent = false) {
             </div>
           </div>
           <div style="display:flex; gap:0.5rem; align-items:flex-start;">
-            <span style="background:#eab308; color:#0f172a; font-size:0.7rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:4px;">Bot</span>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+              <span style="background:#eab308; color:#0f172a; font-size:0.7rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:4px;">Bot</span>
+              ${respSec !== null ? `<span style="font-size:0.65rem; color:#38bdf8; font-weight:600;">${respSec}s</span>` : ''}
+            </div>
             <div style="background:#022c22; border:1px solid #065f46; padding:0.6rem 0.8rem; border-radius:6px; color:#ecfdf5; font-size:0.85rem; flex:1; white-space:pre-wrap;">
               ${escapeHtml(t.bot_reply || t.reply || '')}
             </div>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.7rem; margin-top:0.25rem;">
+            ${respSec !== null ? `<span style="background:#1e3a5f; padding:0.1rem 0.4rem; border-radius:3px; color:#38bdf8; font-weight:600;">⏱️ Phản hồi: <strong>${respSec}s (${latMs}ms)</strong></span>` : ''}
             ${t.status_badge ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#4ade80;">Badge: <strong>${escapeHtml(t.status_badge)}</strong></span>` : ''}
             ${t.intent ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#94a3b8;">Intent: <strong>${escapeHtml(t.intent)}</strong></span>` : ''}
             ${t.matched_product ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#38bdf8;">SP: <strong>${escapeHtml(t.matched_product)}</strong></span>` : ''}
@@ -637,11 +691,15 @@ async function downloadSessionCsv(sessionId) {
       return;
     }
 
-    let csv = '\uFEFFTurn,Timestamp,KhachHang,BotReply,Intent,SanPham,Rule,Decision\n';
+    let csv = '\uFEFFTurn,Timestamp,ThoiGianPhanHoi_Giay,DoTre_ms,KhachHang,BotReply,Intent,SanPham,Rule,Decision\n';
     turns.forEach((t, i) => {
+      const respSec = (t.response_time_sec !== undefined && t.response_time_sec !== null) ? t.response_time_sec : '';
+      const latMs = (t.latency_ms !== undefined && t.latency_ms !== null) ? t.latency_ms : (respSec !== '' ? Math.round(Number(respSec) * 1000) : '');
       csv += [
         t.turn_index || (i + 1),
         `"${(t.timestamp || '').replace(/"/g, '""')}"`,
+        respSec,
+        latMs,
         `"${(t.customer_message || t.user_message || '').replace(/"/g, '""')}"`,
         `"${(t.bot_reply || t.reply || '').replace(/"/g, '""')}"`,
         `"${(t.intent || '').replace(/"/g, '""')}"`,

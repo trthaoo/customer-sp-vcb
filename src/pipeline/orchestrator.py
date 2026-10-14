@@ -31,6 +31,8 @@ class PipelineOrchestrator:
         self.engine = FunnelEngine(self.kb, model_adapter=self.composer.model_adapter)
 
     def process(self, inbound: InboundMessage) -> PipelineResult:
+        import time
+        start_time = time.perf_counter()
         # Step 1: Media processing if not already extracted
         if not inbound.frames and (inbound.media_url or inbound.carousel_urls) and inbound.media_type != "link":
             extracted_frames, missing = self.media_processor.process_media(
@@ -81,6 +83,9 @@ class PipelineOrchestrator:
                 frame_timestamps=[f.label for f in inbound.frames],
                 reply_sent=False
             )
+            elapsed_sec = round(time.perf_counter() - start_time, 3)
+            result.response_time_sec = elapsed_sec
+            result.latency_ms = int(round(elapsed_sec * 1000))
             self._log_event(inbound, result, fallback_reply, "fallback", "handover", escalate_reason, now_ts)
             return result
 
@@ -123,6 +128,9 @@ class PipelineOrchestrator:
                         frame_timestamps=[f.label for f in inbound.frames],
                         reply_sent=False
                     )
+                    elapsed_sec = round(time.perf_counter() - start_time, 3)
+                    result.response_time_sec = elapsed_sec
+                    result.latency_ms = int(round(elapsed_sec * 1000))
                     self._log_event(inbound, result, fallback_reply, "fallback", "handover", escalate_reason, now_ts)
                     return result
 
@@ -307,6 +315,10 @@ class PipelineOrchestrator:
             attached_image_url=attached_image_url
         )
 
+        elapsed_sec = round(time.perf_counter() - start_time, 3)
+        result.response_time_sec = elapsed_sec
+        result.latency_ms = int(round(elapsed_sec * 1000))
+
         now_ts = datetime.now(timezone.utc).isoformat()
         self._log_event(inbound, result, reply, decision, flag, escalate_reason, now_ts)
 
@@ -433,7 +445,8 @@ class PipelineOrchestrator:
             reply_text=reply,
             escalate_reason=escalate_reason,
             thread_id=inbound.thread_id,
-            user_id=inbound.user_id
+            user_id=inbound.user_id,
+            response_time_sec=result.response_time_sec
         )
         self.store.insert_event(event_record)
 

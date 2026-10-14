@@ -113,6 +113,8 @@ class PipelineResult(BaseModel):
     short_reason: Optional[str] = None
     reply_sent: bool = False
     attached_image_url: Optional[str] = None
+    response_time_sec: Optional[float] = None
+    latency_ms: Optional[int] = None
 
 class EventRecord(BaseModel):
     id: str
@@ -135,3 +137,4 @@ class EventRecord(BaseModel):
     escalate_reason: Optional[str] = None
     thread_id: Optional[str] = None
     user_id: Optional[str] = None
+    response_time_sec: Optional[float] = None

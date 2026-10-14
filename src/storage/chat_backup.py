@@ -49,6 +49,14 @@ def format_markdown_transcript(session_data: Dict[str, Any]) -> str:
     lines.append(f"- **Cập nhật cuối:** {updated_at}")
     lines.append(f"- **Tổng số lượt (Turns):** {len(turns)}")
 
+    avg_latency = session_data.get("avg_response_time_sec")
+    if avg_latency is None and turns:
+        times = [t.get("response_time_sec") for t in turns if t.get("response_time_sec") is not None]
+        avg_latency = round(sum(times) / len(times), 3) if times else None
+
+    if avg_latency is not None:
+        lines.append(f"- **Tốc độ phản hồi trung bình:** ⚡ `{avg_latency}s`")
+
     # Rating feedback header
     if rating == "pass":
         title = rating_data.get("title") or "Mẫu chuẩn đạt yêu cầu"
@@ -90,6 +98,11 @@ def format_markdown_transcript(session_data: Dict[str, Any]) -> str:
         for idx, t in enumerate(turns):
             turn_no = t.get("turn_index") or (idx + 1)
             ts = t.get("timestamp") or ""
+            resp_sec = t.get("response_time_sec")
+            lat_ms = t.get("latency_ms")
+            if resp_sec is not None and lat_ms is None:
+                lat_ms = int(round(resp_sec * 1000))
+
             cust_msg = t.get("customer_message") or t.get("customerMessage") or t.get("user_message") or ""
             bot_reply = t.get("bot_reply") or t.get("botReply") or t.get("reply") or ""
             badge = t.get("status_badge") or ""
@@ -102,7 +115,10 @@ def format_markdown_transcript(session_data: Dict[str, Any]) -> str:
             decision = t.get("decision") or ""
             attachment = t.get("attachment_name") or t.get("attachment_url")
 
-            lines.append(f"### 💬 Turn #{turn_no} ({ts})")
+            turn_header_perf = f" — ⚡ {resp_sec}s" if resp_sec is not None else ""
+            lines.append(f"### 💬 Turn #{turn_no} ({ts}{turn_header_perf})")
+            if resp_sec is not None:
+                lines.append(f"- **⏱️ Thời gian phản hồi bot:** `{resp_sec}s` ({lat_ms} ms)")
             if attachment:
                 lines.append(f"- **Đính kèm:** 📎 `{attachment}` ({t.get('attachment_type', 'file')})")
             lines.append(f"- **👤 Khách:** {cust_msg}")
@@ -110,6 +126,8 @@ def format_markdown_transcript(session_data: Dict[str, Any]) -> str:
             lines.append(f"  > {_escape_md(bot_reply).replace(chr(10), chr(10) + '  > ')}")
             
             diag_items = []
+            if resp_sec is not None:
+                diag_items.append(f"⏱️ `{resp_sec}s`")
             if badge:
                 diag_items.append(f"Badge: `{badge}`")
             if decision:
@@ -153,16 +171,26 @@ def save_chat_backup_to_disk(session_data: Dict[str, Any]) -> Dict[str, str]:
 
     # 3. Append to JSONL stream
     try:
+        turns = session_data.get("turns") or []
+        last_turn = turns[-1] if turns else {}
+        resp_sec = last_turn.get("response_time_sec")
+        lat_ms = last_turn.get("latency_ms")
+        if resp_sec is not None and lat_ms is None:
+            lat_ms = int(round(resp_sec * 1000))
+
         stream_entry = {
             "logged_at": datetime.now(timezone.utc).isoformat(),
             "session_id": sess_id,
             "channel": session_data.get("channel"),
             "platform": session_data.get("platform"),
             "surface": session_data.get("surface"),
-            "turn_count": len(session_data.get("turns") or []),
+            "turn_count": len(turns),
             "rating": session_data.get("rating"),
             "last_message": session_data.get("last_message"),
             "last_reply": session_data.get("last_reply"),
+            "response_time_sec": resp_sec,
+            "latency_ms": lat_ms,
+            "avg_response_time_sec": session_data.get("avg_response_time_sec"),
         }
         stream_file = logs_dir / "all_chats_stream.jsonl"
         with open(stream_file, "a", encoding="utf-8") as f:
@@ -184,11 +212,17 @@ def get_chat_backup_stats() -> Dict[str, Any]:
     total_turns = 0
     rated_pass = 0
     rated_fail = 0
+    all_latencies = []
 
     for jf in json_files:
         try:
             data = json.loads(jf.read_text(encoding="utf-8"))
-            total_turns += len(data.get("turns") or [])
+            turns = data.get("turns") or []
+            total_turns += len(turns)
+            for t in turns:
+                rt = t.get("response_time_sec")
+                if rt is not None:
+                    all_latencies.append(rt)
             r = data.get("rating")
             if r == "pass":
                 rated_pass += 1
@@ -197,6 +231,8 @@ def get_chat_backup_stats() -> Dict[str, Any]:
         except Exception:
             pass
 
+    avg_resp_time = round(sum(all_latencies) / len(all_latencies), 3) if all_latencies else None
+
     return {
         "folder_path": str(logs_dir),
         "session_count": len(json_files),
@@ -204,5 +240,6 @@ def get_chat_backup_stats() -> Dict[str, Any]:
         "total_turns": total_turns,
         "rated_pass": rated_pass,
         "rated_fail": rated_fail,
-        "unrated": max(0, len(json_files) - rated_pass - rated_fail)
+        "unrated": max(0, len(json_files) - rated_pass - rated_fail),
+        "avg_response_time_sec": avg_resp_time
     }

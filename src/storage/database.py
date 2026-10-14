@@ -94,7 +94,9 @@ class EventStore:
                     status TEXT NOT NULL DEFAULT 'active',
                     turns_data TEXT NOT NULL DEFAULT '[]',
                     rating TEXT,
-                    rating_data TEXT NOT NULL DEFAULT '{}'
+                    rating_data TEXT NOT NULL DEFAULT '{}',
+                    last_response_time_sec REAL,
+                    avg_response_time_sec REAL
                 );
             """)
             # Migration check for existing SQLite tables
@@ -104,6 +106,18 @@ class EventStore:
                 pass
             try:
                 cursor.execute("ALTER TABLE chat_sessions ADD COLUMN rating_data TEXT NOT NULL DEFAULT '{}';")
+            except Exception:
+                pass
+            try:
+                cursor.execute("ALTER TABLE chat_sessions ADD COLUMN last_response_time_sec REAL;")
+            except Exception:
+                pass
+            try:
+                cursor.execute("ALTER TABLE chat_sessions ADD COLUMN avg_response_time_sec REAL;")
+            except Exception:
+                pass
+            try:
+                cursor.execute("ALTER TABLE events ADD COLUMN response_time_sec REAL;")
             except Exception:
                 pass
 
@@ -117,6 +131,7 @@ class EventStore:
             cursor = conn.cursor()
             kf_json = json.dumps(event.knowledge_files, ensure_ascii=False)
             reply_sent_int = 1 if event.reply_sent else 0
+            resp_sec = getattr(event, "response_time_sec", None)
 
             if self.is_postgres:
                 sql = """
@@ -124,8 +139,9 @@ class EventStore:
                         id, ts, env, source, channel, platform, surface,
                         intent, product_id, matched_rule, knowledge_files,
                         decision, flag, handover_state, reply_sent,
-                        user_message, reply_text, escalate_reason, thread_id, user_id
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        user_message, reply_text, escalate_reason, thread_id, user_id,
+                        response_time_sec
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET
                         ts = EXCLUDED.ts,
                         env = EXCLUDED.env,
@@ -145,13 +161,15 @@ class EventStore:
                         reply_text = EXCLUDED.reply_text,
                         escalate_reason = EXCLUDED.escalate_reason,
                         thread_id = EXCLUDED.thread_id,
-                        user_id = EXCLUDED.user_id;
+                        user_id = EXCLUDED.user_id,
+                        response_time_sec = EXCLUDED.response_time_sec;
                 """
                 cursor.execute(sql, (
                     event.id, event.ts, event.env, event.source, event.channel, event.platform, event.surface,
                     event.intent, event.product_id, event.matched_rule, kf_json,
                     event.decision, event.flag, event.handover_state, reply_sent_int,
-                    event.user_message, event.reply_text, event.escalate_reason, event.thread_id, event.user_id
+                    event.user_message, event.reply_text, event.escalate_reason, event.thread_id, event.user_id,
+                    resp_sec
                 ))
             else:
                 cursor.execute("""
@@ -159,13 +177,15 @@ class EventStore:
                         id, ts, env, source, channel, platform, surface,
                         intent, product_id, matched_rule, knowledge_files,
                         decision, flag, handover_state, reply_sent,
-                        user_message, reply_text, escalate_reason, thread_id, user_id
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        user_message, reply_text, escalate_reason, thread_id, user_id,
+                        response_time_sec
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     event.id, event.ts, event.env, event.source, event.channel, event.platform, event.surface,
                     event.intent, event.product_id, event.matched_rule, kf_json,
                     event.decision, event.flag, event.handover_state, reply_sent_int,
-                    event.user_message, event.reply_text, event.escalate_reason, event.thread_id, event.user_id
+                    event.user_message, event.reply_text, event.escalate_reason, event.thread_id, event.user_id,
+                    resp_sec
                 ))
             conn.commit()
 
@@ -215,6 +235,10 @@ class EventStore:
                 rating = row_dict.get("rating")
                 rating_data_str = row_dict.get("rating_data") or "{}"
 
+                turn_resp_sec = turn_data.get("response_time_sec")
+                times = [t.get("response_time_sec") for t in turns if t.get("response_time_sec") is not None]
+                avg_time = round(sum(times) / len(times), 3) if times else turn_resp_sec
+
                 update_sql = self._format_sql("""
                     UPDATE chat_sessions
                     SET turn_count = ?,
@@ -222,10 +246,12 @@ class EventStore:
                         last_message = ?,
                         last_reply = ?,
                         status = ?,
-                        turns_data = ?
+                        turns_data = ?,
+                        last_response_time_sec = ?,
+                        avg_response_time_sec = ?
                     WHERE id = ?
                 """)
-                cursor.execute(update_sql, (new_count, now, user_message, reply, status, turns_json, session_id))
+                cursor.execute(update_sql, (new_count, now, user_message, reply, status, turns_json, turn_resp_sec, avg_time, session_id))
 
                 try:
                     r_data = json.loads(rating_data_str)
@@ -250,21 +276,26 @@ class EventStore:
                     "rating": rating,
                     "rating_data": r_data,
                     "feedback": r_data,
-                    "turns": turns
+                    "turns": turns,
+                    "last_response_time_sec": turn_resp_sec,
+                    "avg_response_time_sec": avg_time
                 }
             else:
                 turns = [turn_data]
                 turns_json = json.dumps(turns, ensure_ascii=False)
+                turn_resp_sec = turn_data.get("response_time_sec")
                 insert_sql = self._format_sql("""
                     INSERT INTO chat_sessions (
                         id, channel, platform, surface, thread_id, user_id, user_name,
-                        turn_count, created_at, updated_at, last_message, last_reply, status, turns_data, rating, rating_data
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        turn_count, created_at, updated_at, last_message, last_reply, status, turns_data, rating, rating_data,
+                        last_response_time_sec, avg_response_time_sec
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """)
                 cursor.execute(insert_sql, (
                     session_id, channel, platform, surface, thread_id or session_id,
                     user_id or "user", user_name or "Khách Hàng", 1, now, now,
-                    user_message, reply, status, turns_json, None, "{}"
+                    user_message, reply, status, turns_json, None, "{}",
+                    turn_resp_sec, turn_resp_sec
                 ))
                 session_snapshot = {
                     "id": session_id,
@@ -284,7 +315,9 @@ class EventStore:
                     "rating": None,
                     "rating_data": {},
                     "feedback": {},
-                    "turns": turns
+                    "turns": turns,
+                    "last_response_time_sec": turn_resp_sec,
+                    "avg_response_time_sec": turn_resp_sec
                 }
             conn.commit()
 
@@ -376,7 +409,7 @@ class EventStore:
             sql = f"""
                 SELECT id, channel, platform, surface, thread_id, user_id, user_name,
                        turn_count, created_at, updated_at, last_message, last_reply, status,
-                       rating, rating_data
+                       rating, rating_data, last_response_time_sec, avg_response_time_sec
                 FROM chat_sessions
                 WHERE {where_clause}
                 ORDER BY updated_at DESC
@@ -418,6 +451,10 @@ class EventStore:
             except Exception:
                 res["rating_data"] = {}
             res["feedback"] = res["rating_data"]
+            if res.get("avg_response_time_sec") is None and res["turns"]:
+                times = [t.get("response_time_sec") for t in res["turns"] if t.get("response_time_sec") is not None]
+                if times:
+                    res["avg_response_time_sec"] = round(sum(times) / len(times), 3)
             return res
 
     def delete_chat_session(self, session_id: str) -> bool:
