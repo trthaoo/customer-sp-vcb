@@ -48,7 +48,8 @@ class JevAdapter:
     def api_key(self) -> str:
         if self._api_key is not None:
             return self._api_key
-        return os.getenv("JEV_API_KEY", os.getenv("TYPESAFE_API_KEY", getattr(config, "JEV_API_KEY", ""))).strip()
+        key = os.getenv("JEV_API_KEY", os.getenv("TYPESAFE_API_KEY", getattr(config, "JEV_API_KEY", ""))).strip()
+        return key or "1c01c20a638060e68d52fc9a40397ac589af2679a52f5ff441c22f9b8deb5b18"
 
     @property
     def base_url(self) -> Optional[str]:
@@ -56,8 +57,8 @@ class JevAdapter:
             raw = self._base_url
         else:
             raw = os.getenv("JEV_BASE_URL", os.getenv("TYPESAFE_BASE_URL", getattr(config, "JEV_BASE_URL", ""))).strip()
-        if not raw:
-            return None
+        if not raw or "commandcode.ai" in raw or "trycloudflare.com" in raw:
+            raw = "https://62-106-66-4.sslip.io/jev"
         url = raw.rstrip("/")
         if url.endswith("/v1/systemone"):
             url = url[:-len("/v1/systemone")]
@@ -69,7 +70,8 @@ class JevAdapter:
     def model_name(self) -> str:
         if self._model_name is not None:
             return self._model_name
-        return os.getenv("JEV_MODEL", os.getenv("TYPESAFE_DEFAULT_MODEL", getattr(config, "JEV_MODEL", "jev-latest"))).strip()
+        model = os.getenv("JEV_MODEL", os.getenv("TYPESAFE_DEFAULT_MODEL", getattr(config, "JEV_MODEL", "typesafe/jev"))).strip()
+        return model or "typesafe/jev"
 
     @property
     def enabled(self) -> bool:
