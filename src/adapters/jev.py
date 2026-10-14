@@ -41,6 +41,8 @@ class JevAdapter:
         self._timeout = timeout
         self._custom_client = client
         self._cached_client: Optional[Any] = None
+        self._consecutive_failures: int = 0
+        self._circuit_open_until: float = 0.0
 
     @property
     def api_key(self) -> str:
@@ -90,17 +92,21 @@ class JevAdapter:
         if self._timeout is not None:
             return self._timeout
         try:
-            return float(os.getenv("JEV_TIMEOUT", str(getattr(config, "JEV_TIMEOUT", 8.0))))
+            return float(os.getenv("JEV_TIMEOUT", str(getattr(config, "JEV_TIMEOUT", 1.8))))
         except (ValueError, TypeError):
-            return 8.0
+            return 1.8
 
     def is_available(self) -> bool:
         """
         Returns True if the SDK is installed, Jev is enabled, and an API key is provided
         (or a custom/mock client was injected).
+        Automatically returns False if circuit breaker is currently open due to unreachable bridge.
         """
         if self._custom_client is not None:
             return self.enabled
+        import time
+        if time.time() < self._circuit_open_until:
+            return False
         return bool(TYPESAFE_SDK_AVAILABLE and self.enabled and self.api_key)
 
     def _get_client(self) -> Optional[Any]:
@@ -188,6 +194,9 @@ class JevAdapter:
             elif selected_choice == "irrelevant":
                 jev_score = min(jev_score, 0.25)
 
+            # Reset failure count on success
+            self._consecutive_failures = 0
+
             return {
                 "jev_score": jev_score,
                 "is_relevant": (selected_choice != "irrelevant" and jev_score >= self.rerank_threshold),
@@ -196,6 +205,12 @@ class JevAdapter:
                 "evaluated": True
             }
         except Exception as e:
+            import time
+            self._consecutive_failures += 1
+            if self._consecutive_failures >= 2:
+                # Trip circuit breaker for 45 seconds so pipeline does not repeatedly block
+                self._circuit_open_until = time.time() + 45.0
+                print(f"[JevAdapter] Circuit breaker tripped: Jev bridge unavailable ({e}). Disabling Jev for 45s.")
             print(f"[JevAdapter] Warning: Jev evaluation failed for chunk '{chunk.get('title')}': {e}")
             return {
                 "jev_score": float(chunk.get("score", 0.5)),

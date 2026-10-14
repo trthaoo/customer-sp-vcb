@@ -31,7 +31,7 @@ JEV_BASE_URL = os.getenv("JEV_BASE_URL", os.getenv("TYPESAFE_BASE_URL", "")).str
 JEV_MODEL = os.getenv("JEV_MODEL", os.getenv("TYPESAFE_DEFAULT_MODEL", "jev-latest")).strip()
 JEV_ENABLED = os.getenv("JEV_ENABLED", "true").lower() in ("true", "1", "yes")
 JEV_RERANK_THRESHOLD = float(os.getenv("JEV_RERANK_THRESHOLD", "0.35"))
-JEV_TIMEOUT = float(os.getenv("JEV_TIMEOUT", "8.0"))
+JEV_TIMEOUT = float(os.getenv("JEV_TIMEOUT", "1.8"))
 
 # Auto send and handover hold
 AUTO_SEND = os.getenv("AUTO_SEND", "false").lower() in ("true", "1", "yes")

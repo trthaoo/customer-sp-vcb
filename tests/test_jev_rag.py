@@ -283,3 +283,36 @@ def test_rag_chunker_includes_sales_standards_and_new_rules():
     assert "Instructions (DO):" in scam_ec.content
     assert "Trigger Keywords:" in scam_ec.content
     assert "Huy K" in scam_ec.content
+
+
+def test_jev_adapter_circuit_breaker_tripping():
+    import time
+    adapter = JevAdapter(
+        api_key="ts_test_key",
+        enabled=True,
+        base_url="https://dead-tunnel-url-that-does-not-exist.trycloudflare.com",
+        timeout=0.2
+    )
+    assert adapter.is_available() is True
+
+    # 1. First error increments consecutive failures
+    res1 = adapter.evaluate_chunk("test query", {"title": "Doc 1", "content": "Content 1", "score": 0.5})
+    assert res1["evaluated"] is False
+    assert adapter._consecutive_failures == 1
+    assert adapter.is_available() is True
+
+    # 2. Second error trips circuit breaker
+    res2 = adapter.evaluate_chunk("test query", {"title": "Doc 2", "content": "Content 2", "score": 0.5})
+    assert res2["evaluated"] is False
+    assert adapter._consecutive_failures == 2
+    assert adapter._circuit_open_until > time.time()
+    # is_available must now return False in 0ms!
+    assert adapter.is_available() is False
+
+    # 3. Rerank bypasses Jev immediately when circuit is open
+    t0 = time.time()
+    chunks = [{"title": "Doc A", "score": 0.8}, {"title": "Doc B", "score": 0.7}]
+    reranked = adapter.rerank("test query", chunks, top_k=2)
+    elapsed = time.time() - t0
+    assert len(reranked) == 2
+    assert elapsed < 0.05  # bypassed in milliseconds!
