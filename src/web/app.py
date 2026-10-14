@@ -903,5 +903,8 @@ async def ops_console():
     index_file = STATIC_DIR / "index.html"
     if index_file.exists():
         with open(index_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=_inject_posthog_runtime(f.read()))
+            return HTMLResponse(
+                content=_inject_posthog_runtime(f.read()),
+                headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+            )
     return HTMLResponse("<h3>Customer Service Auto-Reply Gateway</h3><p>Dashboard UI not installed yet.</p>")

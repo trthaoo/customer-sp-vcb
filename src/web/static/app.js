@@ -519,8 +519,8 @@ async function viewSessionDetails(sessionId, silent = false) {
           return valid.length ? `${(valid.reduce((a, b) => a + Number(b.response_time_sec), 0) / valid.length).toFixed(2)}s` : 'N/A';
         })() : 'N/A');
 
-    subEl.textContent = `${data.channel.toUpperCase()} · ${data.platform.toUpperCase()} (${data.surface}) · Cập nhật: ${new Date(data.updated_at).toLocaleString()} · ⚡ Phản hồi TB: ${avgLatency}`;
-    countEl.textContent = `Tổng số: ${data.turns ? data.turns.length : 0} lượt trao đổi &bull; Tốc độ TB: ${avgLatency} &bull; Sao lưu tại: data/chat_logs/${sessionId}.json`;
+    subEl.textContent = `${data.channel.toUpperCase()} · ${data.platform.toUpperCase()} (${data.surface}) · Cập nhật: ${new Date(data.updated_at).toLocaleString()} · ⚡ Phản hồi TB: ${avgLatency !== 'N/A' ? avgLatency : 'Chưa đo'}`;
+    countEl.textContent = `Tổng số: ${data.turns ? data.turns.length : 0} lượt trao đổi &bull; Tốc độ TB: ${avgLatency !== 'N/A' ? avgLatency : 'Chưa đo'} &bull; Sao lưu tại: data/chat_logs/${sessionId}.json`;
 
     // Render Rich Feedback Banner
     if (feedbackBannerEl) {
@@ -604,11 +604,9 @@ async function viewSessionDetails(sessionId, silent = false) {
               ${isFailedTurn ? '<span style="background:#e11d48; color:#fff; font-size:0.7rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:3px;">🚨 LƯỢT PHÁT HIỆN LỖI</span>' : ''}
             </div>
             <div style="display:flex; align-items:center; gap:0.6rem;">
-              ${respSec !== null ? `
-                <span style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4); padding:0.15rem 0.55rem; border-radius:12px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:0.25rem;" title="Thời gian chatbot phản hồi: ${respSec} giây (${latMs} mili-giây)">
-                  ⚡ ${respSec}s (${latMs}ms)
-                </span>
-              ` : ''}
+              <span style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4); padding:0.15rem 0.55rem; border-radius:12px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:0.25rem;" title="${respSec !== null ? `Thời gian phản hồi: ${respSec}s (${latMs}ms)` : 'Chưa ghi nhận thời gian phản hồi (phiên cũ)'}">
+                ⚡ ${respSec !== null ? `${respSec}s (${latMs}ms)` : 'Chưa đo'}
+              </span>
               <span>${t.timestamp || ''}</span>
             </div>
           </div>
@@ -629,7 +627,7 @@ async function viewSessionDetails(sessionId, silent = false) {
             </div>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.7rem; margin-top:0.25rem;">
-            ${respSec !== null ? `<span style="background:#1e3a5f; padding:0.1rem 0.4rem; border-radius:3px; color:#38bdf8; font-weight:600;">⏱️ Phản hồi: <strong>${respSec}s (${latMs}ms)</strong></span>` : ''}
+            ${respSec !== null ? `<span style="background:#1e3a5f; padding:0.1rem 0.4rem; border-radius:3px; color:#38bdf8; font-weight:600;">⏱️ Phản hồi: <strong>${respSec}s (${latMs}ms)</strong></span>` : `<span style="background:#1e293b; padding:0.1rem 0.4rem; border-radius:3px; color:#64748b; font-weight:500;">⏱️ Phản hồi: <em>Chưa đo (phiên cũ)</em></span>`}
             ${t.status_badge ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#4ade80;">Badge: <strong>${escapeHtml(t.status_badge)}</strong></span>` : ''}
             ${t.intent ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#94a3b8;">Intent: <strong>${escapeHtml(t.intent)}</strong></span>` : ''}
             ${t.matched_product ? `<span style="background:#334155; padding:0.1rem 0.4rem; border-radius:3px; color:#38bdf8;">SP: <strong>${escapeHtml(t.matched_product)}</strong></span>` : ''}
