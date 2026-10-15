@@ -43,7 +43,9 @@ class ReplyComposer:
         visual_product_guess: Optional[str] = None,
         frame_used: Optional[str] = None,
         attached_image_url: Optional[str] = None,
-        rag_results: Optional[List[Dict[str, Any]]] = None
+        rag_results: Optional[List[Dict[str, Any]]] = None,
+        is_non_jewelry_image: bool = False,
+        unidentified_jewelry_image: bool = False
     ) -> Dict[str, Any]:
         """
         RAG + Visual context every turn:
@@ -63,19 +65,61 @@ class ReplyComposer:
         files_used: List[str] = []
         retrieved_chunks: List[Dict[str, Any]] = []
 
-        # 1. Product visible on screen but not in catalogue -> Say so politely and handover
-        if product_visible_not_in_catalogue:
+        # 0a. Image sent is NOT a jewelry product -> Tell customer politely without fabricating product info
+        if is_non_jewelry_image:
             files_used = ["shared/brand_voice.md"]
             is_vietnamese = bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', inbound.text.lower()))
-            if is_vietnamese:
+            if inbound.surface == "comment":
                 reply_text = (
-                    "Dạ mẫu trang sức trong video này bên em hiện chưa có trong danh mục niêm yết sẵn ạ. "
-                    "Anh/chị gửi thêm ảnh chi tiết qua DM để Huy K và craft team tư vấn chế tác riêng cho mình nhé! ✨"
+                    "Ảnh này không phải trang sức, bạn gửi lại ảnh sản phẩm nhé!"
+                    if is_vietnamese else
+                    "This isn't a jewelry item, please send us the product photo!"
                 )
             else:
                 reply_text = (
-                    "This handcrafted piece in the video is currently not listed in our standard catalogue. "
-                    "Send us a quick DM with close-up photos so Huy K and our craft team can custom-craft it for you! ✨"
+                    "Dạ em thấy hình ảnh gửi qua không phải là hình ảnh sản phẩm trang sức ạ. "
+                    "Anh/chị gửi lại giúp em hình ảnh hoặc tên mẫu trang sức mình quan tâm để em hỗ trợ nhé! ✨"
+                    if is_vietnamese else
+                    "I noticed the image sent isn't a jewelry piece. "
+                    "Please send us a photo or name of the jewelry item you're interested in so we can assist you! ✨"
+                )
+            return {
+                "reply": reply_text,
+                "decision": "fallback",
+                "flag": "auto_reply",
+                "status_badge": "handled",
+                "needs_human": False,
+                "escalate_reason": None,
+                "short_reason": "Ảnh gửi không phải là sản phẩm trang sức (non-jewelry) -> Báo khách gửi lại ảnh, không bịa thông tin",
+                "files_used": files_used,
+                "retrieved_chunks": [{
+                    "file": "shared/fallbacks.md",
+                    "title": "Non-Jewelry Image Filter",
+                    "content": "Hình ảnh nhận được không thuộc ngành hàng trang sức. Tuyệt đối không bịa đặt sản phẩm hoặc báo giá."
+                }],
+                "missing_fields": ["image.not_jewelry"],
+                "example_good_reply": None,
+                "model_called": False,
+                "model_used": None
+            }
+
+        # 0b. Jewelry image uploaded/scanned cannot be recognized -> Fall back and handover to craft team
+        if unidentified_jewelry_image:
+            files_used = ["shared/brand_voice.md", "catalogue/products.json"]
+            is_vietnamese = bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', inbound.text.lower()))
+            if inbound.surface == "comment":
+                reply_text = (
+                    "Mẫu này bên mình kiểm tra rồi nhắn tin qua DM bạn ngay nhé!"
+                    if is_vietnamese else
+                    "Our team will check this piece and message your DM shortly! ✨"
+                )
+            else:
+                reply_text = (
+                    "Dạ hình ảnh mẫu trang sức này bên em chưa nhận diện được trong danh mục niêm yết sẵn ạ.\n\n"
+                    "Em đã chuyển tiếp hình ảnh đến Huy K và craft team để kiểm tra thông tin chi tiết và phản hồi anh/chị ngay nhé! ✨"
+                    if is_vietnamese else
+                    "This jewelry piece isn't currently recognized in our standard catalogue.\n\n"
+                    "I've forwarded your photo to Huy K and our craft team to review and get right back to you! ✨"
                 )
             return {
                 "reply": reply_text,
@@ -83,8 +127,46 @@ class ReplyComposer:
                 "flag": "handover",
                 "status_badge": "handover",
                 "needs_human": True,
-                "escalate_reason": f"Sản phẩm hiển thị trong video ({visual_product_guess or 'mẫu trên màn hình'}) không có trong catalogue -> thông báo cho khách và chuyển giao nhân viên",
-                "short_reason": f"Sản phẩm '{visual_product_guess or 'trên video'}' không có trong catalogue | Frame: {frame_used or 'N/A'}",
+                "escalate_reason": "Ảnh trang sức không nhận dạng được trong danh mục niêm yết -> Fallback và chuyển giao nhân viên kiểm tra thủ công, tuyệt đối không bịa thông tin",
+                "short_reason": "Ảnh trang sức không nhận dạng được trong catalogue -> Fallback & Handover",
+                "files_used": files_used,
+                "retrieved_chunks": [{
+                    "file": "catalogue/products.json",
+                    "title": "Unidentified Jewelry Image",
+                    "content": "Hình ảnh trang sức không khớp với sản phẩm nào trong kho dữ liệu. Chuyển giao nhân viên kiểm tra."
+                }],
+                "missing_fields": ["catalogue.unidentified_product"],
+                "example_good_reply": None,
+                "model_called": False,
+                "model_used": None
+            }
+
+        # 1. Product visible on screen but not in catalogue -> Say so politely and handover
+        if product_visible_not_in_catalogue:
+            files_used = ["shared/brand_voice.md"]
+            is_vietnamese = bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', inbound.text.lower()))
+            if inbound.surface == "comment":
+                reply_text = (
+                    "Mẫu này chưa có trong danh mục niêm yết, bạn nhắn DM mình nhé!"
+                    if is_vietnamese else
+                    "This piece isn't in our standard catalogue, send us a DM for custom crafting! ✨"
+                )
+            else:
+                reply_text = (
+                    "Dạ mẫu trang sức này bên em hiện chưa có trong danh mục niêm yết sẵn ạ.\n\n"
+                    "Em đã chuyển tiếp hình ảnh đến Huy K và craft team để kiểm tra khả năng chế tác riêng và phản hồi anh/chị ngay nhé! ✨"
+                    if is_vietnamese else
+                    "This handcrafted piece is currently not listed in our standard catalogue.\n\n"
+                    "I've shared your request with Huy K and our craft team to check custom-crafting options for you! ✨"
+                )
+            return {
+                "reply": reply_text,
+                "decision": "fallback",
+                "flag": "handover",
+                "status_badge": "handover",
+                "needs_human": True,
+                "escalate_reason": f"Sản phẩm hiển thị ({visual_product_guess or 'mẫu trên màn hình'}) không có trong catalogue -> thông báo cho khách và chuyển giao nhân viên",
+                "short_reason": f"Sản phẩm '{visual_product_guess or 'trên video/ảnh'}' không có trong catalogue | Frame: {frame_used or 'N/A'}",
                 "files_used": files_used,
                 "retrieved_chunks": [{
                     "file": "catalogue/products.json",
@@ -398,19 +480,20 @@ class ReplyComposer:
             return (
                 "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market - Huy K Jewelry).\n"
                 "Persona: Huy K & our craft team. Speak with direct warmth and creator pride.\n"
-                "STRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team.\n"
+                "STRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia', 'studio manager', 'management team'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team.\n"
                 "Target Audience: United States shoppers (roughly 18–34).\n"
                 "CRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n"
                 "1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n"
                 "2. STRICTLY UNDER 15 WORDS (< 15 words): Brevity is mandatory. Keep it punchy, warm, and natural.\n"
                 "3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly guide them to check DM/inbox or bio link for pricing and exclusive details.\n"
                 "4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n"
-                "5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
+                "5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks.\n"
+                "6. STRICT BRAND KNOWLEDGE CONSTRAINTS: Single-layer electroplating only. Strictly no free gifts. Sizing chart/measurements (never video sizing). US online-only with free insured shipping."
             )
         return (
             "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market - Huy K Jewelry).\n"
             "Persona: Huy K & our craft team. Speak with direct creator warmth, craft pride, and personal authority.\n"
-            "STRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team ('I' or 'our craft team').\n"
+            "STRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia', 'studio manager', 'management team'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team ('I' or 'our craft team').\n"
             "Target Audience: United States shoppers (roughly 18–34). Reply in 100% natural, human American texting style.\n"
             "HUMAN TEXTING CONVERSATIONAL ARCHITECTURE (9 NON-NEGOTIABLE RULES FOR PRIVATE DMS):\n"
             "1. DYNAMIC 1–3 BUBBLES RHYTHM: Send 1 to 3 short bubbles (separated by double newlines '\\n\\n'), NOT a giant block of text and NOT robotic 3 bubbles every single turn.\n"
@@ -423,7 +506,8 @@ class ReplyComposer:
             "6. PRIVACY & DMS: DMs are 1–3 bubbles where orders close. Never pull off-platform to WhatsApp/email.\n"
             "7. JEWELRY SCRIPTS: Name the exact piece. Never say 'the item'. In compliments, never upsell.\n"
             "8. COMPLAINTS: Person first, not corporate policy. Never say 'as per our policy' or 'a lot of customers love this'. Direct empathy + quick resolution.\n"
-            "9. ONE QUESTION ONLY: Ask at most ONE question per message. Never bombard with multiple questions. If they say 'I will think about it', one light bubble and silence."
+            "9. ONE QUESTION ONLY: Ask at most ONE question per message. Never bombard with multiple questions. If they say 'I will think about it', one light bubble and silence.\n"
+            "10. STRICT BRAND KNOWLEDGE CONSTRAINTS: Single-layer electroplating only (never promise thick/multi-layer plating). Strictly no free gifts. Sizing chart/measurements (never video sizing). US online-only with free insured shipping; Vietnam physical flagship stores only."
         )
 
     def _call_model_for_edge_case(
@@ -433,6 +517,17 @@ class ReplyComposer:
         chunks: List[Dict[str, Any]],
         attached_image_url: Optional[str] = None
     ) -> Tuple[str, bool, Optional[str], Optional[str]]:
+        turn_number = (len(inbound.history) // 2) + 1 if inbound.history else 1
+        multi_turn_instructions = ""
+        if turn_number > 1:
+            multi_turn_instructions = (
+                f"\nCRITICAL MULTI-TURN CONVERSATION CONTINUATION (CURRENT TURN: {turn_number}):\n"
+                f"- You are ALREADY in an active, ongoing conversation with this customer. Do NOT restart or re-greet them!\n"
+                f"- STRICTLY FORBIDDEN: NEVER repeat greetings like 'Hi love!', 'Hey there!', 'Chào bạn!', 'Dạ chào anh/chị!', 'Hello!'.\n"
+                f"- CONTEXT LINKING & CONTINUITY: Seamlessly link your answer to previous turns like a natural continuous chat.\n"
+                f"- Answer their follow-up directly, naturally, and warmly (1-3 short bubbles under 15 words each).\n"
+            )
+
         if inbound.surface == "comment":
             surface_rules = (
                 "CRITICAL PUBLIC COMMENT REPLY RULES (EXACTLY 1 SINGLE COMMENT - NEVER MULTI-BUBBLE):\n"
@@ -460,6 +555,7 @@ class ReplyComposer:
             f"STRICTLY BANNED: NEVER say 'let me check with Master Jeweler Huy K', NEVER use 'workshop', 'atelier', 'specialist', 'human concierge'. Speak directly as Huy K or our craft team.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
             f"{surface_rules}"
+            f"{multi_turn_instructions}"
             f"Strict Edge Case instructions:\n"
             f"- DO: {edge_case.do}\n"
             f"- DO NOT: {edge_case.do_not}\n\n"
@@ -537,6 +633,18 @@ class ReplyComposer:
                 f"- Or: \"here she is! ✨\\n\\nlet me know if you want to see the clasp or chain detail 🤍\"\n"
             )
 
+        turn_number = (len(inbound.history) // 2) + 1 if inbound.history else 1
+        multi_turn_instructions = ""
+        if turn_number > 1:
+            multi_turn_instructions = (
+                f"\nCRITICAL MULTI-TURN CONVERSATION CONTINUATION (CURRENT TURN: {turn_number}):\n"
+                f"- You are ALREADY in an active, ongoing conversation with this customer. Do NOT restart or re-greet them!\n"
+                f"- STRICTLY FORBIDDEN: NEVER repeat greetings like 'Hi love!', 'Hey there!', 'Chào bạn!', 'Dạ chào anh/chị!', 'Hello!'.\n"
+                f"- CONTEXT LINKING & MEMORY: Seamlessly link your answer to previous turns like a natural continuous chat.\n"
+                f"  Remember the exact product ({product.name if product else 'previously discussed piece'}), questions, sizes, or preferences discussed in earlier turns.\n"
+                f"- Jump straight into answering their follow-up question directly, warmly, and concisely (1-3 short bubbles under 15 words each).\n"
+            )
+
         if inbound.surface == "comment":
             surface_rules = (
                 "CRITICAL PUBLIC COMMENT REPLY RULES (EXACTLY 1 SINGLE COMMENT - NEVER MULTI-BUBBLE):\n"
@@ -567,6 +675,7 @@ class ReplyComposer:
             f"STRICTLY BANNED: NEVER say 'let me check with Master Jeweler Huy K', NEVER use 'workshop', 'atelier', 'specialist', 'human concierge'. Speak directly as Huy K or our craft team.\n"
             f"TARGET MARKET: United States (US). Reply in 100% natural, warm, human American texting style (unless customer writes in Vietnamese).\n"
             f"{surface_rules}"
+            f"{multi_turn_instructions}"
             f"{caption_info}{media_info}{photo_info}\n\n"
             f"GROUNDING KNOWLEDGE CHUNKS (ONLY ALLOWED FACTS):\n"
             f"{chunks_text}\n\n"
@@ -605,6 +714,13 @@ class ReplyComposer:
                 price_str = format_currency(product.price, product.currency)
                 if inbound.surface == "comment":
                     return f"Send us a quick DM or check our bio link for {product.name} details & checkout ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback comment)"
+                if turn_number > 1:
+                    lower_q = inbound.text.lower()
+                    if any(w in lower_q for w in ["size", "cỡ", "ni"]):
+                        return f"Dạ mẫu {product.name} có sẵn các size từ 10 đến 18 cho mình chọn ạ! ✨\n\nBạn đang muốn chọn size bao nhiêu để bên mình chuẩn bị nhé? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback multi-turn size)"
+                    elif any(w in lower_q for w in ["ship", "vận chuyển", "giao hàng", "mấy ngày"]):
+                        return f"Dạ đơn hàng gửi đi sẽ giao trong 1-2 ngày làm việc và được freeship ạ! ✨\n\nBạn cho mình xin thông tin địa chỉ để lên đơn giữ mẫu nhé 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback multi-turn ship)"
+                    return f"Dạ mẫu {product.name} bên mình vẫn sẵn hàng ạ! ✨\n\nBạn muốn mình tư vấn thêm chi tiết nào của mẫu này nhé? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback multi-turn follow-up)"
                 return f"It's the {product.name} at {price_str} with complimentary free US shipping! ✨\n\nWhat size would you like us to prepare for you? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback product reply)"
             if inbound.surface == "comment":
                 return "Let me check with our craft team and get right back to you! ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (comment fallback)"
@@ -620,6 +736,13 @@ class ReplyComposer:
                 price_str = format_currency(product.price, product.currency)
                 if inbound.surface == "comment":
                     return f"Send us a quick DM or check our bio link for {product.name} details & checkout ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback comment)"
+                if turn_number > 1:
+                    lower_q = inbound.text.lower()
+                    if any(w in lower_q for w in ["size", "cỡ", "ni"]):
+                        return f"Dạ mẫu {product.name} có sẵn các size từ 10 đến 18 cho mình chọn ạ! ✨\n\nBạn đang muốn chọn size bao nhiêu để bên mình chuẩn bị nhé? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback multi-turn size)"
+                    elif any(w in lower_q for w in ["ship", "vận chuyển", "giao hàng", "mấy ngày"]):
+                        return f"Dạ đơn hàng gửi đi sẽ giao trong 1-2 ngày làm việc và được freeship ạ! ✨\n\nBạn cho mình xin thông tin địa chỉ để lên đơn giữ mẫu nhé 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback multi-turn ship)"
+                    return f"Dạ mẫu {product.name} bên mình vẫn sẵn hàng ạ! ✨\n\nBạn muốn mình tư vấn thêm chi tiết nào của mẫu này nhé? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback multi-turn follow-up)"
                 return f"It's the {product.name} at {price_str} with complimentary free US shipping! ✨\n\nWhat size would you like us to prepare for you? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback product reply)"
             if inbound.surface == "comment":
                 return "Let me check with our craft team and get right back to you! ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (comment fallback)"

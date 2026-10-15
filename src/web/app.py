@@ -190,8 +190,10 @@ async def handle_zernio_webhook(
     try:
         store = get_event_store()
         sess_id = inbound.thread_id or f"thread_{inbound.user_id or inbound.id}"
+        existing_sess = store.get_chat_session_by_thread_or_user(inbound.thread_id, inbound.user_id)
+        current_turn_index = (len(existing_sess["turns"]) + 1) if (existing_sess and existing_sess.get("turns")) else 1
         turn_data = {
-            "turn_index": 1,
+            "turn_index": current_turn_index,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "customer_message": inbound.text,
             "bot_reply": result.draft_reply,
@@ -199,6 +201,7 @@ async def handle_zernio_webhook(
             "flag": result.flag,
             "status_badge": result.status_badge,
             "matched_product": result.matched_product.name if result.matched_product else None,
+            "product_id": result.matched_product.id if result.matched_product else None,
             "matched_rule": result.matched_rule or result.matched_edge_case,
             "intent": result.intent,
             "knowledge_files": result.knowledge_files,
@@ -564,6 +567,7 @@ async def playground_chat(body: PlaygroundChatRequest):
             "flag": result.flag,
             "status_badge": result.status_badge,
             "matched_product": result.matched_product.name if result.matched_product else None,
+            "product_id": result.matched_product.id if result.matched_product else None,
             "matched_rule": result.matched_rule or result.matched_edge_case,
             "intent": result.intent,
             "knowledge_files": result.knowledge_files,

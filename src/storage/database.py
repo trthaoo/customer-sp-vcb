@@ -457,6 +457,45 @@ class EventStore:
                     res["avg_response_time_sec"] = round(sum(times) / len(times), 3)
             return res
 
+    def get_chat_session_by_thread_or_user(
+        self,
+        thread_id: Optional[str] = None,
+        user_id: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        if not thread_id and not user_id:
+            return None
+        with self._get_connection() as conn:
+            if self.is_postgres:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+            else:
+                cursor = conn.cursor()
+
+            row = None
+            if thread_id:
+                sql = self._format_sql("SELECT * FROM chat_sessions WHERE id = ? OR thread_id = ? ORDER BY updated_at DESC LIMIT 1")
+                cursor.execute(sql, (thread_id, thread_id))
+                row = cursor.fetchone()
+
+            if not row and user_id:
+                sql = self._format_sql("SELECT * FROM chat_sessions WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1")
+                cursor.execute(sql, (user_id,))
+                row = cursor.fetchone()
+
+            if not row:
+                return None
+
+            res = dict(row)
+            try:
+                res["turns"] = json.loads(res["turns_data"]) if res.get("turns_data") else []
+            except Exception:
+                res["turns"] = []
+            try:
+                res["rating_data"] = json.loads(res["rating_data"]) if res.get("rating_data") else {}
+            except Exception:
+                res["rating_data"] = {}
+            res["feedback"] = res["rating_data"]
+            return res
+
     def delete_chat_session(self, session_id: str) -> bool:
         with self._get_connection() as conn:
             cursor = conn.cursor()

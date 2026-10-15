@@ -538,6 +538,165 @@ def test_silver_tarnish_complaint_edge_case(orchestrator):
     assert result.matched_edge_case == "tiktok_edge_silver_tarnish_complaint"
     assert result.decision == "auto_reply"
 
+# 33. Multi-turn DM context continuity (Turn 1 -> Turn 2 -> Turn 3)
+def test_multi_turn_dm_context_continuity(orchestrator, test_store):
+    thread_id = "test_thread_continuity_01"
+
+    # Turn 1: Customer asks about a ring
+    inbound_t1 = InboundMessage(
+        id="turn_1_msg",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        thread_id=thread_id,
+        user_id="user_meta_01",
+        text="Cho mình hỏi chiếc nhẫn mắt thần horus bên bạn giá bao nhiêu?",
+        source="dry_run"
+    )
+    res_1 = orchestrator.process(inbound_t1)
+    assert res_1.matched_product is not None
+    assert "Horus" in res_1.matched_product.name
+    assert res_1.decision == "auto_reply"
+
+    # Save turn 1 into store session
+    test_store.save_session_turn(
+        session_id=thread_id,
+        channel="meta",
+        platform="ig",
+        surface="dm",
+        user_message=inbound_t1.text,
+        reply=res_1.draft_reply,
+        turn_data={
+            "turn_index": 1,
+            "customer_message": inbound_t1.text,
+            "bot_reply": res_1.draft_reply,
+            "matched_product": res_1.matched_product.name,
+            "product_id": res_1.matched_product.id
+        },
+        thread_id=thread_id,
+        user_id="user_meta_01"
+    )
+
+    # Turn 2: Customer asks follow-up size question WITHOUT repeating the product name
+    inbound_t2 = InboundMessage(
+        id="turn_2_msg",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        thread_id=thread_id,
+        user_id="user_meta_01",
+        text="Mẫu này có những size nào vậy shop?",
+        source="dry_run"
+    )
+    res_2 = orchestrator.process(inbound_t2)
+    # Context continuity: Must remember product from turn 1!
+    assert res_2.matched_product is not None
+    assert res_2.matched_product.id == res_1.matched_product.id
+    assert "Horus" in res_2.matched_product.name
+    # Must answer size inquiry without restarting or re-greeting
+    assert "size" in res_2.draft_reply.lower() or "ni" in res_2.draft_reply.lower()
+    # Must NOT repeat formal or first-turn greeting
+    assert not res_2.draft_reply.startswith("Hi love!")
+    assert not res_2.draft_reply.startswith("Chào bạn!")
+    assert not res_2.draft_reply.startswith("Dạ chào")
+
+    # Save turn 2 into store session
+    test_store.save_session_turn(
+        session_id=thread_id,
+        channel="meta",
+        platform="ig",
+        surface="dm",
+        user_message=inbound_t2.text,
+        reply=res_2.draft_reply,
+        turn_data={
+            "turn_index": 2,
+            "customer_message": inbound_t2.text,
+            "bot_reply": res_2.draft_reply,
+            "matched_product": res_2.matched_product.name,
+            "product_id": res_2.matched_product.id
+        },
+        thread_id=thread_id,
+        user_id="user_meta_01"
+    )
+
+    # Turn 3: Customer asks shipping without repeating product name
+    inbound_t3 = InboundMessage(
+        id="turn_3_msg",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        thread_id=thread_id,
+        user_id="user_meta_01",
+        text="Ship về Hà Nội mất mấy ngày vậy bạn?",
+        source="dry_run"
+    )
+    res_3 = orchestrator.process(inbound_t3)
+    assert res_3.matched_product is not None
+    assert res_3.matched_product.id == res_1.matched_product.id
+    assert not res_3.draft_reply.startswith("Hi love!")
+    assert not res_3.draft_reply.startswith("Chào bạn!")
+
+# 34. Image scanning - Non-jewelry image sent: Politely inform customer, NO hallucination
+def test_image_scan_non_jewelry_detection(orchestrator):
+    from src.models import MediaFrame
+    inbound = InboundMessage(
+        id="case_non_jewelry_meme",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="Quét ảnh meme này xem giá bao nhiêu?",
+        frames=[MediaFrame(data_url="data:image/jpeg;base64,...", label="funny_meme_cat.jpg")],
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "fallback"
+    # Must inform customer it is not a jewelry product
+    assert "không phải là hình ảnh sản phẩm trang sức" in result.draft_reply or "trang sức" in result.draft_reply
+    # Must NOT hallucinate product specs or catalogue match
+    assert result.matched_product is None
+
+# 35. Image scanning - Non-jewelry image in comment (< 15 words)
+def test_image_scan_non_jewelry_comment(orchestrator):
+    from src.models import MediaFrame
+    inbound = InboundMessage(
+        id="case_non_jewelry_comment",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="Xem giúp mình hóa đơn này với",
+        frames=[MediaFrame(data_url="data:image/jpeg;base64,...", label="receipt_bill.jpg")],
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "fallback"
+    assert result.matched_product is None
+    words = result.draft_reply.split()
+    assert len(words) <= 15
+    assert "\n" not in result.draft_reply
+
+# 36. Image scanning - Unidentifiable jewelry image: Fallback and Handover, NO guessing
+def test_image_scan_unidentified_jewelry_fallback_handover(orchestrator):
+    from src.models import MediaFrame
+    inbound = InboundMessage(
+        id="case_unidentified_jewelry",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="Nhận dạng ảnh mẫu trang sức này giúp mình với shop ơi",
+        frames=[MediaFrame(data_url="data:image/jpeg;base64,...", label="unknown_custom_piece.jpg")],
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "fallback"
+    assert result.flag == "handover"
+    assert result.needs_human is True
+    assert result.status_badge == "handover"
+    # Never guess product or price
+    assert result.matched_product is None
+    # Inform customer politely and handover
+    assert "chưa nhận diện được" in result.draft_reply or "chưa có trong danh mục" in result.draft_reply
+    assert "Huy K" in result.draft_reply or "craft team" in result.draft_reply
+
 
 
 

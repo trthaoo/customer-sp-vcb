@@ -55,6 +55,7 @@ class KnowledgeBase:
         self.tiktok_edge_cases: List[EdgeCase] = []
         self.policies: Dict[str, str] = {}
         self.products: List[Product] = []
+        self.products_by_id: Dict[str, Product] = {}
         # Parse problems the app skips at runtime; tests/test_knowledge_valid.py fails on any.
         self.errors: List[str] = []
         self.load_all()
@@ -196,6 +197,7 @@ class KnowledgeBase:
             for p in prods:
                 if isinstance(p, dict):
                     self.products.append(Product(**p))
+            self.products_by_id = {p.id: p for p in self.products}
         except Exception as e:
             self.errors.append(f"catalogue/{target.name}: {e}")
             print(f"Warning: Could not load products from {target}: {e}")

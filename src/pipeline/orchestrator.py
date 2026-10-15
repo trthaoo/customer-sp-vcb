@@ -33,6 +33,19 @@ class PipelineOrchestrator:
     def process(self, inbound: InboundMessage) -> PipelineResult:
         import time
         start_time = time.perf_counter()
+
+        # Multi-turn history hydration: if inbound.history is empty, attempt to hydrate from store using thread_id / user_id
+        if not inbound.history and (inbound.thread_id or inbound.user_id):
+            session = self.store.get_chat_session_by_thread_or_user(inbound.thread_id, inbound.user_id)
+            if session and session.get("turns"):
+                hydrated = []
+                for turn in session["turns"]:
+                    if turn.get("customer_message"):
+                        hydrated.append({"role": "user", "content": turn["customer_message"]})
+                    if turn.get("bot_reply"):
+                        hydrated.append({"role": "assistant", "content": turn["bot_reply"]})
+                inbound.history = hydrated
+
         # Step 1: Media processing if not already extracted
         if not inbound.frames and (inbound.media_url or inbound.carousel_urls) and inbound.media_type != "link":
             extracted_frames, missing = self.media_processor.process_media(
@@ -168,11 +181,18 @@ class PipelineOrchestrator:
         catalogue_id_matched: Optional[str] = None
         frame_used: Optional[str] = None
         product_visible_not_in_catalogue = False
+        is_non_jewelry_image = False
+        unidentified_jewelry_image = False
 
         if inbound.frames and not vision_unsupported:
-            if comment_needs_media or not matched_product:
-                v_prod, v_guess, v_frame, unlisted = self._resolve_visual_context(inbound)
-                if unlisted:
+            if comment_needs_media or not matched_product or inbound.surface == "dm":
+                v_prod, v_guess, v_frame, unlisted, is_non_j = self._resolve_visual_context(inbound)
+                if is_non_j:
+                    is_non_jewelry_image = True
+                    matched_product = None
+                    visual_product_guess = v_guess or "non_jewelry"
+                    frame_used = v_frame
+                elif unlisted:
                     product_visible_not_in_catalogue = True
                     visual_product_guess = v_guess
                     frame_used = v_frame
@@ -185,6 +205,13 @@ class PipelineOrchestrator:
                 elif v_guess:
                     visual_product_guess = v_guess
                     frame_used = v_frame
+                elif not matched_product and (inbound.surface == "dm" or "ảnh" in inbound.text.lower()):
+                    unidentified_jewelry_image = True
+                    frame_used = v_frame
+                elif matched_product:
+                    visual_product_guess = matched_product.name
+                    catalogue_id_matched = matched_product.id
+                    frame_used = v_frame or (inbound.frames[0].label if inbound.frames else None)
             else:
                 visual_product_guess = matched_product.name
                 catalogue_id_matched = matched_product.id
@@ -194,17 +221,49 @@ class PipelineOrchestrator:
             catalogue_id_matched = matched_product.id
 
         # Multi-turn context inheritance: if no product matched in current query, check previous turns in thread
-        if not matched_product and inbound.history:
-            for past_turn in reversed(inbound.history):
-                past_text = past_turn.get("content", "")
-                if not past_text:
-                    continue
-                past_prod, past_ambi = self.matcher.match(past_text)
-                if past_prod:
-                    matched_product = past_prod
-                    visual_product_guess = past_prod.name
-                    catalogue_id_matched = past_prod.id
-                    break
+        if not matched_product and not is_non_jewelry_image:
+            # 1. Check session turns first if available
+            if inbound.thread_id or inbound.user_id:
+                session = self.store.get_chat_session_by_thread_or_user(inbound.thread_id, inbound.user_id)
+                if session and session.get("turns"):
+                    for past_turn_data in reversed(session["turns"]):
+                        p_id = past_turn_data.get("product_id")
+                        p_name = past_turn_data.get("matched_product")
+                        if p_id and p_id in self.kb.products_by_id:
+                            matched_product = self.kb.products_by_id[p_id]
+                            visual_product_guess = matched_product.name
+                            catalogue_id_matched = matched_product.id
+                            unidentified_jewelry_image = False
+                            break
+                        elif p_name:
+                            past_p, _ = self.matcher.match(p_name)
+                            if past_p:
+                                matched_product = past_p
+                                visual_product_guess = past_p.name
+                                catalogue_id_matched = past_p.id
+                                unidentified_jewelry_image = False
+                                break
+
+            # 2. Check inbound.history (both user and assistant turns)
+            if not matched_product and inbound.history:
+                for past_turn in reversed(inbound.history):
+                    past_text = past_turn.get("content", "")
+                    if not past_text:
+                        continue
+                    past_prod, _ = self.matcher.match(past_text)
+                    if past_prod:
+                        matched_product = past_prod
+                        visual_product_guess = past_prod.name
+                        catalogue_id_matched = past_prod.id
+                        unidentified_jewelry_image = False
+                        break
+
+        # Check if customer sent image or asked to scan/identify an image but no product matched
+        if not matched_product and not is_non_jewelry_image and not product_visible_not_in_catalogue:
+            lower_msg = inbound.text.lower()
+            asking_scan = any(w in lower_msg for w in ["quét ảnh", "nhận dạng ảnh", "quet anh", "nhan dang anh", "ảnh này là gì", "mẫu trong ảnh", "chiếc này trong ảnh", "xem mẫu trong ảnh"])
+            if inbound.frames or asking_scan:
+                unidentified_jewelry_image = True
 
         is_ambiguous = len(ambiguous_products) > 1
 
@@ -247,7 +306,9 @@ class PipelineOrchestrator:
             visual_product_guess=visual_product_guess,
             frame_used=frame_used,
             attached_image_url=attached_image_url,
-            rag_results=prefetched_rag
+            rag_results=prefetched_rag,
+            is_non_jewelry_image=is_non_jewelry_image,
+            unidentified_jewelry_image=unidentified_jewelry_image
         )
         model_time_ms = int(round((time.perf_counter() - t_comp_start) * 1000))
 
@@ -333,14 +394,28 @@ class PipelineOrchestrator:
 
     def _resolve_visual_context(
         self, inbound: InboundMessage
-    ) -> Tuple[Optional[Product], Optional[str], Optional[str], bool]:
+    ) -> Tuple[Optional[Product], Optional[str], Optional[str], bool, bool]:
         """
-        Resolves product on screen using caption + frames.
-        Returns: (matched_product, visual_product_guess, frame_used, product_visible_not_in_catalogue)
+        Resolves product on screen or uploaded image using caption + frames.
+        Returns: (matched_product, visual_product_guess, frame_used, product_visible_not_in_catalogue, is_non_jewelry)
         """
+        media_str = f"{inbound.text} {inbound.post_context or ''} {' '.join([f.label for f in inbound.frames])} {inbound.media_url or ''}".lower()
+        non_jewelry_signals = [
+            "meme", "hóa đơn", "hoa don", "receipt", "bill", "chuyển khoản", "banking",
+            "chó", "mèo", "pet", "dog", "cat", "đồ ăn", "food", "selfie", "screenshot",
+            "ảnh thẻ", "phong cảnh", "landscape", "xe hơi", "car", "non_jewelry", "unrelated"
+        ]
+        if any(w in media_str for w in non_jewelry_signals):
+            frame_lbl = inbound.frames[0].label if inbound.frames else None
+            return None, "non_jewelry_image", frame_lbl, False, True
+
         if not self.composer.model_adapter.is_available() or not self.composer.model_adapter.is_vision_capable():
             p, _ = self.matcher.match(inbound.text, inbound.post_context)
-            return p, (p.name if p else None), (inbound.frames[0].label if inbound.frames else None), False
+            if p:
+                return p, p.name, (inbound.frames[0].label if inbound.frames else None), False, False
+            if "unlisted" in media_str or "thiết kế riêng" in media_str or "mẫu ngoài" in media_str:
+                return None, "unlisted_jewelry", (inbound.frames[0].label if inbound.frames else None), True, False
+            return None, None, (inbound.frames[0].label if inbound.frames else None), False, False
 
         catalog_lines = []
         for p in self.kb.products:
@@ -351,30 +426,43 @@ class PipelineOrchestrator:
 
         frame_labels = ", ".join([f.label for f in inbound.frames])
         prompt = (
-            f"You are an expert jeweler staff analyzing social media post media for Viễn Chí Bảo Fine Jewelry.\n"
-            f"Customer comment: \"{inbound.text}\"\n"
+            f"You are an expert jeweler staff analyzing social media post media or customer uploaded images for Viễn Chí Bảo Fine Jewelry.\n"
+            f"Customer message: \"{inbound.text}\"\n"
             f"Post caption: \"{inbound.post_context or ''}\"\n"
             f"Frames attached in chronological order: {frame_labels}\n\n"
             f"STORE CATALOGUE ITEMS WITH RECOGNIZED ALIASES:\n"
             f"{catalog_text}\n\n"
             f"TASK:\n"
-            f"1. Examine the attached frames in time order and the caption to identify which jewelry product is on screen or referred to by the customer (resolve 'cái này', 'mẫu trong video', 'cái bên trái', color, etc.).\n"
-            f"2. If it matches an item in the store catalogue above by alias, shape, or design:\n"
-            f"MATCH_ID: <exact catalogue ID, e.g. VCB_SP01>\n"
-            f"GUESS: <product name>\n"
-            f"FRAME: <label of the frame where it is most prominent, e.g. t=2.0s or Slide 1>\n"
-            f"UNLISTED: FALSE\n\n"
-            f"3. If a jewelry product IS clearly shown in the video/images, but it is NOT in the store catalogue:\n"
-            f"MATCH_ID: NONE\n"
-            f"GUESS: <short description of the unlisted jewelry piece>\n"
-            f"FRAME: <frame label>\n"
-            f"UNLISTED: TRUE\n\n"
-            f"4. If no jewelry product is visible or cannot be determined:\n"
-            f"MATCH_ID: NONE\n"
-            f"GUESS: None\n"
-            f"FRAME: None\n"
-            f"UNLISTED: FALSE\n\n"
-            f"Output ONLY these 4 key-value lines."
+            f"1. Check if the attached media contains a JEWELRY product (ring, necklace, bracelet, earrings, pendant, bangle, gemstones, precious metals).\n"
+            f"   - If the image is NOT jewelry (e.g. meme, animal/pet, receipt/bill, selfie/portrait without jewelry focus, random everyday object, landscape, food, car, chat screenshot, document):\n"
+            f"     IS_JEWELRY: FALSE\n"
+            f"     MATCH_ID: NONE\n"
+            f"     GUESS: <short description of non-jewelry image>\n"
+            f"     FRAME: <frame label>\n"
+            f"     UNLISTED: FALSE\n\n"
+            f"2. If the image IS jewelry:\n"
+            f"   IS_JEWELRY: TRUE\n"
+            f"   a. If it matches an item in the store catalogue above by alias, shape, or design:\n"
+            f"      MATCH_ID: <exact catalogue ID, e.g. VCB_SP01>\n"
+            f"      GUESS: <product name>\n"
+            f"      FRAME: <label of the frame where it is most prominent, e.g. t=2.0s or Slide 1>\n"
+            f"      UNLISTED: FALSE\n\n"
+            f"   b. If it IS jewelry, but is NOT in the store catalogue:\n"
+            f"      MATCH_ID: NONE\n"
+            f"      GUESS: <short description of the unlisted jewelry piece>\n"
+            f"      FRAME: <frame label>\n"
+            f"      UNLISTED: TRUE\n\n"
+            f"   c. If it IS jewelry, but cannot be identified / blurry / unclear:\n"
+            f"      MATCH_ID: NONE\n"
+            f"      GUESS: None\n"
+            f"      FRAME: <frame label>\n"
+            f"      UNLISTED: FALSE\n\n"
+            f"Output ONLY these 5 key-value lines:\n"
+            f"IS_JEWELRY: <TRUE/FALSE>\n"
+            f"MATCH_ID: <ID or NONE>\n"
+            f"GUESS: <description or None>\n"
+            f"FRAME: <label or None>\n"
+            f"UNLISTED: <TRUE/FALSE>"
         )
 
         try:
@@ -385,16 +473,21 @@ class PipelineOrchestrator:
                 kwargs["frames"] = inbound.frames
             raw_res = self.composer.model_adapter.generate_reply(prompt, [], **kwargs)
             if not raw_res:
-                return None, None, None, False
+                return None, None, None, False, False
 
             match_id = None
             guess = None
             frame = None
             unlisted = False
+            is_jewelry = True
 
             for line in raw_res.splitlines():
                 line = line.strip()
-                if line.upper().startswith("MATCH_ID:"):
+                if line.upper().startswith("IS_JEWELRY:"):
+                    val = line.split(":", 1)[1].strip().upper()
+                    if "FALSE" in val:
+                        is_jewelry = False
+                elif line.upper().startswith("MATCH_ID:"):
                     val = line.split(":", 1)[1].strip()
                     if val.upper() != "NONE":
                         match_id = val
@@ -410,16 +503,19 @@ class PipelineOrchestrator:
                     val = line.split(":", 1)[1].strip()
                     unlisted = (val.upper() == "TRUE")
 
+            if not is_jewelry:
+                return None, guess or "non_jewelry_image", frame, False, True
+
             matched_p = self.kb.products_by_id.get(match_id) if match_id else None
             if not matched_p and guess and not unlisted:
                 p, _ = self.matcher.match(guess)
                 if p:
                     matched_p = p
 
-            return matched_p, guess, frame, unlisted
+            return matched_p, guess, frame, unlisted, False
         except Exception as e:
             print(f"Warning: Visual resolution error: {e}")
-            return None, None, None, False
+            return None, None, None, False, False
 
     def _log_event(
         self,
