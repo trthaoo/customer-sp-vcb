@@ -1,0 +1,444 @@
+[
+  {
+    "id": "gold_20261014_121548_b1f6fd",
+    "session_id": "session_ezmjrvp",
+    "created_at": "2026-10-14T12:15:48.509136+00:00",
+    "rating": "pass",
+    "channel": "tiktok",
+    "platform": "tiktok",
+    "surface": "comment",
+    "title": "So beautiful",
+    "notes": "",
+    "tags": [
+      "tiktok",
+      "tiktok",
+      "comment"
+    ],
+    "turn_count": 1,
+    "turns": [
+      {
+        "turnIndex": 1,
+        "timestamp": "7:15:37 PM",
+        "customerMessage": "So beautiful",
+        "attachment": null,
+        "botReply": "Thank you so much, that truly means a lot to us ✨",
+        "channel": "tiktok",
+        "platform": "tiktok",
+        "surface": "comment",
+        "postContext": null,
+        "id": "brand_test_1791980128708",
+        "reply": "Thank you so much, that truly means a lot to us ✨",
+        "decision": "auto_reply",
+        "flag": "auto_reply",
+        "status_badge": "handled",
+        "needs_human": false,
+        "escalate_reason": "Khớp tình huống đặc biệt (Edge Case): tiktok_edge_general_compliment",
+        "matched_product": null,
+        "ambiguous_products": [],
+        "matched_rule": null,
+        "matched_edge_case": "tiktok_edge_general_compliment",
+        "intent": "general_compliment",
+        "knowledge_files": [
+          "shared/brand_voice.md",
+          "tiktok/edge_cases.md"
+        ],
+        "knowledge_facts": {},
+        "retrieved_chunks": [
+          {
+            "file": "tiktok/edge_cases.md",
+            "title": "Edge Case: tiktok_edge_general_compliment",
+            "content": "Trigger: Viewer leaves a warm compliment praising the jewelry video or aesthetics without a purchase inquiry\nDO: Reply with genuine warmth, send friendly wishes, and include a tasteful emoji ✨\nDO NOT: Do not aggressively spam sales links when a viewer is just leaving a kind compliment"
+          },
+          {
+            "file": "shared/brand_voice.md",
+            "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
+            "content": "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market - Huy K Jewelry).\nPersona: Huy K & our craft team. Speak with direct warmth and creator pride.\nSTRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team.\nTarget Audience: United States shoppers (roughly 18–34).\nCRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n2. STRICTLY UNDER 15 WORDS (< 15 words): Brevity is mandatory. Keep it punchy, warm, and natural.\n3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly guide them to check DM/inbox or bio link for pricing and exclusive details.\n4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
+          }
+        ],
+        "missing_fields": [],
+        "example_good_reply": "Thank you so much! Wishing you a peaceful and wonderful day ahead filled with positive energy ✨",
+        "model_called": true,
+        "model_used": "deepseek/deepseek-v4.1-flash",
+        "reply_sent": false,
+        "attached_image_url": null,
+        "attachment_url": null,
+        "attachment_type": null,
+        "attachment_name": null,
+        "attached_frames_count": 0,
+        "caption": null,
+        "frame_count": 0,
+        "frame_timestamps": [],
+        "visual_product_guess": null,
+        "catalogue_id_matched": null,
+        "frame_used": null,
+        "context_missing": true,
+        "vision_unsupported": false,
+        "short_reason": "Edge case tiktok_edge_general_compliment | DO: Reply with genuine warmth, send friendly...",
+        "frames": []
+      }
+    ]
+  },
+  {
+    "id": "gold_20261014_120932_e66389",
+    "session_id": "session_sfarhun",
+    "created_at": "2026-10-14T12:09:32.533033+00:00",
+    "rating": "pass",
+    "channel": "tiktok",
+    "platform": "tiktok",
+    "surface": "comment",
+    "title": "Why is my order taking so long?",
+    "notes": "",
+    "tags": [
+      "tiktok",
+      "tiktok",
+      "comment"
+    ],
+    "turn_count": 1,
+    "turns": [
+      {
+        "turnIndex": 1,
+        "timestamp": "7:08:09 PM",
+        "customerMessage": "Why is my order taking so long?",
+        "attachment": null,
+        "botReply": "Some pieces travel from our craft studio, 2–3 weeks. DM order #, checking now 🤍",
+        "channel": "tiktok",
+        "platform": "tiktok",
+        "surface": "comment",
+        "postContext": null,
+        "id": "brand_test_1791979671007",
+        "reply": "Some pieces travel from our craft studio, 2–3 weeks. DM order #, checking now 🤍",
+        "decision": "auto_reply",
+        "flag": "auto_reply",
+        "status_badge": "handled",
+        "needs_human": false,
+        "escalate_reason": null,
+        "matched_product": null,
+        "ambiguous_products": [],
+        "matched_rule": "tiktok_ask_shipping_any",
+        "matched_edge_case": null,
+        "intent": "ask_shipping",
+        "knowledge_files": [
+          "shared/brand_voice.md",
+          "tiktok/rules.md",
+          "policies/shipping.md"
+        ],
+        "knowledge_facts": {
+          "policies.shipping": "# Shipping Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Shipping Terms\n\n## Purpose\nOfficial policies regarding order fulfillment, delivery timeframes, domestic and international shipping rates, and partner logistics carriers.\n\n## Policy Details\nAt VIENCHIBAO – HuyK Jewelry, we believe that every piece of jewelry carries special value and meaning. Therefore, we place the highest priority on delivering every product to our customers safely, carefully, and in the best possible condition. All products are thoroughly inspected before shipment and properly packaged before being dispatched.\n\n### 1. Shipping Destinations (Khu vực giao hàng)\n- **Domestic United States**: We currently offer shipping within the United States (all 50 states).\n- **Standard US Address Format & 5-digit ZIP Code**:\n  - Correct format: `[Recipient Name] -> [Street Address & Apt/Suite] -> [City] -> [State (2-letter code e.g. CA, NY, TX, FL)] -> [5-digit ZIP Code] -> [Country (United States)]`.\n  - *Notice*: Never prompt US customers for Vietnamese administrative levels (Phường/Xã, Quận/Huyện, Tỉnh). Always accept standard 5-digit US ZIP Codes.\n- **International Shipping (Vận chuyển quốc tế)**:\n  - For international shipping outside the United States, requests are currently handled on a case-by-case basis. Customers must contact us prior to placing an order.\n\n### 2. Shipping Methods & Carriers (Phương thức và Đơn vị vận chuyển)\n- Depending on the order contents and delivery location, products will be shipped through a reputable carrier selected and designated by our store (e.g., USPS Ground Advantage, UPS, or trusted insured partners).\n- We are unable to accommodate customer requests for a specific shipping carrier.\n\n### 3. Shipping Fees (Phí vận chuyển)\n- **Free Domestic Shipping (Miễn phí vận chuyển nội địa Mỹ)**:\n  - Product prices already include domestic shipping within the United States.\n  - In general, customers will not be required to pay any additional shipping fees.\n\n### 4. Order Confirmation & Processing Time (Xác nhận đơn hàng và Thời gian xử lý)\n- **Preparation & Inspection Time**:\n  - After your order is confirmed, we generally review the order details and prepare the package for shipment within **1–3 business days**.\n  - Saturdays, Sundays, public holidays, and the New Year holiday period are not counted as business days.\n  - *Important*: Order processing and preparation time is separate from the actual shipping and delivery transit time.\n\n### 5. Estimated Delivery Time (Thời gian giao hàng dự kiến)\nEstimated delivery times vary depending on the product type and inventory status:\n- **Products in stock at our U.S. warehouse**:\n  - **2–5 business days** after shipment.\n- **Products requiring transportation from an overseas facility or workshop**:\n  - Approximately **2–3 weeks** from order confirmation.\n- **Made-to-order / Custom-made products** (size adjustments, items not currently in stock, or specially manufactured products):\n  - Approximately **3–6 weeks** from order confirmation (approx. 2–4 weeks for handcrafted artisan production + 1–2 weeks for shipping).\n  - *Note*: Because custom-made pieces are individually handcrafted by our studio artisans, delivery times may vary depending on design complexity and order volume (particularly during peak holiday periods).\n  - *Notice*: Delivery may be delayed due to severe weather, customs clearance, carrier overcapacity, or unforeseen logistics circumstances beyond our control.\n\n### 6. Shipment Confirmation & Tracking (Hoàn tất gửi hàng & Kiểm tra vận chuyển)\n- **Shipment Status**:\n  - An order is considered \"shipped\" once the product has been handed over to the shipping carrier and an official tracking number has been issued.\n  - We immediately dispatch a shipping confirmation email containing the tracking number upon completion.\n- **Tracking Inquiries**:\n  - Customers can check delivery status at any time using the tracking number provided in their shipping confirmation email.\n  - Delivery status, transit milestones, delays, and returned packages are determined based on information from the shipping carrier's official tracking system.\n\n### 7. Failed Delivery, Extended Absence & Returned Packages (Giao hàng không hoàn tất / Vắng mặt / Hàng hoàn)\n- A package may be returned to our store by the carrier in the following situations:\n  1. The customer is unavailable to receive the package and the carrier's holding period expires.\n  2. The customer does not respond when contacted by the delivery courier.\n  3. The customer refuses delivery for personal reasons.\n- **Processing Returned Orders**:\n  - For packages returned due to the reasons above, reshipping or refund arrangements will be handled in accordance with our Order Cancellation & Return Policy.\n  - Actual round-trip shipping costs and related operational expenses may be deducted from the eligible refund amount.\n\n### 8. Package Not Received / Lost After Delivery Confirmation (Hàng báo giao thành công nhưng chưa nhận)\n- If the carrier's tracking system records the package status as \"Delivered\", the store's shipping obligation is fulfilled.\n- If a package cannot be located, is lost, or is stolen after being marked as delivered, we will actively cooperate with the shipping carrier and use tracking records to investigate and verify the situation.\n\n### 9. Address Accuracy (Lưu ý khi nhập địa chỉ)\n- When placing an order, customers must provide an accurate and complete shipping address, full recipient name, and phone number.\n- If delivery cannot be completed due to incomplete or inaccurate customer information, the customer is responsible for reshipping costs or any incurred carrier re-routing fees.\n\n### 10. Official Logistics Customer Support (Liên hệ / Hỗ trợ khách hàng)\n- If customers have any questions regarding shipping or delivery status, please contact:\n  - **Official Email**: `order@huykjeweler.com`\n\n## TODO Sections\n<!-- TODO: Carrier real-time tracking lookup API integration -->"
+        },
+        "retrieved_chunks": [
+          {
+            "file": "shared/brand_voice.md",
+            "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
+            "content": "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market - Huy K Jewelry).\nPersona: Huy K & our craft team. Speak with direct warmth and creator pride.\nSTRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team.\nTarget Audience: United States shoppers (roughly 18–34).\nCRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n2. STRICTLY UNDER 15 WORDS (< 15 words): Brevity is mandatory. Keep it punchy, warm, and natural.\n3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly guide them to check DM/inbox or bio link for pricing and exclusive details.\n4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
+          },
+          {
+            "file": "policies/shipping.md",
+            "title": "Chính sách: Shipping",
+            "content": "# Shipping Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Shipping Terms\n\n## Purpose\nOfficial policies regarding order fulfillment, delivery timeframes, domestic and international shipping rates, and partner logistics carriers.\n\n## Policy Details\nAt VIENCHIBAO – HuyK Jewelry, we believe that every piece of jewelry carries special value and meaning. Therefore, we place the highest priority on delivering every product to our customers safely, carefully, and in the best possible condition. All products are thoroughly inspected before shipment and properly packaged before being dispatched.\n"
+          },
+          {
+            "file": "tiktok/rules.md",
+            "title": "Quy tắc phản hồi: tiktok_ask_shipping_any",
+            "content": "Kênh: tiktok | Bề mặt: any\nHướng dẫn trả lời: SURFACE IS PUBLIC COMMENT (< 15 words, strictly 1 line, no price/$): Send 2–3 short bubbles: 1) US shipping is 100% free; 2) 2–5 business days for in-stock US warehouse pieces, ~2–3 weeks if traveling from our artisan craft studio; 3) what state are you shopping from? 🤍. Adapt for comment: reply briefly in 1 line (<15 words) and guide to DM/inbox."
+          }
+        ],
+        "missing_fields": [],
+        "example_good_reply": null,
+        "model_called": true,
+        "model_used": "deepseek/deepseek-v4.1-flash",
+        "reply_sent": false,
+        "attached_image_url": null,
+        "attachment_url": null,
+        "attachment_type": null,
+        "attachment_name": null,
+        "attached_frames_count": 0,
+        "caption": null,
+        "frame_count": 0,
+        "frame_timestamps": [],
+        "visual_product_guess": null,
+        "catalogue_id_matched": null,
+        "frame_used": null,
+        "context_missing": true,
+        "vision_unsupported": false,
+        "short_reason": "Product: None (mẫu này) | Rule: tiktok_ask_shipping_any | Chunks: shared/brand_voice.md, tiktok/rules.md, policies/shipping.md",
+        "frames": []
+      }
+    ]
+  },
+  {
+    "id": "gold_20261014_120430_80abd5",
+    "session_id": "session_g76c50s",
+    "created_at": "2026-10-14T12:04:30.875464+00:00",
+    "rating": "pass",
+    "channel": "meta",
+    "platform": "ig",
+    "surface": "comment",
+    "title": "I want to return this product because it doesn't look good a...",
+    "notes": "",
+    "tags": [
+      "meta",
+      "ig",
+      "comment"
+    ],
+    "turn_count": 1,
+    "turns": [
+      {
+        "turnIndex": 1,
+        "timestamp": "7:03:52 PM",
+        "customerMessage": "I want to return this product because it doesn't look good and doesn't match the video.",
+        "attachment": null,
+        "botReply": "Send us a DM with your order number, we'll sort this out 🤍",
+        "channel": "meta",
+        "platform": "ig",
+        "surface": "comment",
+        "postContext": null,
+        "id": "brand_test_1791979420421",
+        "reply": "Send us a DM with your order number, we'll sort this out 🤍",
+        "decision": "auto_reply",
+        "flag": "auto_reply",
+        "status_badge": "handled",
+        "needs_human": false,
+        "escalate_reason": null,
+        "matched_product": null,
+        "ambiguous_products": [],
+        "matched_rule": "meta_ask_return_warranty_any",
+        "matched_edge_case": null,
+        "intent": "ask_return_warranty",
+        "knowledge_files": [
+          "shared/brand_voice.md",
+          "meta/rules.md",
+          "policies/returns.md",
+          "policies/warranty.md"
+        ],
+        "knowledge_facts": {
+          "policies.returns": "# Cancellation, Return & Refund Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Order Cancellation, Return & Refund Policy\n\n## Purpose\nOfficial studio guidelines governing order cancellations, eligible returns, size exchanges, refunds, and undelivered package processing.\n\n## Policy Details\nAt our store, we put the dedication, craftsmanship, and hard work of our artisans into every piece we create. We take great care to provide you with jewelry of the highest quality. In the rare event that a product arrives with an initial defect or damage caused by our side, we will promptly and sincerely resolve the issue by accepting a return, exchange, or refund in accordance with this policy.\n\n### 1. Order Cancellation (Hủy đơn hàng)\n- **Cancellation Before Shipment (Trước khi gửi hàng)**:\n  - Customers may cancel their order before the product has been shipped.\n  - Even after payment has been completed, if the item has not yet been shipped, we will issue a full 100% refund without deducting any processing fees.\n  - Refunds are processed through the original payment method (Credit card, PayPal, Apple Pay, etc.) and may take 3–10 business days to appear on your bank statement.\n- **Cancellation After Shipment (Sau khi đã gửi hàng)**:\n  - We do **not** accept order cancellations once the order has been shipped or a carrier tracking number has been issued.\n  - Please monitor delivery status using the tracking number provided in your shipping confirmation email.\n\n### 2. Conditions for Returns, Exchanges & Refunds (Điều kiện đổi trả & hoàn tiền)\n- **Eligible Cases - Store Responsibility (Lỗi từ phía cửa hàng)**:\n  - Returns, exchanges, or full refunds are accepted in the following cases:\n    1. The product arrives with an initial defect or damage (scratches, deformation, breakage, missing components, loose stones).\n    2. You receive a product that is different from the item you ordered (wrong item delivered).\n  - **Notification Window**: Customers must contact us **within 7 days of receiving the product**.\n  - **Shipping Costs**: Vien Chi Bao covers **100% of all return shipping and reshipping costs**.\n- **Ineligible Cases - Customer Responsibility (Lý do từ phía khách hàng - KHÔNG chấp nhận)**:\n  - Returns, exchanges, refunds, or cancellations are **strictly NOT accepted** for customer-related reasons, including:\n    1. The product does not meet personal expectations or the customer selected the wrong ring/bracelet size.\n    2. The product has been used, even once.\n    3. You contact us **more than 8 days** after receiving the product.\n    4. The product has been damaged, bent, or broken due to improper use, mishandling, or accidents by the customer.\n\n### 3. Undelivered Orders, Refusal of Delivery & Prolonged Absence (Hàng hoàn do từ chối nhận hoặc vắng mặt)\n- **Failed Delivery Due to Customer Circumstances**:\n  - The following situations are classified as customer-caused delivery failure:\n    1. Customer is absent and the carrier's storage period expires.\n    2. Customer does not respond to delivery carrier contact attempts.\n    3. Customer refuses to accept the package for personal reasons.\n- **Resolution & Fee Deductions**:\n  - Returned packages are inspected at our warehouse before any resolution is applied:\n    - **If customer requests reshipment**: Customer is responsible for the actual shipping fee incurred to resend the package.\n    - **If customer requests order cancellation**: We refund the purchase amount **after deducting the round-trip shipping costs and applicable packaging/handling fees**.\n\n### 4. Refund Method & Processing Time (Phương thức & Thời gian hoàn tiền)\n- Once we receive the returned item and inspect its condition, we process the refund promptly.\n- Refunds are issued back to the original payment method used (Credit Card, PayPal, Apple Pay, etc.).\n- Processing window: typically 3–10 business days depending on the customer's financial institution.\n\n### 5. Official Support Contact (Kênh liên hệ chính thức)\n- For inquiries regarding order cancellation, returns, exchanges, or refunds, customers should contact our support team:\n  - **Official Email**: `order@huykjeweler.com`\n  - Support team assists with RMA verification and prepaid return labels for eligible cases.\n\n## TODO Sections\n<!-- TODO: Implement self-service automated return portal -->",
+          "policies.warranty": "# Warranty & Exchange Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Product Exchange & Warranty Policy\n\n## Purpose\nOfficial studio guidelines governing product exchanges, warranty coverage, repair craftsmanship, silver authenticity guarantees, and jewelry maintenance care.\n\n## Policy Details\nHuyK – VIENCHIBAO sincerely thanks our valued customers for supporting HuyK – VIENCHIBAO handcrafted jewelry. With our reputation, dedication, commitment, and extensive experience in the fine jewelry craft, we provide our customers with the following official Product Exchange and Warranty Policy:\n\n### 1. Product Exchange Policy (Chính sách đổi hàng)\n- **Exchange Window & Defect Terms**:\n  - Customers may exchange a product **within 8 days** from the date of receipt if the product has an initial defect, such as deformation, scratches, damage, breakage, or manufacturing flaws.\n  - Each product may be exchanged **only once**.\n- **Exchange Value & Difference**:\n  - Customers may exchange the item for a product of equal or higher value.\n  - If the replacement item is of higher value, the customer is responsible for paying the price difference.\n  - Any applicable shipping costs for customer preference exchange will be borne by the customer.\n- **Exchange Conditions**:\n  - The product must be returned in its original condition, without dents or deformation, and must remain usable.\n  - Customers must provide the purchase invoice, original packaging, and any accompanying gifts (if applicable).\n  - **NON-EXCHANGEABLE ITEMS**: Product exchanges **STRICTLY DO NOT APPLY** to:\n    1. Products that have been custom engraved.\n    2. Products modified or resized according to specific customer requests.\n    3. Specially made-to-order items.\n  - *Inspection*: VIENCHIBAO staff inspects the product to determine whether the defect was caused by the manufacturer workshop or by customer handling before accepting the exchange request.\n\n### 2. Product Warranty Policy (Chính sách bảo hành sản phẩm)\n- **Warranty Coverage**:\n  - **Free 1-to-1 Replacement**: We provide a complimentary replacement if, upon receiving the package, the customer discovers defects such as damage, dents, scratches, breakage, or other issues caused by the manufacturing workshop.\n  - **Repair Services**: VIENCHIBAO accepts warranty and repair requests for all authentic VIENCHIBAO products that have suffered wear or damage. Depending on the condition of the piece, repair craftsmanship includes:\n    * Soldering broken joints and chain links\n    * Stone re-setting or missing stone replacement\n    * Clasp repair and clasp replacement\n    * Re-shaping, re-polishing, and surface refinishing\n    * *Notice*: An applicable warranty or repair fee is determined based on the extent of damage and required materials.\n- **Warranty Conditions**:\n  - Proof of Purchase: Customers must prove that the product was purchased through the VIENCHIBAO system (by providing the registered phone number in our system or a valid purchase invoice).\n  - Exclusions: If a piece has been severely damaged due to improper customer wear, severe impact, chemical exposure, or improper storage, VIENCHIBAO reserves the right to refuse warranty service.\n\n### 3. Silver Authenticity & Studio Purity Guarantee (Cam kết chất lượng bạc S925)\n- **Solid S925 Sterling Silver Guarantee**:\n  - All jewelry is handcrafted from authentic solid S925 Sterling Silver (92.5% pure silver), electroplated with multi-layer platinum/rhodium for superior tarnish resistance and radiant luster.\n  - 100% hypoallergenic, nickel-free, and lead-free—completely safe for sensitive skin. Every genuine piece features the official studio \"S925\" hallmark stamp.\n- **10x Money-Back Guarantee (Cam kết đền bù gấp 10 lần)**:\n  - If any product purchased from Vien Chi Bao is verified by an accredited laboratory to be counterfeit or substandard silver, we unconditionally refund **10 times the full purchase value**.\n- **Quick DIY Silver Authenticity Tests at Home (Mẹo phân biệt bạc thật tại nhà)**:\n  1. *Hallmark Inspection*: Look for the sharp, laser-engraved \"S925\" hallmark on the inner band, clasp, or pendant bale.\n  2. *Magnet Test*: Authentic sterling silver is diamagnetic and will **never attract a magnet**. If it sticks, it contains iron or nickel alloys.\n  3. *Ice Thermal Test*: Silver has the highest thermal conductivity of any precious metal. An ice cube placed directly on silver melts noticeably faster than at room temperature.\n  4. *Density & Acoustic Chime*: Real silver has a substantial hand feel and emits a clear, high-pitched ringing chime when lightly tapped, rather than a dull thud.\n- **Complimentary Care Kit**:\n  - Every order includes an artisan presentation gift box and a reusable microfiber silver polishing cloth with lifetime care guidance.\n\n### 4. Official Customer Support Contact (Hỗ trợ khách hàng)\n- For warranty inquiries, repair requests, or exchange assistance, please contact:\n  - **Official Email**: `order@huykjeweler.com`\n\n## TODO Sections\n<!-- TODO: Online warranty registration & RMA ticket tracking portal -->"
+        },
+        "retrieved_chunks": [
+          {
+            "file": "shared/brand_voice.md",
+            "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
+            "content": "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market - Huy K Jewelry).\nPersona: Huy K & our craft team. Speak with direct warmth and creator pride.\nSTRICTLY BANNED TERMS: 'Master Jeweler', 'workshop', 'atelier', 'specialist', 'human concierge', 'chuyên gia'. NEVER refer to Huy K in the 3rd person. Speak directly as Huy K or our craft team.\nTarget Audience: United States shoppers (roughly 18–34).\nCRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n2. STRICTLY UNDER 15 WORDS (< 15 words): Brevity is mandatory. Keep it punchy, warm, and natural.\n3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly guide them to check DM/inbox or bio link for pricing and exclusive details.\n4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
+          },
+          {
+            "file": "policies/returns.md",
+            "title": "Chính sách: Returns",
+            "content": "# Cancellation, Return & Refund Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Order Cancellation, Return & Refund Policy\n\n## Purpose\nOfficial studio guidelines governing order cancellations, eligible returns, size exchanges, refunds, and undelivered package processing.\n\n## Policy Details\nAt our store, we put the dedication, craftsmanship, and hard work of our artisans into every piece we create. We take great care to provide you with jewelry of the highest quality. In the rare event that a product arrives with an initial defect or damage caused by our side, we will promptly and sincere"
+          },
+          {
+            "file": "policies/warranty.md",
+            "title": "Chính sách: Warranty",
+            "content": "# Warranty & Exchange Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Product Exchange & Warranty Policy\n\n## Purpose\nOfficial studio guidelines governing product exchanges, warranty coverage, repair craftsmanship, silver authenticity guarantees, and jewelry maintenance care.\n\n## Policy Details\nHuyK – VIENCHIBAO sincerely thanks our valued customers for supporting HuyK – VIENCHIBAO handcrafted jewelry. With our reputation, dedication, commitment, and extensive experience in the fine jewelry craft, we provide our customers with the following official Product Exchange and Warranty Policy:\n\n"
+          },
+          {
+            "file": "meta/rules.md",
+            "title": "Quy tắc phản hồi: meta_ask_return_warranty_any",
+            "content": "Kênh: meta | Bề mặt: any\nHướng dẫn trả lời: SURFACE IS PUBLIC COMMENT (< 15 words, strictly 1 line, no price/$): Send 2–3 short bubbles: 1) free return/exchange within 8 days of receipt for initial crafting defects; 2) free 1-to-1 replacement for craft flaws and cancellations allowed before shipment; 3) feel free to DM us or reach order@huykjeweler.com anytime 🤍. Adapt for comment: reply briefly in 1 line (<15 words) and guide to DM/inbox."
+          }
+        ],
+        "missing_fields": [],
+        "example_good_reply": null,
+        "model_called": true,
+        "model_used": "deepseek/deepseek-v4.1-flash",
+        "reply_sent": false,
+        "attached_image_url": null,
+        "attachment_url": null,
+        "attachment_type": null,
+        "attachment_name": null,
+        "attached_frames_count": 0,
+        "caption": null,
+        "frame_count": 0,
+        "frame_timestamps": [],
+        "visual_product_guess": null,
+        "catalogue_id_matched": null,
+        "frame_used": null,
+        "context_missing": true,
+        "vision_unsupported": false,
+        "short_reason": "Product: None (mẫu này) | Rule: meta_ask_return_warranty_any | Chunks: shared/brand_voice.md, meta/rules.md, policies/returns.md, policies/warranty.md",
+        "frames": []
+      }
+    ]
+  },
+  {
+    "id": "gold_20261012_115710_e7b7ea",
+    "session_id": "session_60wplb4",
+    "created_at": "2026-10-12T11:57:10.501824+00:00",
+    "rating": "pass",
+    "channel": "tiktok",
+    "platform": "tiktok",
+    "surface": "comment",
+    "title": "give me the website",
+    "notes": "",
+    "tags": [
+      "tiktok",
+      "tiktok",
+      "comment"
+    ],
+    "turn_count": 1,
+    "turns": [
+      {
+        "turnIndex": 1,
+        "timestamp": "6:43:38 PM",
+        "customerMessage": "give me the website",
+        "attachment": null,
+        "botReply": "Our bio link has it all, or just DM us and we'll point you there 🤍",
+        "channel": "tiktok",
+        "platform": "tiktok",
+        "surface": "comment",
+        "postContext": null,
+        "id": "brand_test_1791805406531",
+        "reply": "Our bio link has it all, or just DM us and we'll point you there 🤍",
+        "decision": "auto_reply",
+        "flag": "auto_reply",
+        "status_badge": "handled",
+        "needs_human": false,
+        "escalate_reason": null,
+        "matched_product": null,
+        "ambiguous_products": [],
+        "matched_rule": null,
+        "matched_edge_case": null,
+        "intent": "other",
+        "knowledge_files": [
+          "shared/brand_voice.md",
+          "tiktok/rules.md",
+          "policies/shipping.md",
+          "policies/payment.md"
+        ],
+        "knowledge_facts": {},
+        "retrieved_chunks": [
+          {
+            "file": "shared/brand_voice.md",
+            "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
+            "content": "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market Concierge - HuyK Jewelry).\nPersona: The Mindful Studio Host, speaking with warmth and quiet pride from Master Jeweler Huy K's workshop.\nTarget Audience: United States shoppers (roughly 18–34).\nCRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n2. STRICTLY UNDER 15 WORDS (< 15 words): Brevity is mandatory. Keep it punchy, warm, and natural.\n3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly guide them to check DM/inbox or bio link for pricing and exclusive details.\n4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
+          },
+          {
+            "file": "policies/shipping.md",
+            "title": "Chính sách: Shipping",
+            "content": "# Shipping Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Shipping Terms\n\n## Purpose\nOfficial policies regarding order fulfillment, delivery timeframes, domestic and international shipping rates, and partner logistics carriers.\n\n## Policy Details\nAt VIENCHIBAO – HuyK Jewelry, we believe that every piece of jewelry carries special value and meaning. Therefore, we place the highest priority on delivering every product to our customers safely, carefully, and in the best possible condition. All products are thoroughly inspected before shipment and properly packaged before being dispatched.\n"
+          },
+          {
+            "file": "policies/payment.md",
+            "title": "Chính sách: Payment",
+            "content": "# Payment Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Payment & Handover Policy\n\n## Purpose\nGuidelines governing checkout payment methods, accepted digital payment gateways, and handover protocols for unsupported payment inquiries.\n\n## Policy Details\n- **Sole Supported Payment Gateway (Phương thức thanh toán được hỗ trợ duy nhất hiện tại)**:\n  - **PayPal**: Currently, VIENCHIBAO accepts payments exclusively via **PayPal** (featuring full PayPal Buyer Protection for secure and reliable international transactions).\n  - Customers can pay securely using their PayPal balance, linked bank "
+          },
+          {
+            "file": "tiktok/rules.md",
+            "title": "Quy tắc phản hồi: tiktok_semantic_concierge",
+            "content": "Kênh: tiktok | Bề mặt: comment\nHướng dẫn trả lời: Respond warmly in Brand Voice as the mindful studio host from Master Jeweler Huy K's atelier. Use only confirmed knowledge and verified catalogue specs. Never invent unconfirmed discounts. Answer the customer naturally and ask at most ONE gentle clarifying question."
+          }
+        ],
+        "missing_fields": [],
+        "example_good_reply": null,
+        "model_called": true,
+        "model_used": "deepseek/deepseek-v4.1-flash",
+        "reply_sent": false,
+        "attached_image_url": null,
+        "attachment_url": null,
+        "attachment_type": null,
+        "attachment_name": null,
+        "attached_frames_count": 0,
+        "caption": null,
+        "frame_count": 0,
+        "frame_timestamps": [],
+        "visual_product_guess": null,
+        "catalogue_id_matched": null,
+        "frame_used": null,
+        "context_missing": true,
+        "vision_unsupported": false,
+        "short_reason": "product=None, frame=N/A, chunks=catalogue/tiktok_semantic_concierge",
+        "frames": []
+      }
+    ]
+  },
+  {
+    "id": "gold_20261012_112316_c6e01d",
+    "session_id": "session_9317g97",
+    "created_at": "2026-10-12T11:23:16.780504+00:00",
+    "rating": "pass",
+    "channel": "meta",
+    "platform": "ig",
+    "surface": "comment",
+    "title": "Good job",
+    "notes": "",
+    "tags": [
+      "meta",
+      "ig",
+      "comment"
+    ],
+    "turn_count": 1,
+    "turns": [
+      {
+        "turnIndex": 1,
+        "timestamp": "6:21:07 PM",
+        "customerMessage": "Good job",
+        "attachment": null,
+        "botReply": "Thank you so much, that means a lot to our little studio ✨",
+        "channel": "meta",
+        "platform": "ig",
+        "surface": "comment",
+        "postContext": null,
+        "id": "brand_test_1791804057003",
+        "reply": "Thank you so much, that means a lot to our little studio ✨",
+        "decision": "auto_reply",
+        "flag": "auto_reply",
+        "status_badge": "handled",
+        "needs_human": false,
+        "escalate_reason": null,
+        "matched_product": null,
+        "ambiguous_products": [],
+        "matched_rule": null,
+        "matched_edge_case": null,
+        "intent": "general_compliment",
+        "knowledge_files": [
+          "shared/brand_voice.md",
+          "meta/rules.md",
+          "policies/shipping.md",
+          "policies/payment.md"
+        ],
+        "knowledge_facts": {},
+        "retrieved_chunks": [
+          {
+            "file": "shared/brand_voice.md",
+            "title": "Brand Voice & Persona (Huy K - Viễn Chí Bảo)",
+            "content": "Brand: Vien Chi Bao Fine Jewelry & Artistry (US Market Concierge - HuyK Jewelry).\nPersona: The Mindful Studio Host, speaking with warmth and quiet pride from Master Jeweler Huy K's workshop.\nTarget Audience: United States shoppers (roughly 18–34).\nCRITICAL PUBLIC COMMENT REPLY RULES (QUY TẮC 1 - NON-NEGOTIABLE):\n1. SINGLE COMMENT ONLY (NO MULTI-BUBBLE): Output EXACTLY ONE single short comment on 1 line. NEVER use double newlines '\\n\\n'. NEVER split into multiple bubbles or paragraphs.\n2. STRICTLY UNDER 15 WORDS (< 15 words): Brevity is mandatory. Keep it punchy, warm, and natural.\n3. BẢO MẬT GIÁ CẢ (PRICE CONFIDENTIALITY): Strictly NEVER reveal any price, dollar amount, or '$' symbol in public comments. Always warmly guide them to check DM/inbox or bio link for pricing and exclusive details.\n4. BANNED EM-DASH: Strictly NEVER use the em-dash '—'. Use commas, periods, or natural flow.\n5. EMOJI: At most 1 emoji at the end (✨ or 🤍). No stacks."
+          },
+          {
+            "file": "policies/shipping.md",
+            "title": "Chính sách: Shipping",
+            "content": "# Shipping Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Shipping Terms\n\n## Purpose\nOfficial policies regarding order fulfillment, delivery timeframes, domestic and international shipping rates, and partner logistics carriers.\n\n## Policy Details\nAt VIENCHIBAO – HuyK Jewelry, we believe that every piece of jewelry carries special value and meaning. Therefore, we place the highest priority on delivering every product to our customers safely, carefully, and in the best possible condition. All products are thoroughly inspected before shipment and properly packaged before being dispatched.\n"
+          },
+          {
+            "file": "policies/payment.md",
+            "title": "Chính sách: Payment",
+            "content": "# Payment Policy (US Market)\nVIENCHIBAO – Official HuyK Jewelry Payment & Handover Policy\n\n## Purpose\nGuidelines governing checkout payment methods, accepted digital payment gateways, and handover protocols for unsupported payment inquiries.\n\n## Policy Details\n- **Sole Supported Payment Gateway (Phương thức thanh toán được hỗ trợ duy nhất hiện tại)**:\n  - **PayPal**: Currently, VIENCHIBAO accepts payments exclusively via **PayPal** (featuring full PayPal Buyer Protection for secure and reliable international transactions).\n  - Customers can pay securely using their PayPal balance, linked bank "
+          },
+          {
+            "file": "meta/rules.md",
+            "title": "Quy tắc phản hồi: meta_semantic_concierge",
+            "content": "Kênh: meta | Bề mặt: comment\nHướng dẫn trả lời: Respond warmly in Brand Voice as the mindful studio host from Master Jeweler Huy K's atelier. Use only confirmed knowledge and verified catalogue specs. Never invent unconfirmed discounts. Answer the customer naturally and ask at most ONE gentle clarifying question."
+          }
+        ],
+        "missing_fields": [],
+        "example_good_reply": null,
+        "model_called": true,
+        "model_used": "deepseek/deepseek-v4.1-flash",
+        "reply_sent": false,
+        "attached_image_url": null,
+        "attachment_url": null,
+        "attachment_type": null,
+        "attachment_name": null,
+        "attached_frames_count": 0,
+        "caption": null,
+        "frame_count": 0,
+        "frame_timestamps": [],
+        "visual_product_guess": null,
+        "catalogue_id_matched": null,
+        "frame_used": null,
+        "context_missing": true,
+        "vision_unsupported": false,
+        "short_reason": "product=None, frame=N/A, chunks=catalogue/meta_semantic_concierge",
+        "frames": []
+      }
+    ]
+  }
+]

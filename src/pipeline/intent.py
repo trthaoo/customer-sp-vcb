@@ -99,10 +99,10 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
         ]
     },
     "ask_legitimacy": {
-        "description": "Customer asks if the brand/store is legitimate, where the business is located, or asks for reassurance against online scams.",
+        "description": "Customer asks if the brand/store is legitimate, or asks for reassurance against online scams or copycat websites.",
         "examples": [
-            "legit", "is this legit", "scam store", "where are you located", "business location", "trustpilot", "buyer protection",
-            "uy tín không", "có lừa đảo không", "shop ở đâu", "cửa hàng ở đâu"
+            "legit", "is this legit", "scam store", "trustpilot", "buyer protection", "real or scam", "copycat", "imposter site",
+            "uy tín không", "có lừa đảo không", "thật hay lừa đảo"
         ]
     },
     "ask_return_warranty": {
@@ -113,10 +113,25 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
         ]
     },
     "ask_store_location": {
-        "description": "Customer asks for physical workshop address, showroom, or visiting the atelier in person.",
+        "description": "Customer asks for physical store address, showroom, workshop location, or visiting in person.",
         "examples": [
-            "address", "store location", "where is the studio", "showroom", "visit in person", "where is your jewelry made", "store address",
-            "địa chỉ", "cửa hàng ở đâu", "qua xem trực tiếp", "shop ở đâu", "xưởng ở đâu"
+            "physical store", "have a store", "where are you located", "where is your store", "where are you based", "store location", "address", "where is the studio", "showroom", "visit in person", "where is your jewelry made", "store address",
+            "địa chỉ", "cửa hàng ở đâu", "qua xem trực tiếp", "shop ở đâu", "xưởng ở đâu", "có cửa hàng không", "tiệm ở đâu"
+        ]
+    },
+    "ask_gift_promotions": {
+        "description": "Customer asks about free gifts, promotional freebies, complimentary jewelry boxes, or buy 1 get 1 offers.",
+        "examples": [
+            "free gift", "gift included", "do i get a gift", "freebies", "free box", "free pendant", "promotion", "promo gift", "bogo",
+            "có quà không", "tặng quà", "quà tặng", "tặng kèm", "freeship và quà", "có khuyến mãi quà không"
+        ]
+    },
+    "ask_price_comparison": {
+        "description": "Customer compares price with cheaper mass-market or marketplace alternatives (Shopee, Amazon, Temu) or questions why the price is higher.",
+        "examples": [
+            "why so expensive", "cheaper on amazon", "cheaper on shopee", "temu is cheaper", "price difference", "why does it cost so much",
+            "half the price", "cheaper online", "other stores sell this for less", "why should i buy yours", "why should i buy", "identical online", "identical to one",
+            "sao đắt thế", "shopee rẻ hơn", "bên khác bán rẻ hơn", "sao giá cao thế", "sao mắc vậy", "đắt hơn chỗ khác", "rẻ hơn một nửa"
         ]
     },
     "request_custom": {
@@ -264,9 +279,10 @@ class IntentClassifier:
 
         # Priority 2: Product & service inquiries
         priority_order = [
-            "ask_silver_quality", "request_custom", "ask_bulk_discount", "ask_legitimacy",
+            "ask_silver_quality", "request_custom", "ask_bulk_discount", "ask_store_location",
+            "ask_gift_promotions", "ask_price_comparison", "ask_legitimacy",
             "ask_size", "ask_order", "ask_payment", "ask_price", "ask_material", "ask_stock", 
-            "ask_shipping", "ask_return_warranty", "ask_store_location", 
+            "ask_shipping", "ask_return_warranty", 
             "general_compliment"
         ]
 

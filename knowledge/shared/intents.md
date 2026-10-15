@@ -17,6 +17,8 @@ Standard list of customer intent classifications recognized by the inbound socia
 - ask_legitimacy: Customer asks if the brand/store is legit, asks where the business is located, or seeks anti-scam reassurance.
 - ask_return_warranty: Customer asks about return window, size exchange, repair service, or warranty policy.
 - ask_store_location: Customer asks about the studio atelier address, workshop visit, or showroom location.
+- ask_gift_promotions: Customer asks about free gifts, promotional freebies, complimentary jewelry boxes, or buy 1 get 1 offers.
+- ask_price_comparison: Customer compares price with cheaper mass-market or marketplace alternatives (Shopee, Amazon, Temu) or questions why the price is higher.
 - general_compliment: Customer compliments the design, leaves warm feedback, or shares friendly social greetings.
 - request_custom: Customer asks about bespoke crafting, custom sizing, engraving, or personalized requests.
 - demand_human: Customer asks to speak with a human team member or probes about AI / bot automation.

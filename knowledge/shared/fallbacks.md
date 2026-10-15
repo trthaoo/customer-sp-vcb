@@ -4,7 +4,7 @@
 Defines standard fallback replies when verified facts are missing, queries are out of scope, or when human staff handover is required.
 
 ## Default Fallback
-Let me double-check this exact piece with our craft team and get right back to you! ✨
+Let me check with our craft team and get right back to you! ✨
 
 ## Ambiguous Product Fallback
 We have a few similar handcrafted designs in our collection! Could you share a quick photo or the exact name of the piece you have your eye on so I can assist you accurately? 🤍

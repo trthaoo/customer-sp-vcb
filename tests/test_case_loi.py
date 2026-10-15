@@ -417,6 +417,128 @@ def test_sanitize_handover_tokens_and_brackets():
     cleaned_bracket = sanitize_model_output(stray_bracket)
     assert "]" not in cleaned_bracket
 
+# 25. Ops Feedback: Khách góp ý phát âm tiếng Anh -> Khớp pronunciation_feedback edge case
+def test_pronunciation_feedback_edge_case(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_pronunciation",
+        platform="ig",
+        channel="meta",
+        surface="comment",
+        text="You’re mispronouncing the words, so I can’t understand what you’re saying.",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_edge_case == "meta_edge_pronunciation_feedback"
+    assert result.decision == "auto_reply"
+    # Public comment under 15 words
+    words = result.draft_reply.split()
+    assert len(words) <= 15
+
+# 26. Ops Feedback: Khách tố cáo AI junk / bot -> Khớp ai_bot_question edge case
+def test_ai_generated_junk_edge_case(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_ai_junk",
+        platform="ig",
+        channel="meta",
+        surface="comment",
+        text="AI-generated junk.",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_edge_case == "meta_edge_ai_bot_question"
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) <= 15
+
+# 27. Ops Feedback: Khách tố cáo lừa đảo (scammer) -> Phủ định lừa đảo & cảnh báo web giả mạo
+def test_tiktok_scammer_denial_and_warning(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_scammer",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        text="You're scammer",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_edge_case == "tiktok_edge_scam_allegation"
+    assert result.decision == "escalate"
+
+# 28. Ops Feedback: Khách hỏi cửa hàng vật lý tại Mỹ vs VN -> Khớp ask_store_location, không nhầm sang scam
+def test_physical_store_inquiry_not_scam(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_store_loc",
+        platform="ig",
+        channel="meta",
+        surface="comment",
+        text="Do you have a physical store?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_rule == "meta_ask_store_location_any"
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) <= 15
+
+# 29. Ops Feedback: Khách hỏi quà tặng kèm -> Khớp ask_gift_promotions rule
+def test_free_gifts_promotion_inquiry(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_gift",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        text="Are there any free gifts included with the purchase?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_rule == "tiktok_ask_gift_promotions_any"
+    assert result.decision == "auto_reply"
+
+# 30. Ops Feedback: Khách so sánh giá với nơi khác rẻ hơn nửa -> Khớp ask_price_comparison rule
+def test_price_comparison_inquiry(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_price_comp",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        text="Your ring looks almost identical to one I found online for half the price. Why should I buy yours?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_rule == "tiktok_ask_price_comparison_any"
+    assert result.decision == "auto_reply"
+
+# 31. Ops Feedback: Khách phàn nàn chưa được trả lời tin nhắn -> Khớp unanswered_dm_complaint
+def test_unanswered_dm_complaint(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_unanswered_dm",
+        platform="ig",
+        channel="meta",
+        surface="comment",
+        text="Why aren’t you replying to my messages? Are you still selling this product or not?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_edge_case == "meta_edge_unanswered_dm_complaint"
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) <= 15
+
+# 32. Ops Feedback: Khách khiếu nại bạc bị đen sau 1 tuần -> Khớp silver_tarnish_complaint
+def test_silver_tarnish_complaint_edge_case(orchestrator):
+    inbound = InboundMessage(
+        id="case_ops_tarnish_complaint",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        text="I’ve only been wearing it for a week, and the silver has already turned black. You sold me a fake product!",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.matched_edge_case == "tiktok_edge_silver_tarnish_complaint"
+    assert result.decision == "auto_reply"
+
+
 
 
 

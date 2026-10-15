@@ -7,8 +7,9 @@ Official policies regarding order fulfillment, delivery timeframes, domestic and
 ## Policy Details
 At VIENCHIBAO – HuyK Jewelry, we believe that every piece of jewelry carries special value and meaning. Therefore, we place the highest priority on delivering every product to our customers safely, carefully, and in the best possible condition. All products are thoroughly inspected before shipment and properly packaged before being dispatched.
 
-### 1. Shipping Destinations (Khu vực giao hàng)
+### 1. Shipping Destinations & Operations (Khu vực giao hàng & Vận hành)
 - **Domestic United States**: We currently offer shipping within the United States (all 50 states).
+- **100% Online Operations in the U.S.**: In the United States, we operate 100% online with no physical storefront. Domestic orders ship directly to your door with complimentary insured delivery via USPS/UPS. In Vietnam, we operate our physical boutique showrooms and artisan crafting studio.
 - **Standard US Address Format & 5-digit ZIP Code**:
   - Correct format: `[Recipient Name] -> [Street Address & Apt/Suite] -> [City] -> [State (2-letter code e.g. CA, NY, TX, FL)] -> [5-digit ZIP Code] -> [Country (United States)]`.
   - *Notice*: Never prompt US customers for Vietnamese administrative levels (Phường/Xã, Quận/Huyện, Tỉnh). Always accept standard 5-digit US ZIP Codes.

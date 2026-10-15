@@ -13,9 +13,10 @@ __pycache__/
 .vscode/
 .idea/
 
-# Runtime data: chat sessions, ratings (golden/failed cases), chat log backups
-# and the RAG vector store. Lives only on the host so deploys never overwrite it.
-data/
+# Runtime data: chat sessions, chat log backups and the RAG vector store.
+data/*
+!data/golden_examples.json
+!data/failed_cases.json
 *.db
 *.sqlite
 *.sqlite3

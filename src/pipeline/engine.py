@@ -49,13 +49,47 @@ class FunnelEngine:
                 if "stuck_shipment" in ec.id:
                     return ec, None
 
-        # Fast intent-based edge case mapping
+        # Fast check for specific edge cases before generic intent buckets
+        if any(kw in text_lower for kw in ["tracking not updating", "shipment is stuck", "tracking stuck", "kẹt hàng", "mã tracking không chạy"]):
+            for ec in edge_cases:
+                if "stuck_shipment" in ec.id:
+                    return ec, None
+
+        if any(k in text_lower for k in ["pronunciation", "pronounce", "mispronouncing", "saying it wrong", "accent", "phát âm", "nói tiếng anh"]):
+            for ec in edge_cases:
+                if "pronunciation" in ec.id:
+                    return ec, None
+
+        if any(k in text_lower for k in ["haven't replied", "not replying", "replying to my messages", "no one answered", "check dm", "check your dm", "check inbox", "chưa trả lời dm", "inbox không rep", "check mess", "mess không trả lời"]):
+            for ec in edge_cases:
+                if "unanswered_dm" in ec.id:
+                    return ec, None
+
+        if any(k in text_lower for k in ["turned black", "tarnished after", "bị đen", "bị xỉn màu", "đeo bị đen", "turned my skin green", "làm xanh da"]):
+            for ec in edge_cases:
+                if "silver_tarnish" in ec.id:
+                    return ec, None
+
+        if any(k in text_lower for k in ["why do you keep showing", "stop showing", "video looks", "bớt đăng", "sao cứ đăng"]):
+            for ec in edge_cases:
+                if "video_content" in ec.id:
+                    return ec, None
+
+        if any(k in text_lower for k in ["ai-generated", "ai generated", "junk", "are you a bot", "is this ai", "are you ai", "robot"]):
+            for ec in edge_cases:
+                if "ai_bot" in ec.id:
+                    return ec, None
+
+        if any(k in text_lower for k in ["is this legit", "are you a scam", "is it a scam", "scam website", "fake website", "uy tín không", "có lừa đảo không", "legit", "imposter site", "copycat"]):
+            for ec in edge_cases:
+                if "scam_legitimacy" in ec.id:
+                    return ec, None
+
+        # General intent-based edge case mapping
         for ec in edge_cases:
-            if "scam_legitimacy" in ec.id and any(k in text_lower for k in ["is this legit", "are you a scam", "is it a scam", "scam website", "where are you located", "real store", "fake website", "uy tín không", "có lừa đảo không", "shop ở đâu", "legit"]):
-                return ec, None
             if ec.id in ("meta_edge_angry_complaint", "tiktok_edge_scam_allegation") and intent == "complaint_angry":
                 return ec, None
-            if ec.id == "meta_edge_ai_bot_question" and intent == "demand_human":
+            if "ai_bot" in ec.id and intent == "demand_human":
                 return ec, None
             if "bulk" in ec.id and intent == "ask_bulk_discount":
                 return ec, None
@@ -69,7 +103,7 @@ class FunnelEngine:
             ai_ec_id = self._infer_edge_case_semantic(inbound.text, edge_cases)
             # If normal silver quality consultation without scam accusation, let standard rule handle with warranty facts
             if intent in ("ask_silver_quality", "ask_material") and ai_ec_id and "scam" in ai_ec_id:
-                if not any(k in text_lower for k in ["scam", "lừa đảo", "fake website", "is this legit", "where are you located", "shop ở đâu"]):
+                if not any(k in text_lower for k in ["scam", "lừa đảo", "fake website", "is this legit"]):
                     ai_ec_id = None
             if ai_ec_id:
                 for ec in edge_cases:

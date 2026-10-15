@@ -47,7 +47,7 @@ class KnowledgeBase:
         self.brand_overview: str = ""
         self.escalation_guide: str = ""
         self.fallbacks: Dict[str, str] = {}
-        self.default_fallback: str = "Let me double-check this exact piece with our craft team and get right back to you! ✨"
+        self.default_fallback: str = "Let me check with our craft team and get right back to you! ✨"
         self.intents: List[str] = []
         self.meta_rules: List[Rule] = []
         self.meta_edge_cases: List[EdgeCase] = []

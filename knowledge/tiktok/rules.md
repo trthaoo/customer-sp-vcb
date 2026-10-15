@@ -95,11 +95,11 @@ Defines automated response rules specifically for the TikTok funnel. These rules
   surface: any
   when:
     intent: ask_return_warranty
-    contains_any: ["return", "exchange", "warranty", "refund", "đổi trả", "bảo hành", "hoàn tiền", "đổi size", "làm sáng"]
+    contains_any: ["return", "exchange", "warranty", "refund", "đổi trả", "bảo hành", "hoàn tiền", "đổi size", "làm sáng", "stone fell out", "stone has fallen out"]
     product_required: false
   use_knowledge: ["policies.returns", "policies.warranty"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) free return/exchange within 8 days of receipt for initial crafting defects; 2) free replacement for crafting flaws, cancellations allowed before shipment; 3) drop us a DM or reach order@huykjeweler.com anytime 🤍"
+  reply_guide: "Send 2–3 short bubbles: 1) so sorry for any frustrating experience or issue with your jewelry; 2) please send us a quick photo of the piece along with your order number so my craft team can inspect the condition right away; 3) for crafting or manufacturing flaws within warranty, we cover 100% free repair or 1-to-1 replacement! 🤍 (Nếu là comment: QUY TẮC 1 < 15 từ: 'So sorry! Please DM your order # and photos so we can help 🤍')"
 
 - id: tiktok_ask_silver_quality_any
   channel: tiktok
@@ -121,29 +121,29 @@ Defines automated response rules specifically for the TikTok funnel. These rules
     product_required: false
   use_knowledge: ["policies.warranty"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) solid S925 sterling silver finished with multi-layer platinum plating to resist tarnishing and stay skin-safe; 2) silver naturally interacts with body chemistry and sulfur (absorbing negative elements), but our platinum finish protects it for long-lasting daily wear; 3) includes lifetime polishing cloth and 1-to-1 replacement warranty! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Solid S925 with platinum plating keeps it radiant! DM for care tips ✨')"
+  reply_guide: "Send 2–3 short bubbles: 1) solid S925 sterling silver is hypoallergenic and completely skin-safe (will not turn your skin green); 2) silver naturally reacts with body chemistry (like salty sweat) and air sulfur over time, which causes natural surface oxidation; 3) keep it dry, wipe gently with a soft cloth, and store sealed when not wearing! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Solid S925 is skin-safe! Wipe dry and store sealed to maintain shine ✨')"
 
 - id: tiktok_ask_custom_design_any
   channel: tiktok
   surface: any
   when:
     intent: request_custom
-    contains_any: ["custom", "custom design", "chế tác", "làm theo mẫu", "đặt làm", "mẫu riêng", "custom jewelry", "make something similar", "theo yêu cầu", "thiết kế riêng"]
+    contains_any: ["custom", "custom design", "chế tác", "làm theo mẫu", "đặt làm", "mẫu riêng", "custom jewelry", "make something similar", "theo yêu cầu", "thiết kế riêng", "engrave", "engraving", "khắc tên"]
     product_required: false
   use_knowledge: ["catalogue.material"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) my craft team definitely takes custom orders; 2) we primarily craft in solid S925 silver and also custom-craft in 14K/18K solid yellow or white gold; 3) send over a photo or sketch of your idea and let's bring it to life! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We do custom silver & gold! DM us your design or photo ✨')"
+  reply_guide: "Send 2–3 short bubbles: 1) my craft team does custom crafting and engraving depending on the piece (plain bands/surfaces can be engraved, whereas delicate pave stones cannot); 2) which design or idea do you have in mind—plain band or stone-set, in silver or 14K/18K gold? 3) what is your approximate budget so we can give exact options? ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We do custom silver & gold! DM us your design or photo ✨')"
 
 - id: tiktok_ask_size_general_any
   channel: tiktok
   surface: any
   when:
     intent: ask_size
-    contains_any: ["size", "sizing", "measurement", "dimensions", "kích thước", "đo size", "vừa không", "chiều dài", "đường kính", "cỡ tay", "size tay"]
+    contains_any: ["size", "sizing", "measurement", "dimensions", "kích thước", "đo size", "vừa không", "chiều dài", "đường kính", "cỡ tay", "size tay", "measure my ring size"]
     product_required: false
   use_knowledge: ["catalogue.size_guide", "catalogue.variants"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) we craft standard US ring sizes from 4 to 12 directly for most pieces; 2) what size are you looking for, or would you like our quick 1-minute finger measurement guide? 3) feel free to share which piece you're eyeing! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We craft standard US sizes 4 to 12! DM us your size ✨')"
+  reply_guide: "Send 2–3 short bubbles: 1) we craft standard US ring sizes from 4 to 12 directly for most pieces; 2) easiest way: wrap a thin strip of paper snug around your finger, mark where it overlaps, and measure the mm against a standard US size chart; 3) what size are you looking for? ✨ (DO NOT offer video guides) (Nếu là comment: QUY TẮC 1 < 15 từ: 'We craft standard US sizes 4 to 12! DM us your size ✨')"
 
 - id: tiktok_ask_shipping_international_any
   channel: tiktok
@@ -249,11 +249,33 @@ Defines automated response rules specifically for the TikTok funnel. These rules
   surface: any
   when:
     intent: ask_store_location
-    contains_any: ["store address", "where is your store", "where is your jewelry made", "cửa hàng ở đâu", "địa chỉ", "made in", "where is it made", "address", "where is the studio", "showroom"]
+    contains_any: ["store address", "where is your store", "where is your jewelry made", "cửa hàng ở đâu", "địa chỉ", "made in", "where is it made", "address", "where is the studio", "showroom", "physical store", "do you have a store", "cửa hàng", "where are you located"]
     product_required: false
   use_knowledge: ["policies.shipping", "policies.payment"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) our jewelry is handcrafted by designer Huy K's craft team; 2) domestic US orders ship directly from our US fulfillment center with insured 2–5 day delivery via USPS/UPS; 3) all online orders are protected by 100% PayPal Buyer Protection ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Handcrafted by Huy K craft team, insured 2-5 day US delivery via bio link ✨')"
+  reply_guide: "Send 2–3 short bubbles: 1) in the US, we operate 100% online with complimentary insured 2–5 day delivery via USPS/UPS and PayPal Buyer Protection; 2) our physical boutique showrooms and silversmithing studio are in Vietnam; 3) which piece would you like us to prepare for you? ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: '100% online in the US with free shipping; physical stores in Vietnam ✨')"
+
+- id: tiktok_ask_gift_promotions_any
+  channel: tiktok
+  surface: any
+  when:
+    intent: ask_gift_promotions
+    contains_any: ["free gift", "free gifts", "gift included", "tặng quà", "quà kèm", "quà tặng", "có quà không", "promotional gift"]
+    product_required: false
+  use_knowledge: ["policies.shipping", "policies.payment"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) we currently do not have a policy for free gift items with purchase; 2) instead, every US order receives 100% complimentary free insured shipping; 3) which design are you eyeing? ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'No free gifts, but 100% free US shipping on all orders! ✨')"
+
+- id: tiktok_ask_price_comparison_any
+  channel: tiktok
+  surface: any
+  when:
+    intent: ask_price_comparison
+    contains_any: ["half the price", "cheaper online", "other stores sell this for less", "why are your prices so high", "identical online", "identical to one", "why should i buy yours", "why should i buy", "rẻ hơn một nửa", "bên khác rẻ hơn", "sao đắt thế", "giá cao thế"]
+    product_required: false
+  use_knowledge: ["catalogue.material", "policies.warranty"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) hello and thank you so much for your interest in Huy K jewelry! 2) our pieces are made with certified solid S925 silver and genuine stones, individually handcrafted with meticulous detail—not cheap mass alloy; 3) which piece are you looking at so I can share exact details? ✨"
 
 - id: tiktok_ask_photo_dm
   channel: tiktok

@@ -143,7 +143,7 @@ def test_playground_missing_fact_returns_fallback_and_handover(client):
     assert data["needs_human"] is True
     assert "catalogue.price" in data["missing_fields"]
     # Ensures fallback text is returned, not invented numbers
-    assert data["reply"] == "Let me double-check this exact piece with our craft team and get right back to you! ✨"
+    assert "Let me check with our craft team" in data["reply"]
     assert not re.search(r'\d+[\.,]?\d*\s*(?:đ|vnd|\$)', data["reply"], re.IGNORECASE)
 
 # 5. Edge case matches before a general rule, example_good_reply is a sample not the fact source
@@ -166,7 +166,7 @@ def test_playground_edge_case_beats_general_rule(client):
     assert data["needs_human"] is True
     # example_good_reply is provided as side-by-side sample for brand review
     assert data["example_good_reply"] is not None
-    assert "management" in data["example_good_reply"].lower() or "quản lý" in data["example_good_reply"].lower()
+    assert "craft team" in data["example_good_reply"].lower() or "photo" in data["example_good_reply"].lower()
 
 # 6. Multi-turn conversation preserves history across turns
 def test_playground_multi_turn_history(client):

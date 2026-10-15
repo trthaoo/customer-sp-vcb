@@ -247,7 +247,7 @@ class ReplyComposer:
         if not rule:
             from src.models import Rule, RuleWhen
             guide = (
-                "Respond warmly in Brand Voice as the mindful studio host from Master Jeweler Huy K's atelier. "
+                "Respond warmly in Brand Voice as Huy K / our craft team. "
                 "Use only confirmed knowledge and verified catalogue specs. Never invent unconfirmed discounts. "
                 "Answer the customer naturally and ask at most ONE gentle clarifying question."
             )
@@ -488,7 +488,9 @@ class ReplyComposer:
             if not self.model_adapter.is_available():
                 return "chưa gắn API model", False, None, None
             if inbound.surface == "comment":
-                return "We apologize! Escalating directly to our studio manager to resolve this right away 🤍", False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (comment fallback)"
+                if edge_case.example_good_reply and len(edge_case.example_good_reply.split()) <= 15:
+                    return edge_case.example_good_reply, False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (fallback example)"
+                return "So sorry for this! Please DM us so we can help 🤍", False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (comment fallback)"
             if edge_case.example_good_reply:
                 return edge_case.example_good_reply, False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (fallback example)"
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
@@ -498,7 +500,9 @@ class ReplyComposer:
         reply = sanitize_model_output(reply)
         if not reply or len(reply.strip()) < 3:
             if inbound.surface == "comment":
-                return "We apologize! Escalating directly to our studio manager to resolve this right away 🤍", False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (comment fallback)"
+                if edge_case.example_good_reply and len(edge_case.example_good_reply.split()) <= 15:
+                    return edge_case.example_good_reply, False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (fallback example)"
+                return "So sorry for this! Please DM us so we can help 🤍", False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (comment fallback)"
             if edge_case.example_good_reply:
                 return edge_case.example_good_reply, False, self.model_adapter.model_name, f"EdgeCase {edge_case.id} (fallback example)"
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
@@ -602,6 +606,8 @@ class ReplyComposer:
                 if inbound.surface == "comment":
                     return f"Send us a quick DM or check our bio link for {product.name} details & checkout ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback comment)"
                 return f"It's the {product.name} at {price_str} with complimentary free US shipping! ✨\n\nWhat size would you like us to prepare for you? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback product reply)"
+            if inbound.surface == "comment":
+                return "Let me check with our craft team and get right back to you! ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (comment fallback)"
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
             return fallback_text, False, self.model_adapter.model_name, f"Model {self.model_adapter.model_name} response empty -> Fallback"
 
@@ -615,6 +621,8 @@ class ReplyComposer:
                 if inbound.surface == "comment":
                     return f"Send us a quick DM or check our bio link for {product.name} details & checkout ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback comment)"
                 return f"It's the {product.name} at {price_str} with complimentary free US shipping! ✨\n\nWhat size would you like us to prepare for you? 🤍", False, self.model_adapter.model_name, f"Rule {rule.id} (fallback product reply)"
+            if inbound.surface == "comment":
+                return "Let me check with our craft team and get right back to you! ✨", False, self.model_adapter.model_name, f"Rule {rule.id} (comment fallback)"
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
             return fallback_text, False, self.model_adapter.model_name, f"Model response empty -> Fallback"
         return reply, True, self.model_adapter.model_name, reason
