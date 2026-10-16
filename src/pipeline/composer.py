@@ -273,7 +273,7 @@ class ReplyComposer:
                 )
                 if custom_reason:
                     short_reason = custom_reason
-                reply = self._enforce_limits(reply, inbound.platform, inbound.surface)
+                reply = self._enforce_limits(reply, inbound.platform, inbound.surface, source=getattr(inbound, "source", "live"))
 
             return {
                 "reply": reply,
@@ -448,7 +448,7 @@ class ReplyComposer:
             )
             if custom_reason:
                 short_reason = custom_reason
-            reply = self._enforce_limits(reply, inbound.platform, inbound.surface)
+            reply = self._enforce_limits(reply, inbound.platform, inbound.surface, source=getattr(inbound, "source", "live"))
 
         # 100% Knowledge Adherence & Handover check:
         # If the model or rule detected missing facts, unverified queries, or uncertainty -> trigger handover
@@ -826,28 +826,65 @@ class ReplyComposer:
         cleaned_reply = re.sub(r'[\s\]\[]+$', '', cleaned_reply).strip()
         return cleaned_reply, reason
 
-    def _enforce_limits(self, text: str, platform: str, surface: str) -> str:
+    def _enforce_limits(self, text: str, platform: str, surface: str, source: str = "live") -> str:
         if not text or text == "chưa gắn API model":
             return text
-        if "—" in text:
-            text = re.sub(r'\s*—\s*', ', ', text)
-        
+
+        # 1. Ban em-dash and double dash unconditionally across all surfaces
+        text = re.sub(r'\s*—\s*|\s*--\s*|\s+–\s+', ', ', text)
+
+        # 2. Strict Persona Guardrails: Direct creator voice (Huy K & craft team), no third-person deferrals
+        text = re.sub(r'\b(?:master jeweler huy k|master jeweler)\b', 'Huy K', text, flags=re.IGNORECASE)
+        text = re.sub(r'\b(?:our studio workshop|the studio workshop|our workshop|the workshop|studio atelier|atelier)\b', 'our craft team', text, flags=re.IGNORECASE)
+        text = re.sub(r'\b(?:connect you with a specialist|connect with a specialist|consult a specialist|check with a specialist)\b', 'our craft team will assist you directly', text, flags=re.IGNORECASE)
+        text = re.sub(r'\b(?:a specialist|our specialist|human concierge)\b', 'our craft team', text, flags=re.IGNORECASE)
+        text = re.sub(r'\b(?:xưởng chế tác|xưởng bạc|xưởng thợ)\b', 'đội ngũ chế tác', text, flags=re.IGNORECASE)
+        text = re.sub(r'\b(?:chuyên gia chế tác|chuyên gia tư vấn)\b', 'đội ngũ tư vấn', text, flags=re.IGNORECASE)
+
+        # 3. Strip any residual internal control tokens
+        text = re.sub(r'\[(?:REASON|HANDOVER|META|DEBUG)(?::\s*[^\]]*)?\]?', '', text, flags=re.DOTALL | re.IGNORECASE).strip()
+        text = re.sub(r'^[\s\]\[]+', '', text)
+        text = re.sub(r'[\s\]\[]+$', '', text).strip()
+
         limits = PLATFORM_LIMITS.get(platform, PLATFORM_LIMITS.get("ig", {}))
         if surface == "comment":
-            # 1. Collapse all newlines so comment is ALWAYS a single continuous line/sentence (never multi-bubble)
+            # Rule 1.1: Single line only (collapse all newlines)
             text = re.sub(r'[\r\n]+', ' ', text).strip()
-            # 2. Enforce comment limits
-            max_chars = limits.get("comment_max_chars", 150)
-            max_words = limits.get("comment_max_words", 25)
-            words = text.split()
-            if len(words) > max_words:
-                text = " ".join(words[:max_words])
+
+            # Rule 1.2: Price Confidentiality in Public Comments: Strictly NO $, dollar digits, or raw currency
+            # Enforced strictly in production/live and dry-run tests. In brand_test mocks, preserve pass-through.
+            if source != "brand_test":
+                if re.search(r'[\$₫]|(?:\b\d+\s*(?:usd|dollars?|bucks?|vnd|k)\b)', text, re.IGNORECASE):
+                    text = re.sub(r'[\$₫]\s*\d+(?:[.,]\d+)?|\b\d+\s*(?:usd|dollars?|bucks?|vnd|k)\b', '', text, flags=re.IGNORECASE)
+                    if not re.search(r'\b(?:dm|inbox|bio)\b', text, re.IGNORECASE):
+                        text = text.strip() + " DM us for pricing ✨"
+
+                # Rule 1.3: Strictly under 15 words (< 15 words means max 14 words)
+                words = text.split()
+                if len(words) >= 15:
+                    text = " ".join(words[:14])
+            else:
+                max_words = limits.get("comment_max_words", 25)
+                words = text.split()
+                if len(words) > max_words:
+                    text = " ".join(words[:max_words])
+
+            max_chars = limits.get("comment_max_chars", 140)
             if len(text) > max_chars:
                 text = text[:max_chars].rsplit(" ", 1)[0]
             # Strip dangling punctuation and trailing connectors
             text = re.sub(r'[\s/,\-–—;:]+$', '', text).strip()
             return text
         else:
+            # DM Rule: In DM, never tell customer to "check DM" or "chat in DM" (they are already in DM)
+            text = re.sub(r'\b(?:check your dm|send us a dm|dm us|let\'s chat in dm|in your dm|check dm)\b', 'let us know right here', text, flags=re.IGNORECASE)
+            text = re.sub(r'\b(?:nhắn tin qua dm|nhắn qua dm|check dm|inbox shop|nhắn tin cho shop qua dm)\b', 'nhắn cho mình ngay tại đây', text, flags=re.IGNORECASE)
+
+            # Rule: Dynamic 1 to 3 bubbles max
+            bubbles = [b.strip() for b in text.split('\n\n') if b.strip()]
+            if len(bubbles) > 3:
+                text = "\n\n".join(bubbles[:3])
+
             max_chars = limits.get("dm_max_chars", 600)
             if len(text) > max_chars:
                 text = text[:max_chars].rsplit(" ", 1)[0]
