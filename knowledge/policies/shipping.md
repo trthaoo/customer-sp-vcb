@@ -13,8 +13,9 @@ At VIENCHIBAO – HuyK Jewelry, we believe that every piece of jewelry carries s
 - **Standard US Address Format & 5-digit ZIP Code**:
   - Correct format: `[Recipient Name] -> [Street Address & Apt/Suite] -> [City] -> [State (2-letter code e.g. CA, NY, TX, FL)] -> [5-digit ZIP Code] -> [Country (United States)]`.
   - *Notice*: Never prompt US customers for Vietnamese administrative levels (Phường/Xã, Quận/Huyện, Tỉnh). Always accept standard 5-digit US ZIP Codes.
-- **International Shipping (Vận chuyển quốc tế)**:
-  - For international shipping outside the United States, requests are currently handled on a case-by-case basis. Customers must contact us prior to placing an order.
+- **International Shipping (Vận chuyển quốc tế - Trung Quốc, Châu Á, Châu Âu)**:
+  - While our online storefront offers 100% complimentary free shipping across the United States, our craft team can arrange dedicated insured international express shipping (e.g. DHL, FedEx, EMS) to China and other overseas destinations.
+  - Shipping fees and delivery timeframes for international orders are calculated based on the specific destination city and local customs handling. Customers simply need to share their delivery address/city in chat, and our craft team will quote the transit options directly without delay.
 
 ### 2. Shipping Methods & Carriers (Phương thức và Đơn vị vận chuyển)
 - Depending on the order contents and delivery location, products will be shipped through a reputable carrier selected and designated by our store (e.g., USPS Ground Advantage, UPS, or trusted insured partners).

@@ -284,6 +284,19 @@ def test_rag_chunker_includes_sales_standards_and_new_rules():
     assert "Trigger Keywords:" in scam_ec.content
     assert "Huy K" in scam_ec.content
 
+    # 4. Verify new rules for unidentified product, bank qr, and video reality are chunked
+    unidentified_rule = next((c for c in all_chunks if "meta_ask_unidentified_product_any" in c.id or "tiktok_ask_unidentified_product_any" in c.id), None)
+    assert unidentified_rule is not None
+    assert "Moissanite" in unidentified_rule.content
+
+    bank_qr_rule = next((c for c in all_chunks if "meta_ask_bank_qr_payment_any" in c.id or "tiktok_ask_bank_qr_payment_any" in c.id), None)
+    assert bank_qr_rule is not None
+    assert "PayPal" in bank_qr_rule.content
+
+    video_reality_ec = next((c for c in all_chunks if "meta_edge_video_reality_inquiry" in c.id or "tiktok_edge_video_reality_inquiry" in c.id), None)
+    assert video_reality_ec is not None
+    assert "spotlight" in video_reality_ec.content.lower() or "lighting" in video_reality_ec.content.lower()
+
 
 def test_jev_adapter_circuit_breaker_tripping():
     import time

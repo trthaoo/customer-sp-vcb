@@ -710,6 +710,9 @@ class ReplyComposer:
                 return "chưa gắn API model", False, None, None
             if rule and getattr(rule, "example_good_reply", None):
                 return rule.example_good_reply, False, self.model_adapter.model_name, f"Rule {rule.id} (fallback example)"
+            guide_fallback = self._synthesize_fallback_from_guide(rule, inbound.surface, product)
+            if guide_fallback:
+                return guide_fallback, False, self.model_adapter.model_name, f"Rule {rule.id} (guide fallback)"
             if product and product.price is not None:
                 price_str = format_currency(product.price, product.currency)
                 if inbound.surface == "comment":
@@ -732,6 +735,9 @@ class ReplyComposer:
         if not reply or len(reply.strip()) < 3:
             if rule and getattr(rule, "example_good_reply", None):
                 return rule.example_good_reply, False, self.model_adapter.model_name, f"Rule {rule.id} (fallback example)"
+            guide_fallback = self._synthesize_fallback_from_guide(rule, inbound.surface, product)
+            if guide_fallback:
+                return guide_fallback, False, self.model_adapter.model_name, f"Rule {rule.id} (guide fallback)"
             if product and product.price is not None:
                 price_str = format_currency(product.price, product.currency)
                 if inbound.surface == "comment":
@@ -749,6 +755,60 @@ class ReplyComposer:
             fallback_text = self.kb.fallbacks.get("default", self.kb.default_fallback)
             return fallback_text, False, self.model_adapter.model_name, f"Model response empty -> Fallback"
         return reply, True, self.model_adapter.model_name, reason
+
+    def _synthesize_fallback_from_guide(
+        self,
+        rule: Optional[Rule],
+        surface: str,
+        product: Optional[Product] = None
+    ) -> Optional[str]:
+        if not rule or not getattr(rule, "reply_guide", None):
+            return None
+        guide = rule.reply_guide.strip()
+
+        # Replace product placeholders if product is provided
+        if product:
+            guide = guide.replace("[piece name]", product.name).replace("[tên sản phẩm]", product.name)
+            if product.price is not None:
+                guide = guide.replace("$[price]", f"${product.price:g}").replace("[price]", f"${product.price:g}")
+        else:
+            guide = guide.replace("[piece name]", "this piece").replace("[tên sản phẩm]", "mẫu này")
+            guide = guide.replace("$[price]", "our listed price").replace("[price]", "our listed price")
+
+        if surface == "comment":
+            m = re.search(r'(?:comment|bình luận|ví dụ).*?[\'"]([^\'"]{5,140})[\'"]', guide, re.IGNORECASE)
+            if m:
+                res = m.group(1).strip()
+            else:
+                m2 = re.search(r'[\'"]([^\'"]{5,120})[\'"]', guide)
+                if m2:
+                    res = m2.group(1).strip()
+                else:
+                    clean = re.sub(r'^(?:quy tắc \d+.*?:\s*|dặn dò:\s*|send\s+.*?:)', '', guide, flags=re.IGNORECASE).strip()
+                    res = clean
+            res = re.sub(r'[\r\n]+', ' ', res).strip()
+            res = re.sub(r'^(?:QUY TẮC \d+.*?:\s*)', '', res, flags=re.IGNORECASE).strip()
+            words = res.split()
+            if len(words) >= 15:
+                res = " ".join(words[:14])
+            return res
+        else:
+            dm_guide = re.split(r'\(Nếu là comment|Nếu là comment|\(Ví dụ comment', guide, flags=re.IGNORECASE)[0].strip()
+            dm_guide = re.sub(r'^(?:send\s+\d+[–-]\d+\s+short\s+bubbles:?|dặn dò:?|lưu ý:?|hướng dẫn:?)\s*', '', dm_guide, flags=re.IGNORECASE)
+
+            bubbles = re.findall(r'(?:^|\s)\d+\)\s*([^;]+?)(?=;\s*\d+\)|$)', dm_guide)
+            if bubbles:
+                cleaned = []
+                for b in bubbles:
+                    text_b = b.strip().rstrip(";")
+                    if not text_b:
+                        continue
+                    text_b = re.sub(r'\(DO NOT.*?\)', '', text_b, flags=re.IGNORECASE).strip()
+                    text_b = text_b[0].upper() + text_b[1:]
+                    cleaned.append(text_b)
+                if cleaned:
+                    return "\n\n".join(cleaned)
+            return dm_guide if dm_guide else None
 
     def _extract_diagnostic_reason(self, raw_reply: str) -> Tuple[str, Optional[str]]:
         """Extracts [REASON: ...] tag and [HANDOVER: ...] for playground panel and strips them completely from customer reply."""

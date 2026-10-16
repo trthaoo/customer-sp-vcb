@@ -23,6 +23,8 @@ Standard list of customer intent classifications recognized by the inbound socia
 - request_custom: Customer asks about bespoke crafting, custom sizing, engraving, or personalized requests.
 - demand_human: Customer asks to speak with a human team member or probes about AI / bot automation.
 - complaint_angry: Customer expresses dissatisfaction, reports damaged goods, requests an urgent refund, or alleges scam.
+- ask_video_reality: Customer asks if the jewelry looks as beautiful and shiny in real life as it does in the video, or compares studio lighting vs everyday natural lighting.
+
 
 ## TODO Sections
 <!-- TODO: Add specialized campaign intents for Black Friday and holiday drops -->

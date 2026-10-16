@@ -138,14 +138,26 @@ Defines high-priority edge case scenarios for the Meta funnel (Instagram and Fac
 
 - id: meta_edge_unsupported_payment_handover
   channel: meta
-  trigger: "Customer asks to pay via an unsupported payment method other than PayPal (such as bank QR code, COD, direct credit card outside PayPal, bank wire transfer, Zelle, Venmo, or Klarna installment) or requests an alternative payment arrangement"
-  contains_any: ["qr code", "mã qr", "bank transfer", "chuyển khoản", "cod", "cash on delivery", "quẹt thẻ", "thanh toán khi nhận hàng", "thẻ tín dụng", "credit card", "debit card", "wire transfer", "zelle", "venmo", "klarna", "afterpay", "installment", "trả góp"]
-  do: "Politely inform the customer that we cannot send bank QR codes in chat and our official shop checkout accepts payment via PayPal (with full buyer protection) at our website in bio, and connect with my craft team for custom payment assistance"
-  do_not: "Do not send bank QR codes or unsupported payment links in chat, and do not refuse the customer without connecting them to support staff"
+  trigger: "Customer asks to pay via an unsupported payment method other than PayPal (such as COD, direct card payment, wire transfer, Zelle, Venmo, or Klarna installment) or requests an alternative payment arrangement"
+  contains_any: ["cod", "cash on delivery", "quẹt thẻ", "thanh toán khi nhận hàng", "thẻ tín dụng", "credit card", "debit card", "wire transfer", "zelle", "venmo", "klarna", "afterpay", "installment", "trả góp"]
+  do: "Politely inform the customer that our official shop checkout accepts payment via PayPal (with full buyer protection) at our website in bio, and connect with my craft team for custom payment assistance"
+  do_not: "Do not promise unsupported payment methods, and do not refuse the customer without connecting them to support staff"
   escalate: true
-  example_user_message: "Please send me your QR code for the bank transfer."
-  example_good_reply: "Thanks for reaching out! I can't send a bank QR code directly here in chat. Our official store checkout securely accepts PayPal with full buyer protection. You can place your order securely through the website link in our bio, or let me connect you directly with my craft team to help with custom payment arrangements! ✨"
+  example_user_message: "Shop có cho thanh toán khi nhận hàng ship COD không hay phải quẹt thẻ?"
+  example_good_reply: "We do not offer cash on delivery (COD) or in-person card payments for secure delivery. All orders are processed securely via PayPal on our website, or let me connect you directly with my craft team to help with custom payment arrangements! 🤍"
+
+- id: meta_edge_video_reality_inquiry
+
+  channel: meta
+  trigger: "Customer asks if the jewelry looks as beautiful and shiny in person as it does in the video or compares real-life appearance vs video lighting"
+  contains_any: ["in person as it does in the video", "look as beautiful and shiny", "as shiny in person", "look like in real life", "look as good in person", "giống trong video không", "nhìn ngoài có đẹp như video", "ở ngoài có sáng như video", "ngoài đời như video không", "như trong clip không", "có sáng như video không"]
+  do: "Explain honestly and objectively: Every piece is filmed directly on 100% real jewelry. Under direct studio spotlights, the faceted Moissanite and mirror-polished silver sparkle intensely with high refraction, whereas under natural everyday daylight, they display an elegant, authentic, and deep luster. Do not boast with exaggerated claims ('it looks 100x better, video never captures it') and do not proactively volunteer to send video clips unprompted; offer clear still photos if they want to view details."
+  do_not: "Never over-hype or make exaggerated claims, never proactively push unprompted video clips, and never dismiss the customer's question"
+  escalate: false
+  example_user_message: "Does the ring look as beautiful and shiny in person as it does in the video?"
+  example_good_reply: "All our pieces are filmed directly from the real handcrafted jewelry! Under focused studio lighting, the Moissanite reflects brilliant, fiery sparkle, while in natural daylight, it shows an elegant, authentic, and subtle luster. If you'd like, I'd be happy to share a clear photo of the piece in natural light! ✨"
 ```
+
 
 ## TODO Sections
 <!-- TODO: Add edge cases for third-party spam link drops in comments -->

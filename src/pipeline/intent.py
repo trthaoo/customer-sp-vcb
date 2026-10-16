@@ -28,8 +28,9 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
             "how to order", "how can i order", "how do i order", "want to order", "order this", "place an order", "can i order",
             "where to buy", "where can i buy", "how to purchase", "how can i get", "where to order", "link to buy", "order link", "checkout link",
             "how to get this", "how can i get this", "buy", "order", "purchase",
+            "website", "see more designs", "web", "collection", "see designs",
             "mua", "mua thế nào", "cách mua", "mua ở đâu", "làm sao để mua", "tôi muốn mua", "muốn mua",
-            "đặt hàng", "đặt mua", "chốt đơn", "lên đơn", "mua hàng", "hướng dẫn mua"
+            "đặt hàng", "đặt mua", "chốt đơn", "lên đơn", "mua hàng", "hướng dẫn mua", "trang web", "xem thêm"
         ]
     },
     "ask_photo": {
@@ -81,7 +82,8 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
         "description": "Customer asks about payment methods, credit/debit cards, PayPal, Klarna/BNPL, taxes, or COD availability.",
         "examples": [
             "payment", "pay", "paypal", "credit card", "apple pay", "google pay", "klarna", "afterpay", "installment", "cod", "cash on delivery",
-            "thanh toán", "thẻ", "quẹt thẻ", "trả sau", "trả góp", "ship cod"
+            "qr code", "qr", "bank qr", "bank transfer", "send me your qr", "qr code for the bank transfer",
+            "thanh toán", "thẻ", "quẹt thẻ", "trả sau", "trả góp", "ship cod", "chuyển khoản", "mã qr"
         ]
     },
     "ask_silver_quality": {
@@ -146,6 +148,13 @@ INTENT_TAXONOMY: Dict[str, Dict[str, Any]] = {
         "examples": [
             "beautiful", "gorgeous", "so pretty", "stunning", "love this", "obsessed", "amazing", "thank you", "thanks",
             "đẹp quá", "xinh xỉu", "mê quá", "cuốn ghê", "nhìn sang ghê", "tuyệt vời", "thả tim", "cảm ơn"
+        ]
+    },
+    "ask_video_reality": {
+        "description": "Customer asks if the jewelry looks as beautiful and shiny in real life as it does in the video, or compares studio lighting vs everyday natural lighting.",
+        "examples": [
+            "look as beautiful", "in person as it does in the video", "shiny in person", "as shiny as in video", "look like in real life",
+            "nhìn ngoài có đẹp như video", "ở ngoài có sáng như video", "ngoài đời như video không", "như trong clip không"
         ]
     }
 }

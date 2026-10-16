@@ -19,7 +19,7 @@ Defines automated response rules specifically for the TikTok funnel. These rules
   when:
     intent: ask_price
     contains_any: ["price", "how much", "cost", "giá", "nhiêu", "bao nhiêu", "tiền", "ib giá"]
-    product_required: true
+    product_required: false
   use_knowledge: ["catalogue.price", "catalogue.currency"]
   if_missing: escalate
   reply_guide: "QUY TẮC 1 (< 15 từ): Tuyệt đối KHÔNG BÁO GIÁ CÔNG KHAI, không viết số tiền hay ký hiệu $. Luôn điều hướng khách check DM/inbox nhận giá và ưu đãi độc quyền ✨ (Ví dụ: 'mình nhắn giá qua inbox cho bạn rồi nha ✨' hoặc 'check your DM for exclusive pricing and details ✨')"
@@ -121,14 +121,14 @@ Defines automated response rules specifically for the TikTok funnel. These rules
     product_required: false
   use_knowledge: ["policies.warranty"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) solid S925 sterling silver is hypoallergenic and completely skin-safe (will not turn your skin green); 2) silver naturally reacts with body chemistry (like salty sweat) and air sulfur over time, which causes natural surface oxidation; 3) keep it dry, wipe gently with a soft cloth, and store sealed when not wearing! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Solid S925 is skin-safe! Wipe dry and store sealed to maintain shine ✨')"
+  reply_guide: "Send 2–3 short bubbles: 1) solid S925 sterling silver is hypoallergenic and skin-safe (never turns skin green); 2) silver naturally oxidizes with body chemistry (salty sweat) and air over time, traditionally valued for absorbing body heat and toxins ('đánh gió'); 3) a quick gentle rub with a soft polishing cloth restores full mirror shine! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Solid S925 naturally oxidizes with sweat/air; easily wiped back to full shine! ✨')"
 
 - id: tiktok_ask_custom_design_any
   channel: tiktok
   surface: any
   when:
     intent: request_custom
-    contains_any: ["custom", "custom design", "chế tác", "làm theo mẫu", "đặt làm", "mẫu riêng", "custom jewelry", "make something similar", "theo yêu cầu", "thiết kế riêng", "engrave", "engraving", "khắc tên"]
+    contains_any: ["custom", "custom design", "chế tác", "làm theo mẫu", "đặt làm", "mẫu riêng", "custom jewelry", "theo yêu cầu", "thiết kế riêng", "engrave", "engraving", "khắc tên"]
     product_required: false
   use_knowledge: ["catalogue.material"]
   if_missing: escalate
@@ -139,7 +139,7 @@ Defines automated response rules specifically for the TikTok funnel. These rules
   surface: any
   when:
     intent: ask_size
-    contains_any: ["size", "sizing", "measurement", "dimensions", "kích thước", "đo size", "vừa không", "chiều dài", "đường kính", "cỡ tay", "size tay", "measure my ring size"]
+    contains_any: ["size", "sizing", "measurement", "dimensions", "kích thước", "đo size", "vừa không", "chiều dài", "đường kính", "cỡ tay", "size tay", "measure my ring size", "in my size", "my size", "order in my size", "order this ring in my size"]
     product_required: false
   use_knowledge: ["catalogue.size_guide", "catalogue.variants"]
   if_missing: escalate
@@ -150,17 +150,16 @@ Defines automated response rules specifically for the TikTok funnel. These rules
   surface: any
   when:
     intent: ask_shipping
-    contains_any: ["china", "international", "ship to", "quốc tế", "nước ngoài", "ở trung quốc", "在中国能买吗", "overseas", "global shipping", "ship abroad"]
+    contains_any: ["china", "international", "ship to", "quốc tế", "nước ngoài", "ở trung quốc", "在中国能买吗", "中国", "overseas", "global shipping", "ship abroad"]
     product_required: false
   use_knowledge: ["policies.shipping"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) we primarily offer complimentary free shipping across the US; 2) for international destinations (including Asia/China/Europe), my craft team can arrange dedicated insured international courier shipping; 3) DM us your exact delivery address and we will confirm international transit options right away! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We do US & international shipping! DM us your location ✨')"
+  reply_guide: "Send 2–3 short bubbles: 1) we offer complimentary free shipping across the US; 2) for international destinations (including China, Asia, Europe), my craft team can arrange dedicated insured international courier shipping; 3) DM us your exact delivery address and we will confirm international transit options right away! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'We do US & international shipping! DM us your location ✨')"
 
 - id: tiktok_ask_catalogue_website_any
   channel: tiktok
   surface: any
   when:
-    intent: ask_order
     contains_any: ["website", "see more designs", "web", "collection", "trang web", "xem thêm"]
     product_required: false
   use_knowledge: ["policies.payment", "catalogue.material"]
@@ -231,7 +230,7 @@ Defines automated response rules specifically for the TikTok funnel. These rules
     product_required: false
   use_knowledge: ["policies.shipping", "policies.payment"]
   if_missing: escalate
-  reply_guide: "Send 2–3 short bubbles: 1) yes, you can order directly right here with us in DM or via our bio link; 2) includes complimentary free US shipping and secure PayPal checkout; 3) what design can I prepare for you? ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Yes, order directly right here in DM with free US shipping! ✨')"
+  reply_guide: "Send 2–3 short bubbles: 1) yes, you can order directly right here with us in DM or via our bio link; 2) includes complimentary free US shipping and secure PayPal checkout; 3) what design can I prepare for you? (Nếu là comment: QUY TẮC 1 < 15 từ: 'Yes, you can order directly by sending us a DM, or via our bio website.')"
 
 - id: tiktok_ask_order_general_dm
   channel: tiktok
@@ -287,7 +286,40 @@ Defines automated response rules specifically for the TikTok funnel. These rules
   use_knowledge: ["catalogue.material", "catalogue.price"]
   if_missing: escalate
   reply_guide: "Send 1–2 short bubbles: 1) here's a close-up look at the [piece name] in our studio lighting ✨; 2) shows the exact stone setting and double-latch clasp, want to check sizing? 🤍"
+
+- id: tiktok_ask_unidentified_product_any
+  channel: tiktok
+  surface: any
+  when:
+    contains_any: ["saw one of your rings", "make something similar in silver", "make something similar", "real diamond or moissanite", "similar in silver"]
+    product_required: false
+  use_knowledge: ["catalogue.material", "policies.warranty"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) our signature ready-to-wear designs feature brilliant Moissanite set in solid S925 sterling silver, and we also craft bespoke orders with lab or natural diamonds; 2) because custom pricing depends on silver weight and setting, please send a quick photo or link of the ring; 3) my craft team will quote the exact options for you right away! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Our pieces are solid S925 & Moissanite! DM your ring photo for quote ✨')"
+
+- id: tiktok_ask_bank_qr_payment_any
+  channel: tiktok
+  surface: any
+  when:
+    intent: ask_payment
+    contains_any: ["qr code", "bank qr", "send me your qr", "mã qr", "gửi mã qr", "qr code for the bank transfer", "chuyển khoản qr"]
+    product_required: false
+  use_knowledge: ["policies.payment"]
+  if_missing: escalate
+  reply_guide: "Send 1–2 short bubbles: 1) we do not send bank QR codes in chat for buyer security; 2) all orders are placed through our official website in bio with secure PayPal checkout (including full Buyer Protection) ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'No bank QR in chat; order securely via PayPal link in bio! ✨')"
+
+- id: tiktok_ask_video_reality_any
+  channel: tiktok
+  surface: any
+  when:
+    intent: ask_material
+    contains_any: ["in person as it does in the video", "look as beautiful and shiny", "as shiny in person", "as it does in the video", "giống trong video không", "nhìn ngoài có đẹp như video", "ở ngoài có sáng như video"]
+    product_required: false
+  use_knowledge: ["catalogue.material"]
+  if_missing: escalate
+  reply_guide: "Send 2–3 short bubbles: 1) all pieces are filmed directly from real jewelry; 2) studio spotlights create dazzling fiery sparkle, while natural daylight gives an authentic, elegant luster; 3) I'd be happy to share a clear photo in natural light if you'd like! ✨ (Nếu là comment: QUY TẮC 1 < 15 từ: 'Filmed on real jewelry! Radiant in spotlights, elegant in natural light ✨')"
 ```
+
 
 ## TODO Sections
 <!-- TODO: Add TikTok rules for LIVE stream flash giveaways -->

@@ -118,14 +118,24 @@ Defines high-priority edge cases specifically for the TikTok funnel. Edge cases 
 
 - id: tiktok_edge_unsupported_payment_handover
   channel: tiktok
-  trigger: "Commenter or DM sender asks to pay via an unsupported payment method other than PayPal (such as bank QR code, COD, direct card payment, bank wire transfer, Zelle, Venmo, or Klarna installment) or requests special payment handling"
-  contains_any: ["qr code", "mã qr", "cod", "cash on delivery", "quẹt thẻ", "thanh toán khi nhận hàng", "thẻ tín dụng", "credit card", "debit card", "chuyển khoản", "bank transfer", "wire transfer", "zelle", "venmo", "klarna", "afterpay", "installment", "trả góp"]
-  do: "Politely state that we cannot send bank QR codes in chat and our online checkout accepts payment via PayPal (with full buyer protection) at our website in bio, and connect with my craft team for custom payment arrangements"
-  do_not: "Do not send bank QR codes in chat or promise unsupported payment methods, and do not refuse the customer without connecting them to support staff"
+  trigger: "Commenter or DM sender asks to pay via an unsupported payment method other than PayPal (such as COD, direct card payment, wire transfer, Zelle, Venmo, or Klarna installment) or requests special payment handling"
+  contains_any: ["cod", "cash on delivery", "quẹt thẻ", "thanh toán khi nhận hàng", "thẻ tín dụng", "credit card", "debit card", "wire transfer", "zelle", "venmo", "klarna", "afterpay", "installment", "trả góp"]
+  do: "Politely state that our online checkout accepts payment via PayPal (with full buyer protection) at our website in bio, and connect with my craft team for custom payment arrangements"
+  do_not: "Do not promise unsupported payment methods, and do not refuse the customer without connecting them to support staff"
   escalate: true
   example_user_message: "Shop có nhận ship COD không hay phải thanh toán trước?"
-  example_good_reply: "Dạ hiện tại bên em nhận thanh toán an toàn qua cổng PayPal trên website (kèm chính sách bảo vệ người mua). Với hình thức COD hoặc các phương thức thanh toán riêng khác, em xin phép kết nối ngay với đội ngũ chế tác để tư vấn chu đáo cho mình nha! ✨"
+  example_good_reply: "We do not offer cash on delivery (COD) or in-person card payments for secure delivery. Let me connect you directly with my craft team to help with custom payment arrangements! 🤍"
+- id: tiktok_edge_video_reality_inquiry
+  channel: tiktok
+  trigger: "Viewer or DM sender asks if the jewelry looks as beautiful and shiny in person as it does in the video or compares real-life appearance vs video lighting"
+  contains_any: ["in person as it does in the video", "look as beautiful and shiny", "as shiny in person", "look like in real life", "look as good in person", "giống trong video không", "nhìn ngoài có đẹp như video", "ở ngoài có sáng như video", "ngoài đời như video không", "như trong clip không", "có sáng như video không"]
+  do: "Explain honestly and objectively: Every piece is filmed directly from 100% real jewelry. Under direct studio spotlights, the faceted Moissanite and mirror-polished silver sparkle intensely with high refraction, whereas under natural everyday daylight, they display an elegant, authentic, and deep luster. Do not boast with exaggerated claims ('it looks 100x better, video never captures it') and do not proactively volunteer to send video clips unprompted; offer clear still photos if they want to view details."
+  do_not: "Never over-hype or make exaggerated claims, never proactively push unprompted video clips, and never dismiss the customer's question"
+  escalate: false
+  example_user_message: "Does the ring look as beautiful and shiny in person as it does in the video?"
+  example_good_reply: "All our pieces are filmed directly from the real handcrafted jewelry! Under focused studio lighting, the Moissanite reflects brilliant, fiery sparkle, while in natural daylight, it shows an elegant, authentic, and subtle luster. If you'd like, I'd be happy to share a clear photo of the piece in natural light! ✨"
 ```
+
 
 ## TODO Sections
 <!-- TODO: Add edge cases for malicious link phishing comments -->

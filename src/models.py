@@ -28,7 +28,7 @@ class Product(BaseModel):
     notes: Optional[str] = None
 
 class RuleWhen(BaseModel):
-    intent: str
+    intent: Optional[str] = None
     contains_any: List[str] = Field(default_factory=list)
     product_required: bool = False
 

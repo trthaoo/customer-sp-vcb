@@ -4,6 +4,14 @@ from src.models import InboundMessage, Product, Rule, EdgeCase
 from src.knowledge.loader import KnowledgeBase
 from src.adapters.model import ModelAdapter
 
+def _matches_kw(kw: str, text: str) -> bool:
+    kw_lower = kw.lower().strip()
+    if not kw_lower:
+        return False
+    if len(kw_lower) <= 4 and re.match(r'^[a-z0-9_]+$', kw_lower):
+        return bool(re.search(r'\b' + re.escape(kw_lower) + r'\b', text))
+    return kw_lower in text
+
 class FunnelEngine:
     def __init__(self, kb: KnowledgeBase, model_adapter: Optional[ModelAdapter] = None):
         self.kb = kb
@@ -49,16 +57,17 @@ class FunnelEngine:
                 if "stuck_shipment" in ec.id:
                     return ec, None
 
-        # Fast check for specific edge cases before generic intent buckets
-        if any(kw in text_lower for kw in ["tracking not updating", "shipment is stuck", "tracking stuck", "kẹt hàng", "mã tracking không chạy"]):
+        # Fast check for video reality inquiry (video vs real life)
+        if any(k in text_lower for k in ["look as beautiful", "in person as it does in the video", "shiny in person", "as shiny as in video", "nhìn ngoài có đẹp như video", "ở ngoài có sáng như video", "ngoài đời như video không", "như trong clip không"]):
             for ec in edge_cases:
-                if "stuck_shipment" in ec.id:
+                if "video_reality" in ec.id:
                     return ec, None
 
         if any(k in text_lower for k in ["pronunciation", "pronounce", "mispronouncing", "saying it wrong", "accent", "phát âm", "nói tiếng anh"]):
             for ec in edge_cases:
                 if "pronunciation" in ec.id:
                     return ec, None
+
 
         if any(k in text_lower for k in ["haven't replied", "not replying", "replying to my messages", "no one answered", "check dm", "check your dm", "check inbox", "chưa trả lời dm", "inbox không rep", "check mess", "mess không trả lời"]):
             for ec in edge_cases:
@@ -113,7 +122,7 @@ class FunnelEngine:
         # Fallback check on illustrative keyword examples
         for ec in edge_cases:
             if ec.contains_any:
-                matched_kw = any(kw.lower() in text_lower for kw in ec.contains_any)
+                matched_kw = any(_matches_kw(kw, text_lower) for kw in ec.contains_any)
                 if matched_kw:
                     return ec, None
 
@@ -132,7 +141,7 @@ class FunnelEngine:
                 continue
 
             if rule.when.contains_any:
-                matched_kw = any(kw.lower() in text_lower for kw in rule.when.contains_any)
+                matched_kw = any(_matches_kw(kw, text_lower) for kw in rule.when.contains_any)
                 if matched_kw:
                     return None, rule
 
@@ -149,7 +158,7 @@ class FunnelEngine:
 
             # Check contains_any only for rules without an explicit intent requirement
             if not rule.when.intent and rule.when.contains_any:
-                matched_kw = any(kw.lower() in text_lower for kw in rule.when.contains_any)
+                matched_kw = any(_matches_kw(kw, text_lower) for kw in rule.when.contains_any)
                 if not matched_kw:
                     continue
 

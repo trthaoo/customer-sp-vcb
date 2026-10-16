@@ -15,9 +15,9 @@ Guidelines governing checkout payment methods, accepted digital payment gateways
 - **Unsupported Payment Methods & Mandatory Handover Protocol (Các trường hợp thanh toán khác - Fallback & Handover)**:
   - Direct non-PayPal payment methods—such as direct credit/debit card processing outside PayPal, direct bank wire transfer, Zelle, Venmo, or Buy-Now-Pay-Later installment plans (Klarna/Afterpay)—are **not currently supported** via automated checkout.
   - **No Bank QR Codes in Chat (Không gửi mã QR trong tin nhắn)**: We strictly do not provide bank QR codes or manual bank transfer codes in social chat. Customers place orders directly through our website bio link with full PayPal Buyer Protection.
-  - **HANDOVER RULE**: If a customer asks to pay via, inquires about, or insists on any payment method other than PayPal (e.g. asking for bank QR code, direct credit card, COD, bank transfer, installment, etc.):
-    1. Clarify that our automated store accepts payment via PayPal (with full buyer protection) through our website in bio.
-    2. Connect them directly with our craft team for personalized assistance.
+  - **HANDOVER RULE**: If a customer requests a custom bulk invoice or manual wire escrow:
+    1. Clarify that our official store accepts payment via PayPal (with full buyer protection) through our website in bio.
+    2. My craft team assists with custom payment coordination if specialized arrangements are needed.
 
 - **Taxes, Currency & Zero Hidden Fees**:
   - All product prices are quoted in USD ($). We adhere to a strict policy of zero hidden fees or unexpected post-purchase charges.

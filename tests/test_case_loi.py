@@ -697,6 +697,183 @@ def test_image_scan_unidentified_jewelry_fallback_handover(orchestrator):
     assert "chưa nhận diện được" in result.draft_reply or "chưa có trong danh mục" in result.draft_reply
     assert "Huy K" in result.draft_reply or "craft team" in result.draft_reply
 
+# 37. Video reality inquiry (video vs real life sparkle / shine): Edge Case match
+def test_video_reality_inquiry_edge_case(orchestrator):
+    inbound = InboundMessage(
+        id="case_video_reality",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        text="Does the ring look as beautiful and shiny in person as it does in the video?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_edge_case == "tiktok_edge_video_reality_inquiry"
+    reply_lower = result.draft_reply.lower()
+    assert "spotlight" in reply_lower or "daylight" in reply_lower or "lighting" in reply_lower or "real" in reply_lower
+
+# 38. Unidentified product inquiry in DM: Moissanite/S925 baseline + custom quote, NO handover token
+def test_unidentified_product_inquiry_dm(orchestrator):
+    inbound = InboundMessage(
+        id="case_unidentified_dm",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="Hi! I saw one of your rings on Instagram and I really love it. Is that a real diamond or moissanite? And how much would it cost to make something similar in silver?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert "[HANDOVER" not in result.draft_reply
+    assert "let's chat in dm" not in result.draft_reply.lower()
+    assert "moissanite" in result.draft_reply.lower() or "s925" in result.draft_reply.lower()
+
+# 39. Bank QR code payment request: Direct website PayPal checkout without third-party handover
+def test_bank_qr_code_payment_request(orchestrator):
+    inbound = InboundMessage(
+        id="case_bank_qr",
+        platform="tiktok",
+        channel="tiktok",
+        surface="dm",
+        text="Please send me your QR code for the bank transfer.",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert "PayPal" in result.draft_reply or "paypal" in result.draft_reply.lower()
+    assert "specialist" not in result.draft_reply.lower()
+
+# 40. Ring sizing inquiry without pre-selected product: Standard sizes 4-12, no workshop deferral
+def test_ring_size_inquiry_without_product(orchestrator):
+    inbound = InboundMessage(
+        id="case_size_general",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="Can I order this ring in my size?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert result.matched_rule is not None
+    assert "meta_ask_size_general_any" == result.matched_rule
+    assert "4" in result.draft_reply and "12" in result.draft_reply
+    assert "workshop" not in result.draft_reply.lower()
+
+# 41. Website collection inquiry on comment (< 15 words)
+def test_website_collection_inquiry_comment(orchestrator):
+    inbound = InboundMessage(
+        id="case_website_comment",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="Do you have a website where I can see more designs?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) < 15
+    assert "bio" in result.draft_reply.lower()
+
+# 42. Stone types inquiry on TikTok comment (< 15 words)
+def test_stone_types_inquiry_comment(orchestrator):
+    inbound = InboundMessage(
+        id="case_stones_comment",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="What kind of stones do you use?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) < 15
+    assert "moissanite" in result.draft_reply.lower() or "diamond" in result.draft_reply.lower()
+
+# 43. Direct ordering inquiry on comment (< 15 words, definitive)
+def test_direct_order_inquiry_comment(orchestrator):
+    inbound = InboundMessage(
+        id="case_direct_order_comment",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="Can I order directly from you?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) < 15
+    assert "order directly" in result.draft_reply.lower() or "dm" in result.draft_reply.lower()
+
+# 44. International shipping to China in DM
+def test_international_shipping_china_dm(orchestrator):
+    inbound = InboundMessage(
+        id="case_china_shipping_dm",
+        platform="ig",
+        channel="meta",
+        surface="dm",
+        text="你好，在中国能买吗",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    assert "specialist" not in result.draft_reply.lower()
+    assert "workshop" not in result.draft_reply.lower()
+    assert "international" in result.draft_reply.lower() or "shipping" in result.draft_reply.lower() or "us" in result.draft_reply.lower()
+
+# 45. Silver tarnish on public comment (< 15 words, answers directly)
+def test_silver_tarnish_public_comment(orchestrator):
+    inbound = InboundMessage(
+        id="case_tarnish_comment",
+        platform="ig",
+        channel="meta",
+        surface="comment",
+        text="Will the ring tarnish or turn black over time?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) < 15
+    assert "s925" in result.draft_reply.lower() or "shine" in result.draft_reply.lower() or "silver" in result.draft_reply.lower()
+
+# 46. Gold material inquiry on TikTok comment (< 15 words)
+def test_gold_material_tiktok_comment(orchestrator):
+    inbound = InboundMessage(
+        id="case_gold_comment",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="Do you have this ring in gold?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    assert result.decision == "auto_reply"
+    words = result.draft_reply.split()
+    assert len(words) < 15
+    assert "gold" in result.draft_reply.lower()
+
+# 47. Price inquiry on TikTok comment (< 15 words, NO price numbers or $)
+def test_price_inquiry_tiktok_comment(orchestrator):
+    inbound = InboundMessage(
+        id="case_price_comment",
+        platform="tiktok",
+        channel="tiktok",
+        surface="comment",
+        text="How much is this ring?",
+        source="dry_run"
+    )
+    result = orchestrator.process(inbound)
+    words = result.draft_reply.split()
+    assert len(words) < 15
+    assert "$" not in result.draft_reply
+    assert "dm" in result.draft_reply.lower() or "inbox" in result.draft_reply.lower()
+
+
 
 
 

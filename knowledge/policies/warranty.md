@@ -56,7 +56,16 @@ HuyK – VIENCHIBAO sincerely thanks our valued customers for supporting HuyK �
 - **Promotions & Packaging**:
   - Every order includes an artisan presentation box. Complimentary 100% free insured shipping is provided for all US orders (we do not have a free gift policy).
 
-### 4. Official Customer Support Contact (Hỗ trợ khách hàng)
+### 4. Silver Oxidation Science & Traditional Wellness ("Đánh gió" & Bảo dưỡng bạc)
+- **Natural Surface Oxidation**:
+  - Genuine solid S925 sterling silver naturally reacts with airborne sulfur compounds and personal body chemistry (such as salty perspiration or acidic skin pH), resulting in thin surface silver sulfide patina over time.
+  - This natural oxidation reaction is scientific proof that the jewelry is authentic sterling silver rather than non-reactive stainless steel or inert alloy trinkets.
+- **Traditional Cultural Wellness ("Đánh gió")**:
+  - In Vietnamese cultural tradition, silver is deeply valued for its natural antimicrobial qualities and its ability to absorb "toxic wind" and bodily heat (dùng bạc đánh gió khi ốm). Blackening when feeling unwell is seen as silver shielding the wearer.
+- **Easy Restoration**:
+  - Surface oxidation is strictly on the outer micro-layer. A gentle rub with our included silver polishing cloth or a standard jewelry cleaning dip restores full mirror brilliance instantly.
+
+### 5. Official Customer Support Contact (Hỗ trợ khách hàng)
 - For warranty inquiries, repair requests, or exchange assistance, please contact:
   - **Official Email**: `order@huykjeweler.com`
 
